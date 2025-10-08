@@ -1,53 +1,82 @@
 import 'package:flutter/material.dart';
 import 'model/user_model.dart';
+import 'model/guru_model.dart'; // <-- 1. TAMBAHKAN IMPORT INI
 import 'profil_page.dart';
 import 'beranda_page.dart';
-import 'cari_guru_page.dart';
+import 'favorit.dart'; // Pastikan nama file ini benar (favorit.dart atau favorit_page.dart)
 import 'tambah_guru_page.dart';
 
 class MyHomePage extends StatefulWidget {
   final UserModel user;
+  final int initialIndex;
+  // <-- 2. UBAH TIPE DATA DI SINI
+  final List<Guru> favoriteTeachers;
 
-  const MyHomePage({super.key, required this.user});
+  const MyHomePage({
+    super.key,
+    required this.user,
+    this.initialIndex = 0,
+    this.favoriteTeachers = const [],
+  });
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _selectedIndex = 0;
-  bool _isDarkMode = false; // status mode gelap/terang
+  late int _selectedIndex;
+  bool _isDarkMode = false;
+  // <-- 3. UBAH TIPE DATA STATE DI SINI JUGA
+  late List<Guru> _favoriteTeachers;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+    _favoriteTeachers = List.from(widget.favoriteTeachers);
+  }
+
+  List<Widget> get _pages => [
+    BerandaPage(
+      user: widget.user,
+      isDarkMode: _isDarkMode,
+      favoriteTeachers: _favoriteTeachers,
+      // Penting: BerandaPage mungkin perlu menerima list favorit juga
+      // agar bisa meneruskannya ke DetailGuruPage saat item guru di klik.
+      // Jika tidak, daftar favorit akan reset setiap kali pindah halaman.
+    ),
+    FavoritPage(
+      user: widget.user,
+      isDarkMode: _isDarkMode,
+      favoriteTeachers: _favoriteTeachers, // <-- Tipe data sudah cocok sekarang
+    ),
+    TambahGuruPage(isDarkMode: _isDarkMode),
+    ProfilPage(user: widget.user, isDarkMode: _isDarkMode),
+  ];
 
   void _onItemTapped(int index) {
     setState(() => _selectedIndex = index);
   }
 
   void _toggleDarkMode() {
-    setState(() {
-      _isDarkMode = !_isDarkMode;
-    });
+    setState(() => _isDarkMode = !_isDarkMode);
   }
 
   @override
   Widget build(BuildContext context) {
-    final pages = [
-      BerandaPage(email: widget.user.email, isDarkMode: _isDarkMode),
-      CariGuruPage(email: widget.user.email, isDarkMode: _isDarkMode),
-      TambahGuruPage(isDarkMode: _isDarkMode),
-      ProfilPage(user: widget.user, isDarkMode: _isDarkMode),
-    ];
+    final bgColor = _isDarkMode ? Colors.grey[900] : const Color(0xFFFFF0F5);
+    final gradientColors = _isDarkMode
+        ? [Colors.grey[800]!, Colors.black]
+        : [Colors.pink[200]!, Colors.pink[400]!];
 
     return Scaffold(
-      // background sesuai mode
-      backgroundColor: _isDarkMode ? Colors.grey[900] : const Color(0xFFFFF0F5),
-
+      backgroundColor: bgColor,
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(236, 64, 122, 1),
-        iconTheme: const IconThemeData(color: Colors.white), // ikon putih
+        iconTheme: const IconThemeData(color: Colors.white),
         title: Row(
           children: [
-            // Logo panda di assets
-            Image.asset("assets/panda.png", height: 50, width: 50),
+            Image.asset("assets/panda.png", height: 40, width: 40),
             const SizedBox(width: 8),
             const Text(
               "LES MANIA",
@@ -66,7 +95,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-
       body: Column(
         children: [
           Container(
@@ -74,9 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: _isDarkMode
-                    ? [Colors.grey[800]!, Colors.black]
-                    : [Colors.pink[200]!, Colors.pink[400]!],
+                colors: gradientColors,
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -91,12 +117,9 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
           ),
-
-          // halaman utama
-          Expanded(child: pages[_selectedIndex]),
+          Expanded(child: _pages[_selectedIndex]),
         ],
       ),
-
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: _isDarkMode ? Colors.black : Colors.white,
         currentIndex: _selectedIndex,
@@ -108,7 +131,7 @@ class _MyHomePageState extends State<MyHomePage> {
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Beranda"),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: "Cari Guru"),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favorit"),
           BottomNavigationBarItem(icon: Icon(Icons.add), label: "Tambah Guru"),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
         ],

@@ -1,8 +1,12 @@
+// lib/pages/login_page.dart
+
 import 'package:flutter/material.dart';
-import 'userdata.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'model/user_model.dart';
 import 'home_page.dart';
 import 'SignUpPage.dart';
+import 'admin_page.dart'; // ✅ 1. IMPORT HALAMAN ADMIN
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,41 +16,107 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _emailController = TextEditingController();
+  // Mengganti nama controller agar lebih jelas bisa untuk email atau username
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
-  void _login() {
-    String email = _emailController.text.trim();
+  final RegExp _emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    // ... (Fungsi ini tidak perlu diubah)
+    final prefs = await SharedPreferences.getInstance();
+    final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    if (isLoggedIn) {
+      String? email = prefs.getString('email');
+      String? password = prefs.getString('password');
+      String? name = prefs.getString('name');
+      String? username = prefs.getString('username');
+
+      if (email != null && password != null) {
+        UserModel user = UserModel(
+          name: name ?? "",
+          username: username ?? "",
+          email: email,
+          password: password,
+        );
+        if (!context.mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MyHomePage(user: user)),
+        );
+      }
+    }
+  }
+
+  /// ✅ 2. MODIFIKASI FUNGSI LOGIN DI SINI
+  void _login() async {
+    String username = _usernameController.text.trim();
     String password = _passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Email dan Password wajib diisi!")),
+    // --- PINTU RAHASIA UNTUK ADMIN ---
+    if (username == 'admin' && password == 'admin123') {
+      if (!context.mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const AdminPage()),
       );
+      return; // Hentikan eksekusi jika login sebagai admin
+    }
+
+    // --- PROSES LOGIN PENGGUNA BIASA (KODE LAMA ANDA) ---
+    if (username.isEmpty || password.isEmpty) {
+      _showMessage("Email dan Password wajib diisi!");
       return;
     }
 
-    UserModel? loggedInUser;
-    for (var user in UserData.users) {
-      if (user.email == email && user.password == password) {
-        loggedInUser = user;
-        break;
-      }
+    if (!_emailRegex.hasMatch(username)) {
+      _showMessage("Format email tidak valid!");
+      return;
     }
 
-    if (loggedInUser != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => MyHomePage(user: loggedInUser!),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Email atau password salah!")),
-      );
+    final prefs = await SharedPreferences.getInstance();
+    String? savedEmail = prefs.getString('email');
+    String? savedPassword = prefs.getString('password');
+    String? savedName = prefs.getString('name');
+    String? savedUsername = prefs.getString('username');
+
+    if (savedEmail == null || savedPassword == null) {
+      _showMessage("Belum ada akun yang terdaftar!");
+      return;
     }
+
+    if (savedEmail != username) {
+      // Pengecekan tetap menggunakan email
+      _showMessage("Email tidak ditemukan!");
+      return;
+    }
+
+    if (savedPassword != password) {
+      _showMessage("Password salah!");
+      return;
+    }
+
+    await prefs.setBool('isLoggedIn', true);
+
+    UserModel user = UserModel(
+      name: savedName ?? "",
+      username: savedUsername ?? "",
+      email: savedEmail,
+      password: savedPassword,
+    );
+
+    if (!context.mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => MyHomePage(user: user)),
+    );
   }
 
   void _goToSignUp() {
@@ -56,10 +126,16 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  void _showMessage(String msg) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login Page')),
+      // AppBar sengaja di-disable agar lebih bersih
+      // appBar: AppBar(title: const Text('Login Page')),
       body: Container(
         decoration: const BoxDecoration(
           color: Color.fromARGB(255, 233, 152, 179),
@@ -84,21 +160,18 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // Input Email
+                    // ✅ 3. UBAH CONTROLLER DAN LABEL TEXTFIELD
                     TextField(
-                      controller: _emailController,
+                      controller: _usernameController,
                       keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(
-                        labelText: 'Email',
+                        labelText: 'Email atau Username',
                         border: OutlineInputBorder(),
                         filled: true,
                         fillColor: Colors.white,
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // Input Password
                     TextField(
                       controller: _passwordController,
                       obscureText: _obscurePassword,
@@ -122,8 +195,6 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // Tombol Login
                     ElevatedButton(
                       onPressed: _login,
                       style: ElevatedButton.styleFrom(
@@ -134,8 +205,6 @@ class _LoginPageState extends State<LoginPage> {
                       child: const Text('Login'),
                     ),
                     const SizedBox(height: 10),
-
-                    // Tombol Sign Up
                     TextButton(
                       onPressed: _goToSignUp,
                       child: const Text(
@@ -146,8 +215,6 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
               ),
-
-              // Created by
               const Padding(
                 padding: EdgeInsets.only(bottom: 12),
                 child: Text(

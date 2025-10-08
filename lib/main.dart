@@ -43,11 +43,10 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignUpPage(),
-        // UBAH BAGIAN DI BAWAH INI
         '/home': (context) => MyHomePage(
           user: UserModel(
             name: "Guest",
-            username: "guest", // TAMBAHKAN USERNAME INI
+            username: "guest",
             email: "guest@lesmania.com",
             password: "-",
           ),

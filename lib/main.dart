@@ -1,12 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_web/webview_flutter_web.dart';
+import 'package:flutter/foundation.dart';
+
 import 'pages/splash_screen.dart';
 import 'pages/login_page.dart';
 import 'pages/SignUpPage.dart';
 import 'pages/home_page.dart';
 import 'pages/model/user_model.dart';
+import 'pages/model/guru_provider.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  if (kIsWeb) {
+    WebViewPlatform.instance = WebWebViewPlatform();
+  }
+
+  await initializeDateFormatting('id_ID', null);
+  runApp(
+    MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => GuruProvider())],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -24,13 +43,13 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignUpPage(),
+        // UBAH BAGIAN DI BAWAH INI
         '/home': (context) => MyHomePage(
-          user: CustomerUser(
+          user: UserModel(
             name: "Guest",
+            username: "guest", // TAMBAHKAN USERNAME INI
             email: "guest@lesmania.com",
-            phone: "-",
             password: "-",
-            address: "Belum diisi",
           ),
         ),
       },
@@ -52,9 +71,11 @@ class _SplashWrapperState extends State<SplashWrapper> {
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 3), () {
-      setState(() {
-        _showSplash = false;
-      });
+      if (mounted) {
+        setState(() {
+          _showSplash = false;
+        });
+      }
     });
   }
 

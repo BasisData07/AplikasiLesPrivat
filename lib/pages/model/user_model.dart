@@ -1,8 +1,6 @@
-// lib/pages/model/user_model.dart
-
 class UserModel {
   String _name;
-  String _username; // TAMBAHKAN INI
+  String _username;
   String _email;
   String _password;
   String? _role;
@@ -10,13 +8,13 @@ class UserModel {
 
   UserModel({
     required String name,
-    required String username, // TAMBAHKAN INI
+    required String username,
     required String email,
     required String password,
     String? role,
     String? subject,
   }) : _name = name,
-       _username = username, // TAMBAHKAN INI
+       _username = username,
        _email = email,
        _password = password,
        _role = role,
@@ -24,7 +22,7 @@ class UserModel {
 
   // Getter
   String get name => _name;
-  String get username => _username; // TAMBAHKAN INI
+  String get username => _username;
   String get email => _email;
   String get password => _password;
   String? get role => _role;
@@ -32,7 +30,7 @@ class UserModel {
 
   // Setter
   set name(String value) => _name = value;
-  set username(String value) => _username = value; // TAMBAHKAN INI
+  set username(String value) => _username = value;
   set email(String value) => _email = value;
   set password(String value) => _password = value;
   set role(String? value) => _role = value;
@@ -40,7 +38,6 @@ class UserModel {
 
   @override
   String toString() {
-    // Perbarui toString untuk debugging yang lebih mudah
     return "UserModel{name: $_name, username: $_username, email: $_email, role: $_role, subject: $_subject}";
   }
 }

@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'model/user_model.dart';
 import 'home_page.dart';
 import 'SignUpPage.dart';
-import 'admin_page.dart'; // ✅ 1. IMPORT HALAMAN ADMIN
+import 'admin_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -16,7 +16,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  // Mengganti nama controller agar lebih jelas bisa untuk email atau username
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
@@ -55,22 +54,19 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  /// ✅ 2. MODIFIKASI FUNGSI LOGIN DI SINI
   void _login() async {
     String username = _usernameController.text.trim();
     String password = _passwordController.text.trim();
 
-    // --- PINTU RAHASIA UNTUK ADMIN ---
     if (username == 'admin' && password == 'admin123') {
       if (!context.mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const AdminPage()),
       );
-      return; // Hentikan eksekusi jika login sebagai admin
+      return;
     }
 
-    // --- PROSES LOGIN PENGGUNA BIASA (KODE LAMA ANDA) ---
     if (username.isEmpty || password.isEmpty) {
       _showMessage("Email dan Password wajib diisi!");
       return;
@@ -93,7 +89,6 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     if (savedEmail != username) {
-      // Pengecekan tetap menggunakan email
       _showMessage("Email tidak ditemukan!");
       return;
     }
@@ -134,8 +129,6 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // AppBar sengaja di-disable agar lebih bersih
-      // appBar: AppBar(title: const Text('Login Page')),
       body: Container(
         decoration: const BoxDecoration(
           color: Color.fromARGB(255, 233, 152, 179),
@@ -160,7 +153,6 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    // ✅ 3. UBAH CONTROLLER DAN LABEL TEXTFIELD
                     TextField(
                       controller: _usernameController,
                       keyboardType: TextInputType.emailAddress,

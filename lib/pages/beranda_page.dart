@@ -23,7 +23,7 @@ class BerandaPage extends StatefulWidget {
 
 class _BerandaPageState extends State<BerandaPage> {
   String _searchQuery = "";
-  String _selectedLevel = "Semua"; // State untuk filter
+  String _selectedLevel = "Semua";
 
   ImageProvider getImage(String path) {
     try {
@@ -31,7 +31,7 @@ class _BerandaPageState extends State<BerandaPage> {
           ? NetworkImage(path)
           : AssetImage(path) as ImageProvider;
     } catch (e) {
-      return const AssetImage("assets/panda.png"); // Fallback image
+      return const AssetImage("assets/panda.png");
     }
   }
 
@@ -52,8 +52,6 @@ class _BerandaPageState extends State<BerandaPage> {
           guru.name.toLowerCase().contains(query);
     }).toList();
   }
-
-  // === UI WIDGETS ===
 
   Widget _buildFilterChips() {
     final levels = ["Semua", "SD", "SMP", "SMA/SMK"];
@@ -152,8 +150,7 @@ class _BerandaPageState extends State<BerandaPage> {
               builder: (context) => DetailGuruPage(
                 guru: guru,
                 isDarkMode: widget.isDarkMode,
-                favoriteTeachers: widget
-                    .favoriteTeachers, // Anda mungkin perlu meneruskan data favorit yang benar
+                favoriteTeachers: widget.favoriteTeachers,
                 user: widget.user,
               ),
             ),
@@ -224,7 +221,7 @@ class _BerandaPageState extends State<BerandaPage> {
                 subTextColor,
                 textColor: widget.isDarkMode
                     ? Colors.cyanAccent
-                    : Colors.green[700], // <-- FIX HERE
+                    : Colors.green[700],
               ),
             ],
           ),
@@ -259,7 +256,6 @@ class _BerandaPageState extends State<BerandaPage> {
     final allGurus = guruProvider.guruList;
     final textColor = widget.isDarkMode ? Colors.white : Colors.black;
 
-    // Terapkan filter jenjang
     final filteredGurus = _selectedLevel == "Semua"
         ? allGurus
         : allGurus.where((g) => g.level == _selectedLevel).toList();
@@ -300,7 +296,7 @@ class _BerandaPageState extends State<BerandaPage> {
               },
             ),
             const SizedBox(height: 16),
-            _buildFilterChips(), // Tambahkan filter chips di sini
+            _buildFilterChips(),
             const SizedBox(height: 20),
 
             if (_searchQuery.isNotEmpty) ...[

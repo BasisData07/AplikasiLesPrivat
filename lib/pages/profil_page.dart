@@ -1,12 +1,12 @@
-// lib/pages/ProfilPage.dart
-
 import 'package:flutter/material.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
+// Sesuaikan path import ini jika berbeda di proyek Anda
 import 'model/user_model.dart';
 import 'login_page.dart';
 import 'help_center_page.dart';
@@ -27,10 +27,19 @@ class _ProfilPageState extends State<ProfilPage> {
   Map<String, dynamic> _deviceData = <String, dynamic>{};
   bool _isPasswordVisible = false;
 
+  double _rating = 3.0;
+  final TextEditingController _feedbackController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     initPlatformState();
+  }
+
+  @override
+  void dispose() {
+    _feedbackController.dispose();
+    super.dispose();
   }
 
   Future<void> initPlatformState() async {
@@ -148,6 +157,107 @@ class _ProfilPageState extends State<ProfilPage> {
       default:
         return Icons.device_hub;
     }
+  }
+
+  void _showRatingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Beri Rating Aplikasi"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text("Seberapa puas Anda dengan aplikasi ini?"),
+              const SizedBox(height: 20),
+              RatingBar.builder(
+                initialRating: _rating,
+                minRating: 1,
+                direction: Axis.horizontal,
+                allowHalfRating: true,
+                itemCount: 5,
+                itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+                itemBuilder: (context, _) =>
+                    const Icon(Icons.star, color: Colors.amber),
+                onRatingUpdate: (rating) {
+                  setState(() {
+                    _rating = rating;
+                  });
+                },
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: _feedbackController,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  hintText: "Tulis masukan Anda (opsional)...",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: const Text("Batal"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text("Kirim"),
+              onPressed: () {
+                print(
+                  "Rating: $_rating, Feedback: ${_feedbackController.text}",
+                );
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Terima kasih atas penilaian Anda!"),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                _feedbackController.clear();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // FUNGSI BARU UNTUK KONFIRMASI LOGOUT
+  void _showLogoutConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Konfirmasi Logout"),
+          content: const Text("Apakah Anda yakin ingin keluar dari akun Anda?"),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("Batal"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              child: const Text("Ya, Keluar"),
+              onPressed: () async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.clear();
+                if (!context.mounted) return;
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                  (route) => false,
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -302,6 +412,15 @@ class _ProfilPageState extends State<ProfilPage> {
               );
             },
           ),
+          const SizedBox(height: 10),
+          _infoCard(
+            icon: Icons.star_outline,
+            title: "Beri Rating",
+            value: "Bantu kami menjadi lebih baik",
+            cardColor: cardColor,
+            textColor: textColor,
+            onTap: _showRatingDialog,
+          ),
           const SizedBox(height: 25),
           Text(
             "Device Information:",
@@ -355,13 +474,8 @@ class _ProfilPageState extends State<ProfilPage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              onPressed: () async {
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.clear();
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const LoginPage()),
-                  (route) => false,
-                );
+              onPressed: () {
+                _showLogoutConfirmationDialog();
               },
               icon: const Icon(Icons.logout, color: Colors.white),
               label: const Text(

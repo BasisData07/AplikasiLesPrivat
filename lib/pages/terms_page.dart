@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// Kelas data sederhana untuk menyimpan konten setiap bagian agar kode lebih rapi
 class _TermsSection {
   final IconData icon;
   final String title;
@@ -15,8 +14,6 @@ class _TermsSection {
 
 class TermsPage extends StatelessWidget {
   const TermsPage({super.key});
-
-  // Memisahkan data dari UI. Lebih mudah dikelola.
   final List<_TermsSection> _sections = const [
     _TermsSection(
       icon: Icons.gavel_rounded,
@@ -73,32 +70,27 @@ class TermsPage extends StatelessWidget {
     final brandColor = Colors.pink[700];
 
     return Scaffold(
-      // AppBar yang sudah disesuaikan dengan permintaan Anda
       appBar: AppBar(
         title: const Text("Syarat dan Ketentuan"),
         backgroundColor: brandColor,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
-      // Menggunakan ListView.builder agar lebih efisien
       body: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
-        itemCount: _sections.length + 1, // +1 untuk Header di bagian atas
+        itemCount: _sections.length + 1,
         itemBuilder: (context, index) {
-          // Item pertama (index 0) adalah Header
           if (index == 0) {
             return _buildHeader(context, isDarkMode, brandColor);
           }
 
           final section = _sections[index - 1];
-          // Item selanjutnya adalah Card untuk setiap bagian S&K
           return _buildSectionCard(context, section, cardColor, brandColor);
         },
       ),
     );
   }
 
-  // Widget khusus untuk membuat Header
   Widget _buildHeader(
     BuildContext context,
     bool isDarkMode,
@@ -136,7 +128,6 @@ class TermsPage extends StatelessWidget {
     );
   }
 
-  // Widget khusus untuk membuat Card di setiap bagian
   Widget _buildSectionCard(
     BuildContext context,
     _TermsSection section,

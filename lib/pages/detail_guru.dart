@@ -7,7 +7,6 @@ import 'home_page.dart';
 class DetailGuruPage extends StatelessWidget {
   final Guru guru;
   final bool isDarkMode;
-  // --- PERUBAHAN 1: Tipe data diubah menjadi List<Guru> ---
   final List<Guru> favoriteTeachers;
   final UserModel user;
 
@@ -25,7 +24,7 @@ class DetailGuruPage extends StatelessWidget {
           ? NetworkImage(path)
           : AssetImage(path) as ImageProvider;
     } catch (e) {
-      return const AssetImage("assets/panda.png"); // Fallback image
+      return const AssetImage("assets/panda.png");
     }
   }
 
@@ -68,7 +67,6 @@ class DetailGuruPage extends StatelessWidget {
           color: isDarkMode ? Colors.white : Colors.black,
         ),
       ),
-      // ... Isi dari body tetap sama, tidak ada perubahan di sini
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
@@ -157,9 +155,6 @@ class DetailGuruPage extends StatelessWidget {
       bottomNavigationBar: _buildBookingButton(context),
     );
   }
-
-  // ... Widget-widget helper lainnya (_buildSectionTitle, _buildStatsCard, dll) tetap sama
-  // ... Tidak perlu disalin ulang karena tidak ada perubahan
 
   Widget _buildSectionTitle(String title, Color textColor) {
     return Text(
@@ -316,14 +311,11 @@ class DetailGuruPage extends StatelessWidget {
     );
   }
 
-  // --- PERUBAHAN UTAMA ADA DI FUNGSI INI ---
   Widget _buildBookingButton(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: ElevatedButton.icon(
         onPressed: () {
-          // Cek apakah guru sudah ada di daftar favorit
-          // Kita anggap nama guru unik untuk pengecekan ini
           bool isAlreadyFavorite = favoriteTeachers.any(
             (favGuru) => favGuru.name == guru.name,
           );
@@ -335,14 +327,10 @@ class DetailGuruPage extends StatelessWidget {
                 backgroundColor: Colors.orange,
               ),
             );
-            return; // Hentikan eksekusi jika sudah favorit
+            return;
           }
 
-          // --- PERUBAHAN 2: Tambahkan objek 'guru' langsung, bukan Map ---
-          final updatedFavorites = [
-            ...favoriteTeachers,
-            guru, // Cukup tambahkan objek guru
-          ];
+          final updatedFavorites = [...favoriteTeachers, guru];
 
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -356,9 +344,8 @@ class DetailGuruPage extends StatelessWidget {
             MaterialPageRoute(
               builder: (context) => MyHomePage(
                 user: user,
-                initialIndex: 1, // Langsung ke halaman favorit
-                favoriteTeachers:
-                    updatedFavorites, // Kirim list yang sudah diupdate
+                initialIndex: 1,
+                favoriteTeachers: updatedFavorites,
               ),
             ),
             (route) => route.isFirst,

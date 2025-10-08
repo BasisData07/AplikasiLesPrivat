@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'model/user_model.dart';
-import 'model/guru_model.dart'; // <-- 1. TAMBAHKAN IMPORT INI
+import 'model/guru_model.dart';
 import 'profil_page.dart';
 import 'beranda_page.dart';
-import 'favorit.dart'; // Pastikan nama file ini benar (favorit.dart atau favorit_page.dart)
+import 'favorit.dart';
 import 'tambah_guru_page.dart';
 
 class MyHomePage extends StatefulWidget {
   final UserModel user;
   final int initialIndex;
-  // <-- 2. UBAH TIPE DATA DI SINI
   final List<Guru> favoriteTeachers;
 
   const MyHomePage({
@@ -26,7 +25,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late int _selectedIndex;
   bool _isDarkMode = false;
-  // <-- 3. UBAH TIPE DATA STATE DI SINI JUGA
   late List<Guru> _favoriteTeachers;
 
   @override
@@ -41,14 +39,11 @@ class _MyHomePageState extends State<MyHomePage> {
       user: widget.user,
       isDarkMode: _isDarkMode,
       favoriteTeachers: _favoriteTeachers,
-      // Penting: BerandaPage mungkin perlu menerima list favorit juga
-      // agar bisa meneruskannya ke DetailGuruPage saat item guru di klik.
-      // Jika tidak, daftar favorit akan reset setiap kali pindah halaman.
     ),
     FavoritPage(
       user: widget.user,
       isDarkMode: _isDarkMode,
-      favoriteTeachers: _favoriteTeachers, // <-- Tipe data sudah cocok sekarang
+      favoriteTeachers: _favoriteTeachers,
     ),
     TambahGuruPage(isDarkMode: _isDarkMode),
     ProfilPage(user: widget.user, isDarkMode: _isDarkMode),

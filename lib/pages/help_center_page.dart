@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart'; // <-- TAMBAHKAN IMPORT INI
+import 'package:flutter/services.dart';
 
 class HelpCenterPage extends StatefulWidget {
   const HelpCenterPage({super.key});
@@ -26,18 +26,13 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
     }
   }
 
-  // ===== UBAH FUNGSI INI SEPERTI DI BAWAH =====
   Future<void> _loadHtmlFromAssets() async {
     try {
-      // 1. Baca isi file HTML dari assets sebagai sebuah String
       final String htmlContent = await rootBundle.loadString(
         'assets/html/help_center.html',
       );
-
-      // 2. Muat String HTML tersebut ke dalam WebView
       await _controller.loadHtmlString(htmlContent);
     } catch (e) {
-      // Menangani jika ada error saat memuat file
       debugPrint('Error loading HTML from assets: $e');
     }
   }

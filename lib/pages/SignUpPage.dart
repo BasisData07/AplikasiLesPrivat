@@ -10,20 +10,18 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  final _formKey = GlobalKey<FormState>(); // Tambahkan GlobalKey untuk validasi
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _usernameController =
-      TextEditingController(); // Controller untuk username
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
-      TextEditingController(); // Controller untuk konfirmasi password
+      TextEditingController();
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
   Future<void> _signUp() async {
-    // Validasi form terlebih dahulu
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -34,7 +32,6 @@ class _SignUpPageState extends State<SignUpPage> {
     String pass = _passwordController.text.trim();
     String confirmPass = _confirmPasswordController.text.trim();
 
-    // Validasi tambahan jika password tidak cocok
     if (pass != confirmPass) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -53,21 +50,19 @@ class _SignUpPageState extends State<SignUpPage> {
 
     final prefs = await SharedPreferences.getInstance();
 
-    // Simpan user ke SharedPreferences
     await prefs.setString('name', newUser.name);
-    await prefs.setString('username', newUser.username); // Simpan username
+    await prefs.setString('username', newUser.username);
     await prefs.setString('email', newUser.email);
     await prefs.setString('password', newUser.password);
-    // Kita set isLoggedIn menjadi false, karena user harus login dulu setelah daftar
     await prefs.setBool('isLoggedIn', false);
 
-    print("✅ User disimpan ke SharedPreferences: $newUser");
+    print("User disimpan ke SharedPreferences: $newUser");
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Akun berhasil dibuat! Silakan login.")),
     );
 
-    Navigator.pop(context); // Kembali ke halaman login
+    Navigator.pop(context);
   }
 
   @override
@@ -81,7 +76,6 @@ class _SignUpPageState extends State<SignUpPage> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Form(
-            // Bungkus dengan widget Form
             key: _formKey,
             child: ListView(
               children: [
@@ -99,7 +93,6 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 const SizedBox(height: 20),
 
-                // Field Nama Lengkap
                 TextFormField(
                   controller: _nameController,
                   decoration: _buildInputDecoration("Nama Lengkap"),
@@ -108,7 +101,6 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 const SizedBox(height: 12),
 
-                // Field Username
                 TextFormField(
                   controller: _usernameController,
                   decoration: _buildInputDecoration("Username"),
@@ -117,7 +109,6 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 const SizedBox(height: 12),
 
-                // Field Email
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -130,7 +121,6 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 const SizedBox(height: 12),
 
-                // Field Password
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
@@ -150,7 +140,6 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 const SizedBox(height: 12),
 
-                // Field Konfirmasi Password
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: _obscureConfirmPassword,
@@ -195,7 +184,6 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  // Helper method untuk dekorasi TextField agar tidak berulang
   InputDecoration _buildInputDecoration(String label) {
     return InputDecoration(
       labelText: label,

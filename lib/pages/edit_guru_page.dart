@@ -4,7 +4,7 @@ import 'model/guru_model.dart';
 import 'model/guru_provider.dart';
 
 class EditGuruPage extends StatefulWidget {
-  final Guru guru; // Menerima data guru yang akan diedit
+  final Guru guru;
   final bool isDarkMode;
 
   const EditGuruPage({super.key, required this.guru, required this.isDarkMode});
@@ -14,7 +14,6 @@ class EditGuruPage extends StatefulWidget {
 }
 
 class _EditGuruPageState extends State<EditGuruPage> {
-  // --- Text Editing Controllers ---
   final _namaController = TextEditingController();
   final _gelarController = TextEditingController();
   final _noTeleponController = TextEditingController();
@@ -32,7 +31,6 @@ class _EditGuruPageState extends State<EditGuruPage> {
   @override
   void initState() {
     super.initState();
-    // Mengisi semua form dengan data guru yang ada saat halaman pertama kali dibuka
     _namaController.text = widget.guru.name;
     _gelarController.text = widget.guru.gelar;
     _noTeleponController.text = widget.guru.noTelepon;
@@ -48,7 +46,6 @@ class _EditGuruPageState extends State<EditGuruPage> {
 
   @override
   void dispose() {
-    // Membersihkan controller untuk mencegah kebocoran memori (memory leak)
     _namaController.dispose();
     _gelarController.dispose();
     _noTeleponController.dispose();
@@ -197,7 +194,6 @@ class _EditGuruPageState extends State<EditGuruPage> {
     );
   }
 
-  // Helper Widgets (Tidak ada perubahan)
   InputDecoration _inputDecoration(String label, Color textColor) {
     return InputDecoration(
       labelText: label,
@@ -234,7 +230,6 @@ class _EditGuruPageState extends State<EditGuruPage> {
     );
   }
 
-  // Fungsi untuk menyimpan perubahan data
   void _updateForm() {
     final nama = _namaController.text;
     final gelar = _gelarController.text;
@@ -259,7 +254,6 @@ class _EditGuruPageState extends State<EditGuruPage> {
 
     Guru updatedGuru;
 
-    // Membuat objek Guru BARU dengan data yang sudah diupdate
     if (_selectedLevel == "SD") {
       updatedGuru = GuruSD(
         name: nama,
@@ -273,7 +267,7 @@ class _EditGuruPageState extends State<EditGuruPage> {
         pengalaman: pengalaman,
         deskripsi: deskripsi,
         cvUrl: cvUrl,
-        isApproved: widget.guru.isApproved, // Pertahankan status approval
+        isApproved: widget.guru.isApproved,
       );
     } else if (_selectedLevel == "SMP") {
       updatedGuru = GuruSMP(
@@ -307,7 +301,6 @@ class _EditGuruPageState extends State<EditGuruPage> {
       );
     }
 
-    // Memanggil fungsi update dari provider, mengirim data lama dan data baru
     context.read<GuruProvider>().updateGuru(widget.guru, updatedGuru);
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -317,7 +310,6 @@ class _EditGuruPageState extends State<EditGuruPage> {
       ),
     );
 
-    // Kembali ke halaman admin setelah update berhasil
     Navigator.of(context).pop();
   }
 }

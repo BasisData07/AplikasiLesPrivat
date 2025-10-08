@@ -25,7 +25,6 @@ class _TambahGuruPageState extends State<TambahGuruPage> {
   final _pengalamanController = TextEditingController();
   final _deskripsiController = TextEditingController();
   final _photoController = TextEditingController();
-  // ✅ 1. Tambahkan controller untuk CV
   final _cvUrlController = TextEditingController();
 
   String _selectedLevel = "SD";
@@ -67,7 +66,6 @@ class _TambahGuruPageState extends State<TambahGuruPage> {
                 ),
                 const SizedBox(height: 24),
 
-                // --- Input Fields ---
                 _buildTextField(_namaController, "Nama Lengkap", textColor),
                 _buildTextField(
                   _gelarController,
@@ -125,8 +123,6 @@ class _TambahGuruPageState extends State<TambahGuruPage> {
                   "URL Foto Profil (Opsional)",
                   textColor,
                 ),
-
-                // ✅ 2. Tambahkan TextField untuk URL CV di sini
                 _buildTextField(
                   _cvUrlController,
                   "URL CV Google Drive (Opsional)",
@@ -194,7 +190,6 @@ class _TambahGuruPageState extends State<TambahGuruPage> {
   }
 
   void _submitForm() {
-    // Mengambil semua nilai dari controller
     final nama = _namaController.text;
     final gelar = _gelarController.text;
     final alamat = _alamatController.text;
@@ -204,10 +199,8 @@ class _TambahGuruPageState extends State<TambahGuruPage> {
     final deskripsi = _deskripsiController.text;
     final harga = int.tryParse(_hargaController.text) ?? 0;
     final photo = _photoController.text;
-    // ✅ 3. Ambil nilai dari controller CV
     final cvUrl = _cvUrlController.text;
 
-    // Validasi input
     if (nama.isEmpty ||
         gelar.isEmpty ||
         alamat.isEmpty ||
@@ -225,8 +218,6 @@ class _TambahGuruPageState extends State<TambahGuruPage> {
     }
 
     Guru guru;
-
-    // Membuat objek Guru berdasarkan level yang dipilih
     if (_selectedLevel == "SD") {
       guru = GuruSD(
         name: nama,
@@ -239,7 +230,7 @@ class _TambahGuruPageState extends State<TambahGuruPage> {
         noTelepon: noTelepon,
         pengalaman: pengalaman,
         deskripsi: deskripsi,
-        cvUrl: cvUrl, // ✅ 4. Kirim data cvUrl ke constructor
+        cvUrl: cvUrl,
       );
     } else if (_selectedLevel == "SMP") {
       guru = GuruSMP(
@@ -253,7 +244,7 @@ class _TambahGuruPageState extends State<TambahGuruPage> {
         noTelepon: noTelepon,
         pengalaman: pengalaman,
         deskripsi: deskripsi,
-        cvUrl: cvUrl, // ✅ 4. Kirim data cvUrl ke constructor
+        cvUrl: cvUrl,
       );
     } else {
       guru = GuruSMA(
@@ -267,11 +258,10 @@ class _TambahGuruPageState extends State<TambahGuruPage> {
         noTelepon: noTelepon,
         pengalaman: pengalaman,
         deskripsi: deskripsi,
-        cvUrl: cvUrl, // ✅ 4. Kirim data cvUrl ke constructor
+        cvUrl: cvUrl,
       );
     }
 
-    // Menambahkan guru ke provider
     context.read<GuruProvider>().tambahGuru(guru);
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -280,8 +270,6 @@ class _TambahGuruPageState extends State<TambahGuruPage> {
         content: Text("Guru baru berhasil ditambahkan!"),
       ),
     );
-
-    // Membersihkan semua controller
     _namaController.clear();
     _gelarController.clear();
     _alamatController.clear();
@@ -291,7 +279,7 @@ class _TambahGuruPageState extends State<TambahGuruPage> {
     _noTeleponController.clear();
     _pengalamanController.clear();
     _deskripsiController.clear();
-    _cvUrlController.clear(); // ✅ 5. Bersihkan controller CV
+    _cvUrlController.clear(); //
     setState(() => _selectedLevel = "SD");
   }
 }

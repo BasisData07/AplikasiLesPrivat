@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'model/user_model.dart';
-import 'model/guru_model.dart'; // <-- TAMBAHKAN IMPORT INI
-import 'detail_guru.dart'; // <-- TAMBAHKAN IMPORT INI
+import 'model/guru_model.dart';
+import 'detail_guru.dart'; //
 
 class FavoritPage extends StatefulWidget {
   final UserModel user;
   final bool isDarkMode;
-  // --- UBAH TIPE DATA DI SINI ---
   final List<Guru> favoriteTeachers;
 
   const FavoritPage({
@@ -21,16 +20,12 @@ class FavoritPage extends StatefulWidget {
 }
 
 class _FavoritPageState extends State<FavoritPage> {
-  // Letakkan di dalam class _FavoritPageState di file favorit.dart
-
   ImageProvider getImage(String path) {
     try {
-      // Cek jika path adalah URL atau path aset lokal
       return path.startsWith('http')
           ? NetworkImage(path)
           : AssetImage(path) as ImageProvider;
     } catch (e) {
-      // Gambar default jika terjadi error atau path tidak valid
       return const AssetImage("assets/panda.png");
     }
   }
@@ -74,18 +69,14 @@ class _FavoritPageState extends State<FavoritPage> {
               padding: const EdgeInsets.all(16.0),
               itemCount: widget.favoriteTeachers.length,
               itemBuilder: (context, index) {
-                // 'guru' sekarang adalah objek Guru, bukan Map
                 final guru = widget.favoriteTeachers[index];
-
-                // --- DIBUNGKUS DENGAN INKWELL AGAR BISA DI-KLIK ---
                 return InkWell(
                   onTap: () {
-                    // Navigasi ke halaman detail saat item di-klik
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => DetailGuruPage(
-                          guru: guru, // Kirim objek guru lengkap
+                          guru: guru,
                           isDarkMode: widget.isDarkMode,
                           user: widget.user,
                           favoriteTeachers: widget.favoriteTeachers,
@@ -102,15 +93,12 @@ class _FavoritPageState extends State<FavoritPage> {
                     ),
                     margin: const EdgeInsets.only(bottom: 12),
                     child: ListTile(
-                      // KODE BARU YANG SUDAH DIPERBAIKI ✅
                       leading: CircleAvatar(
-                        radius: 28, // Anda bisa sesuaikan ukurannya
+                        radius: 28,
                         backgroundColor: Colors.grey[300],
-                        // Gunakan backgroundImage untuk memuat foto dari data guru
                         backgroundImage: getImage(guru.photo),
                       ),
                       title: Text(
-                        // Akses properti langsung dari objek guru
                         "${guru.name} (${guru.level})",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
@@ -118,12 +106,10 @@ class _FavoritPageState extends State<FavoritPage> {
                         ),
                       ),
                       subtitle: Text(
-                        // Akses properti langsung dari objek guru
                         "Alamat: ${guru.kota}\nTelp: ${guru.noTelepon}",
                         style: TextStyle(color: subTextColor),
                       ),
                       trailing: Text(
-                        // Akses properti langsung dari objek guru
                         "⭐ ${guru.rating}",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,

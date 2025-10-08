@@ -1,18 +1,16 @@
-// lib/pages/admin_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'model/guru_model.dart';
 import 'model/guru_provider.dart';
 import 'login_page.dart';
-import 'edit_guru_page.dart'; // Pastikan file ini sudah ada
+import 'edit_guru_page.dart';
 
 class AdminPage extends StatelessWidget {
   const AdminPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Mengambil data guru dari provider untuk ditampilkan dan dimanipulasi
+    // Mengambil data guru dari provider
     final guruProvider = context.watch<GuruProvider>();
     final List<Guru> guruList = guruProvider.guruList;
 
@@ -64,7 +62,7 @@ class AdminPage extends StatelessWidget {
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               subtitle: Text(
-                // Menampilkan status persetujuan dengan warna
+                // Menampilkan status persetujuan
                 "Status: ${guru.isApproved ? 'Disetujui' : 'Menunggu Persetujuan'}",
                 style: TextStyle(
                   color: guru.isApproved
@@ -75,7 +73,7 @@ class AdminPage extends StatelessWidget {
               ),
               trailing: guru.isApproved
                   ? Row(
-                      // Jika guru sudah disetujui, tampilkan tombol Edit & Hapus
+                      // Jika guru sudah disetujui, menampilkan tombol Edit & Hapus
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
@@ -85,15 +83,11 @@ class AdminPage extends StatelessWidget {
                           ),
                           tooltip: "Edit",
                           onPressed: () {
-                            // Navigasi ke halaman EditGuruPage
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => EditGuruPage(
-                                  guru: guru,
-                                  isDarkMode:
-                                      false, // Asumsi admin panel tidak punya dark mode
-                                ),
+                                builder: (context) =>
+                                    EditGuruPage(guru: guru, isDarkMode: false),
                               ),
                             );
                           },
@@ -109,7 +103,7 @@ class AdminPage extends StatelessWidget {
                       ],
                     )
                   : TextButton(
-                      // Jika guru belum disetujui, tampilkan tombol "Setujui"
+                      // Jika guru belum disetujui, menampilkan tombol "Setujui"
                       child: const Text("Setujui"),
                       onPressed: () {
                         context.read<GuruProvider>().approveGuru(guru);
@@ -122,7 +116,6 @@ class AdminPage extends StatelessWidget {
     );
   }
 
-  // Helper method untuk menampilkan dialog konfirmasi hapus
   void _showDeleteDialog(BuildContext context, Guru guru) {
     showDialog(
       context: context,

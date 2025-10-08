@@ -1,49 +1,92 @@
-abstract class Guru {
-  String _name;
-  String _level;
-  int _price;
-  double _rating;
-  String _photo;
+import 'package:equatable/equatable.dart';
 
-  Guru(this._name, this._level, this._price, this._rating, this._photo);
+abstract class Guru extends Equatable {
+  final String name;
+  final String gelar;
+  final String level;
+  final int price;
+  final double rating;
+  final String photo;
+  final String kota;
+  final String mapel;
+  final String noTelepon;
+  final String pengalaman;
+  final String deskripsi;
+  final String? cvUrl;
+  final bool isApproved;
 
-  // Getter
-  String get name => _name;
-  String get level => _level;
-  int get price => _price;
-  double get rating => _rating;
-  String get photo => _photo;
+  const Guru({
+    required this.name,
+    required this.gelar,
+    required this.level,
+    required this.price,
+    required this.rating,
+    required this.photo,
+    required this.kota,
+    required this.mapel,
+    required this.noTelepon,
+    required this.pengalaman,
+    required this.deskripsi,
+    this.cvUrl,
+    this.isApproved = false,
+  });
 
-  // Setter
-  set name(String value) => _name = value;
-  set level(String value) => _level = value;
-  set price(int value) => _price = value;
-  set rating(double value) => _rating = value;
-  set photo(String value) => _photo = value;
+  @override
+  String toString() {
+    return "$name, $gelar ($level, $mapel di $kota) - Rp$price.000, Rating: $rating⭐, Telp: $noTelepon";
+  }
 
-  String deskripsi();
+  @override
+  List<Object?> get props => [name, noTelepon, mapel];
 }
 
 class GuruSD extends Guru {
-  GuruSD(String name, int price, double rating, String photo)
-    : super(name, "SD", price, rating, photo);
-
-  @override
-  String deskripsi() => "$name adalah guru SD dengan rating $rating ⭐";
+  const GuruSD({
+    required super.name,
+    required super.gelar,
+    required super.price,
+    required super.rating,
+    required super.photo,
+    required super.kota,
+    required super.mapel,
+    required super.noTelepon,
+    required super.pengalaman,
+    required super.deskripsi,
+    super.cvUrl,
+    super.isApproved,
+  }) : super(level: "SD");
 }
 
 class GuruSMP extends Guru {
-  GuruSMP(String name, int price, double rating, String photo)
-    : super(name, "SMP", price, rating, photo);
-
-  @override
-  String deskripsi() => "$name adalah guru SMP dengan rating $rating ⭐";
+  const GuruSMP({
+    required super.name,
+    required super.gelar,
+    required super.price,
+    required super.rating,
+    required super.photo,
+    required super.kota,
+    required super.mapel,
+    required super.noTelepon,
+    required super.pengalaman,
+    required super.deskripsi,
+    super.cvUrl,
+    super.isApproved,
+  }) : super(level: "SMP");
 }
 
 class GuruSMA extends Guru {
-  GuruSMA(String name, int price, double rating, String photo)
-    : super(name, "SMA/SMK", price, rating, photo);
-
-  @override
-  String deskripsi() => "$name adalah guru SMA/SMK dengan rating $rating ⭐";
+  const GuruSMA({
+    required super.name,
+    required super.gelar,
+    required super.price,
+    required super.rating,
+    required super.photo,
+    required super.kota,
+    required super.mapel,
+    required super.noTelepon,
+    required super.pengalaman,
+    required super.deskripsi,
+    super.cvUrl,
+    super.isApproved,
+  }) : super(level: "SMA/SMK");
 }

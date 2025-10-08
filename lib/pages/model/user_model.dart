@@ -1,96 +1,46 @@
-abstract class UserModel {
+// lib/pages/model/user_model.dart
+
+class UserModel {
   String _name;
+  String _username; // TAMBAHKAN INI
   String _email;
-  String _phone;
   String _password;
-  String? _address;
-  String? _profileImage;
+  String? _role;
+  String? _subject;
 
   UserModel({
     required String name,
+    required String username, // TAMBAHKAN INI
     required String email,
-    required String phone,
     required String password,
-    String? address,
-    String? profileImage,
+    String? role,
+    String? subject,
   }) : _name = name,
+       _username = username, // TAMBAHKAN INI
        _email = email,
-       _phone = phone,
        _password = password,
-       _address = address,
-       _profileImage = profileImage;
+       _role = role,
+       _subject = subject;
 
   // Getter
   String get name => _name;
+  String get username => _username; // TAMBAHKAN INI
   String get email => _email;
-  String get phone => _phone;
   String get password => _password;
-  String? get address => _address;
-  String? get profileImage => _profileImage;
+  String? get role => _role;
+  String? get subject => _subject;
 
   // Setter
   set name(String value) => _name = value;
+  set username(String value) => _username = value; // TAMBAHKAN INI
   set email(String value) => _email = value;
-  set phone(String value) => _phone = value;
   set password(String value) => _password = value;
-  set address(String? value) => _address = value;
-  set profileImage(String? value) => _profileImage = value;
-
-  @override
-  String toString();
-}
-
-// Customer User
-class CustomerUser extends UserModel {
-  CustomerUser({
-    required String name,
-    required String email,
-    required String phone,
-    required String password,
-    String? address,
-    String? profileImage,
-  }) : super(
-         name: name,
-         email: email,
-         phone: phone,
-         password: password,
-         address: address,
-         profileImage: profileImage,
-       );
+  set role(String? value) => _role = value;
+  set subject(String? value) => _subject = value;
 
   @override
   String toString() {
-    return "Customer{name: $name, email: $email, phone: $phone, address: $address}";
-  }
-}
-
-// Teacher User
-class TeacherUser extends UserModel {
-  String _subject;
-
-  TeacherUser({
-    required String name,
-    required String email,
-    required String phone,
-    required String password,
-    required String subject,
-    String? address,
-    String? profileImage,
-  }) : _subject = subject,
-       super(
-         name: name,
-         email: email,
-         phone: phone,
-         password: password,
-         address: address,
-         profileImage: profileImage,
-       );
-
-  String get subject => _subject;
-  set subject(String value) => _subject = value;
-
-  @override
-  String toString() {
-    return "Teacher{name: $name, email: $email, phone: $phone, subject: $_subject, address: $address}";
+    // Perbarui toString untuk debugging yang lebih mudah
+    return "UserModel{name: $_name, username: $_username, email: $_email, role: $_role, subject: $_subject}";
   }
 }

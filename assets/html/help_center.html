@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pusat Bantuan Les Mania</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Variabel Warna Utama */
+        :root {
+            --primary-pink: #D81B60;
+            --user-bubble-bg: #FFE4EC; /* Warna pink sangat muda untuk bubble user */
+            --support-bubble-bg: #F1F1F1; /* Abu-abu muda untuk bubble support */
+            --text-dark: #2c2c2c;
+            --background: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--background);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-dark);
+        }
+
+        .chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--primary-pink);
+            font-weight: 700;
+            font-size: 1.5em;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-end;
+            margin-bottom: 15px;
+            max-width: 80%;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            flex-shrink: 0; /* Mencegah avatar menyusut */
+        }
+
+        .bubble {
+            padding: 12px 18px;
+            border-radius: 20px;
+            line-height: 1.5;
+        }
+
+        /* --- Pesan dari Pengguna (Pertanyaan) --- */
+        .user-message {
+            align-self: flex-end; /* Rata kanan */
+            flex-direction: row-reverse; /* Balik urutan: bubble dulu baru avatar */
+        }
+
+        .user-message .avatar {
+            background-color: var(--primary-pink);
+            color: white;
+            margin-left: 10px;
+        }
+
+        .user-message .bubble {
+            background-color: var(--user-bubble-bg);
+            border-bottom-right-radius: 5px; /* Efek "ekor" bubble */
+        }
+
+        /* --- Pesan dari Support (Jawaban) --- */
+        .support-message {
+            align-self: flex-start; /* Rata kiri */
+        }
+
+        .support-message .avatar {
+            background-color: #e0e0e0;
+            margin-right: 10px;
+        }
+
+        .support-message .bubble {
+            background-color: var(--support-bubble-bg);
+            border-bottom-left-radius: 5px; /* Efek "ekor" bubble */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h1 class="chat-header">Percakapan Bantuan</h1>
+
+        <div class="message user-message">
+            <div class="bubble">
+                Bagaimana cara mencari guru?
+            </div>
+            <div class="avatar">👤</div>
+        </div>
+
+        <div class="message support-message">
+            <div class="avatar">🤖</div>
+            <div class="bubble">
+                Tentu! Anda dapat menggunakan bilah pencarian di halaman Beranda untuk mencari guru berdasarkan <strong>nama, kota,</strong> atau <strong>mata pelajaran</strong>.
+            </div>
+        </div>
+
+
+        <div class="message user-message">
+            <div class="bubble">
+                Apa fungsi fitur favorit?
+            </div>
+            <div class="avatar">👤</div>
+        </div>
+
+        <div class="message support-message">
+            <div class="avatar">🤖</div>
+            <div class="bubble">
+                 Fitur favorit memungkinkan Anda untuk menyimpan profil guru-guru yang Anda sukai. Ini memudahkan Anda untuk menemukan mereka kembali di lain waktu tanpa harus mencari ulang. Anda bisa mengakses daftar guru favorit Anda melalui menu "Favorit".
+            </div>
+        </div>
+
+
+        <div class="message user-message">
+            <div class="bubble">
+                OK, lalu bagaimana cara menambahkan guru ke favorit?
+            </div>
+            <div class="avatar">👤</div>
+        </div>
+
+        <div class="message support-message">
+            <div class="avatar">🤖</div>
+            <div class="bubble">
+                Sangat mudah! Masuk ke halaman detail guru, lalu tekan tombol <strong>"Tambahkan ke Favorit"</strong> di bagian bawah layar.
+            </div>
+        </div>
+        
+        </div>
+</body>
+</html>

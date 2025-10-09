@@ -6,11 +6,11 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
-// Sesuaikan path import ini jika berbeda di proyek Anda
 import 'model/user_model.dart';
 import 'login_page.dart';
 import 'help_center_page.dart';
 import 'terms_page.dart';
+import 'about_me_page.dart';
 
 class ProfilPage extends StatefulWidget {
   final UserModel user;
@@ -226,7 +226,6 @@ class _ProfilPageState extends State<ProfilPage> {
     );
   }
 
-  // FUNGSI BARU UNTUK KONFIRMASI LOGOUT
   void _showLogoutConfirmationDialog() {
     showDialog(
       context: context,
@@ -413,6 +412,22 @@ class _ProfilPageState extends State<ProfilPage> {
             },
           ),
           const SizedBox(height: 10),
+
+          _infoCard(
+            icon: Icons.info_outline,
+            title: "About Me",
+            value: "Latar belakang pembuat aplikasi",
+            cardColor: cardColor,
+            textColor: textColor,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AboutMePage()),
+              );
+            },
+          ),
+          const SizedBox(height: 10),
+
           _infoCard(
             icon: Icons.star_outline,
             title: "Beri Rating",
@@ -422,6 +437,7 @@ class _ProfilPageState extends State<ProfilPage> {
             onTap: _showRatingDialog,
           ),
           const SizedBox(height: 25),
+
           Text(
             "Device Information:",
             style: TextStyle(

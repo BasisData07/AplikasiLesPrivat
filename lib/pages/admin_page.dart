@@ -8,16 +8,31 @@ import 'edit_guru_page.dart';
 class AdminPage extends StatelessWidget {
   const AdminPage({super.key});
 
+  // FUNGSI BARU UNTUK MENGAMBIL GAMBAR DARI URL ATAU ASSET
+  ImageProvider getImage(String path) {
+    if (path.isEmpty) {
+      return const AssetImage("assets/panda.png");
+    }
+    try {
+      // Cek jika path adalah URL, gunakan NetworkImage. Jika tidak, gunakan AssetImage.
+      return path.startsWith('http')
+          ? NetworkImage(path)
+          : AssetImage(path) as ImageProvider;
+    } catch (e) {
+      // Jika terjadi error (misal URL tidak valid), tampilkan gambar default
+      return const AssetImage("assets/panda.png");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Mengambil data guru dari provider
     final guruProvider = context.watch<GuruProvider>();
     final List<Guru> guruList = guruProvider.guruList;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Admin Panel - Manajemen Guru"),
-        backgroundColor: Colors.pink[700],
+        backgroundColor: const Color.fromARGB(255, 24, 24, 194),
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
@@ -53,16 +68,15 @@ class AdminPage extends StatelessWidget {
               ),
               leading: CircleAvatar(
                 radius: 25,
-                backgroundImage: AssetImage(
-                  guru.photo.isNotEmpty ? guru.photo : "assets/panda.png",
-                ),
+                // --- BAGIAN INI DIUBAH ---
+                // Memanggil fungsi getImage untuk menampilkan foto
+                backgroundImage: getImage(guru.photo),
               ),
               title: Text(
                 guru.name,
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               subtitle: Text(
-                // Menampilkan status persetujuan
                 "Status: ${guru.isApproved ? 'Disetujui' : 'Menunggu Persetujuan'}",
                 style: TextStyle(
                   color: guru.isApproved
@@ -73,13 +87,12 @@ class AdminPage extends StatelessWidget {
               ),
               trailing: guru.isApproved
                   ? Row(
-                      // Jika guru sudah disetujui, menampilkan tombol Edit & Hapus
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
                           icon: Icon(
                             Icons.edit_outlined,
-                            color: Colors.blue[700],
+                            color: const Color.fromARGB(255, 24, 24, 194),
                           ),
                           tooltip: "Edit",
                           onPressed: () {
@@ -103,7 +116,6 @@ class AdminPage extends StatelessWidget {
                       ],
                     )
                   : TextButton(
-                      // Jika guru belum disetujui, menampilkan tombol "Setujui"
                       child: const Text("Setujui"),
                       onPressed: () {
                         context.read<GuruProvider>().approveGuru(guru);

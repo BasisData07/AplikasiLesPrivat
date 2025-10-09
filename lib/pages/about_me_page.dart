@@ -5,15 +5,10 @@ import 'package:url_launcher/url_launcher.dart';
 class AboutMePage extends StatelessWidget {
   const AboutMePage({super.key});
 
-  // Fungsi untuk meluncurkan URL yang sudah diperbaiki
   Future<void> _launchUrl(String url) async {
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
-      await launchUrl(
-        uri,
-        // Buka di tab baru khusus untuk web, ini memperbaiki masalah mailto:
-        webOnlyWindowName: '_blank',
-      );
+      await launchUrl(uri, webOnlyWindowName: '_blank');
     } else {
       throw 'Could not launch $url';
     }
@@ -21,7 +16,6 @@ class AboutMePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // --- Variabel untuk Tema Warna ---
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDarkMode ? Colors.grey[900]! : const Color(0xFFF692B3);
     final cardColor = isDarkMode ? Colors.grey[850]! : const Color(0xFFFFD2E1);
@@ -33,16 +27,14 @@ class AboutMePage extends StatelessWidget {
       backgroundColor: bgColor,
       body: CustomScrollView(
         slivers: [
-          // --- AppBar Sederhana yang Tetap di Atas ---
           SliverAppBar(
-            title: const Text("Tentang Pengembang"),
-            pinned: true, // Membuat AppBar tetap terlihat saat scroll
+            title: const Text("Tentang Pencipta"),
+            pinned: true,
             backgroundColor: highlightColor,
             foregroundColor: Colors.white,
             elevation: 2,
           ),
 
-          // --- Konten Utama Halaman ---
           SliverList(
             delegate: SliverChildListDelegate([
               Padding(
@@ -50,8 +42,7 @@ class AboutMePage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 24), // Jarak dari AppBar
-                    // --- Foto Profil ---
+                    const SizedBox(height: 24),
                     Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
@@ -67,16 +58,12 @@ class AboutMePage extends StatelessWidget {
                       ),
                       child: const CircleAvatar(
                         radius: 75,
-                        backgroundImage: AssetImage(
-                          'assets/rahma.jpg',
-                        ), // <-- PASTIKAN NAMA FILE INI BENAR
+                        backgroundImage: AssetImage('assets/rahma.jpg'),
                       ),
                     ),
                     const SizedBox(height: 24),
-
-                    // --- Nama & Status ---
                     Text(
-                      "PRIMA MIFTAKHUL RAHMA", // <-- GANTI DENGAN NAMA ANDA
+                      "PRIMA MIFTAKHUL RAHMA",
                       style: TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
@@ -87,7 +74,7 @@ class AboutMePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      "Mahasiswi S1 Informatika, Universitas Negeri Surabaya", // <-- GANTI DENGAN STATUS ANDA
+                      "Mahasiswi S1 Informatika, Universitas Negeri Surabaya",
                       style: TextStyle(
                         fontSize: 18,
                         color: secondaryTextColor,
@@ -97,7 +84,6 @@ class AboutMePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 32),
 
-                    // --- Kartu-kartu Informasi ---
                     _buildInfoCard(
                       context,
                       cardColor,
@@ -127,7 +113,7 @@ class AboutMePage extends StatelessWidget {
                       content: Wrap(
                         spacing: 8.0,
                         runSpacing: 4.0,
-                        alignment: WrapAlignment.center, // Agar chip di tengah
+                        alignment: WrapAlignment.center,
                         children: [
                           _buildSkillChip("Flutter & Dart", highlightColor),
                           _buildSkillChip(
@@ -204,8 +190,6 @@ class AboutMePage extends StatelessWidget {
       ),
     );
   }
-
-  // --- WIDGET HELPER DI BAWAH INI (TIDAK ADA PERUBAHAN) ---
 
   Widget _buildInfoCard(
     BuildContext context,

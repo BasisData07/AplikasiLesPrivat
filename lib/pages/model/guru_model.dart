@@ -1,7 +1,10 @@
+// lib/model/guru_model.dart
+
 import 'package:equatable/equatable.dart';
 
 abstract class Guru extends Equatable {
   final String name;
+  final String email; // <-- TAMBAHKAN KEMBALI FIELD INI
   final String gelar;
   final String level;
   final int price;
@@ -17,6 +20,7 @@ abstract class Guru extends Equatable {
 
   const Guru({
     required this.name,
+    required this.email, // <-- TAMBAHKAN KEMBALI DI CONSTRUCTOR
     required this.gelar,
     required this.level,
     required this.price,
@@ -37,12 +41,13 @@ abstract class Guru extends Equatable {
   }
 
   @override
-  List<Object?> get props => [name, noTelepon, mapel];
+  List<Object?> get props => [name, email, noTelepon, mapel]; // <-- TAMBAHKAN email KE props
 }
 
 class GuruSD extends Guru {
   const GuruSD({
     required super.name,
+    required super.email, // <-- TAMBAHKAN DI SEMUA SUBCLASS
     required super.gelar,
     required super.price,
     required super.rating,
@@ -60,6 +65,7 @@ class GuruSD extends Guru {
 class GuruSMP extends Guru {
   const GuruSMP({
     required super.name,
+    required super.email, // <-- TAMBAHKAN DI SEMUA SUBCLASS
     required super.gelar,
     required super.price,
     required super.rating,
@@ -77,6 +83,7 @@ class GuruSMP extends Guru {
 class GuruSMA extends Guru {
   const GuruSMA({
     required super.name,
+    required super.email, // <-- TAMBAHKAN DI SEMUA SUBCLASS
     required super.gelar,
     required super.price,
     required super.rating,

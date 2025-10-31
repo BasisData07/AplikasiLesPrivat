@@ -12,7 +12,8 @@ class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
-  String _fullText = "LES MANIA";
+  // DIUBAH DI SINI: Nama aplikasi diganti
+  final String _fullText = "PRIVATE AJA";
   String _displayedText = "";
   int _charIndex = 0;
   Timer? _typingTimer;
@@ -20,14 +21,11 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-
-    // Animasi gambar berputar
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat();
 
-    // Animasi mengetik teks
     _typingTimer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
       if (_charIndex < _fullText.length) {
         setState(() {
@@ -55,7 +53,8 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 233, 152, 179),
+      // DIUBAH DI SINI: Warna latar belakang diubah menjadi hijau mint yang elegan
+      backgroundColor: const Color.fromARGB(255, 86, 218, 143),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -78,7 +77,7 @@ class _SplashScreenState extends State<SplashScreen>
             ),
             const SizedBox(height: 40),
             const Text(
-              "Created by Prima Miftakhul Rahma",
+              "Created by Kelompok 8",
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,

@@ -1,12 +1,13 @@
-// lib/pages/login_page.dart
+// login_page.dart
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'model/user_model.dart';
-import 'home_page.dart';
+import 'murid/home_page.dart';
 import 'SignUpPage.dart';
-import 'admin_page.dart';
+import 'admin/admin_page.dart';
+import 'guru/guru_home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -29,27 +30,18 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _checkLoginStatus() async {
-    // ... (Fungsi ini tidak perlu diubah)
     final prefs = await SharedPreferences.getInstance();
-    final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-    if (isLoggedIn) {
-      String? email = prefs.getString('email');
-      String? password = prefs.getString('password');
-      String? name = prefs.getString('name');
-      String? username = prefs.getString('username');
-
-      if (email != null && password != null) {
-        UserModel user = UserModel(
-          name: name ?? "",
-          username: username ?? "",
-          email: email,
-          password: password,
-        );
-        if (!context.mounted) return;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => MyHomePage(user: user)),
-        );
+    if (prefs.getBool('isLoggedIn') ?? false) {
+      final user = UserModel(
+        name: prefs.getString('name') ?? "",
+        username: prefs.getString('username') ?? "",
+        email: prefs.getString('email') ?? "",
+        password: prefs.getString('password') ?? "",
+        role: prefs.getString('role'),
+        subject: prefs.getString('subject'),
+      );
+      if (user.email.isNotEmpty && context.mounted) {
+        _navigateByUserRole(user);
       }
     }
   }
@@ -59,11 +51,10 @@ class _LoginPageState extends State<LoginPage> {
     String password = _passwordController.text.trim();
 
     if (username == 'admin' && password == 'admin123') {
-      if (!context.mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const AdminPage()),
-      );
+      if (context.mounted) {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => const AdminPage()));
+      }
       return;
     }
 
@@ -71,7 +62,6 @@ class _LoginPageState extends State<LoginPage> {
       _showMessage("Email dan Password wajib diisi!");
       return;
     }
-
     if (!_emailRegex.hasMatch(username)) {
       _showMessage("Format email tidak valid!");
       return;
@@ -80,38 +70,47 @@ class _LoginPageState extends State<LoginPage> {
     final prefs = await SharedPreferences.getInstance();
     String? savedEmail = prefs.getString('email');
     String? savedPassword = prefs.getString('password');
-    String? savedName = prefs.getString('name');
-    String? savedUsername = prefs.getString('username');
 
-    if (savedEmail == null || savedPassword == null) {
-      _showMessage("Belum ada akun yang terdaftar!");
+    if (savedEmail == null) {
+      _showMessage("Akun tidak ditemukan!");
       return;
     }
-
-    if (savedEmail != username) {
-      _showMessage("Email tidak ditemukan!");
-      return;
-    }
-
-    if (savedPassword != password) {
-      _showMessage("Password salah!");
+    if (savedEmail != username || savedPassword != password) {
+      _showMessage("Email atau Password salah!");
       return;
     }
 
     await prefs.setBool('isLoggedIn', true);
 
-    UserModel user = UserModel(
-      name: savedName ?? "",
-      username: savedUsername ?? "",
-      email: savedEmail,
-      password: savedPassword,
+    // ## INI BAGIAN YANG DIPERBAIKI ##
+    // Kita menambahkan tanda seru (!) untuk meyakinkan Dart bahwa savedEmail
+    // dan savedPassword tidak akan null di baris ini.
+    final user = UserModel(
+      name: prefs.getString('name') ?? "",
+      username: prefs.getString('username') ?? "",
+      email: savedEmail!,      // <-- PERBAIKAN DI SINI
+      password: savedPassword!, // <-- PERBAIKAN DI SINI
+      role: prefs.getString('role'),
+      subject: prefs.getString('subject'),
     );
 
-    if (!context.mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => MyHomePage(user: user)),
-    );
+    if (context.mounted) {
+      _navigateByUserRole(user);
+    }
+  }
+
+  void _navigateByUserRole(UserModel user) {
+    if (user.role == 'guru') {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => GuruHomePage(user: user)),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => MyHomePage(user: user)),
+      );
+    }
   }
 
   void _goToSignUp() {
@@ -122,17 +121,19 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _showMessage(String msg) {
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    const Color mintBackground = Color(0xFF3CB371);
+    const Color darkerMintButton = Color(0xFF2E8B57);
+
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          color: Color.fromARGB(255, 233, 152, 179),
-        ),
+        decoration: const BoxDecoration(color: mintBackground),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -144,7 +145,7 @@ class _LoginPageState extends State<LoginPage> {
                     Image.asset('assets/panda.png', height: 150),
                     const SizedBox(height: 10),
                     const Text(
-                      "LES MANIA",
+                      "PRIVATE AJA",
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
@@ -157,7 +158,7 @@ class _LoginPageState extends State<LoginPage> {
                       controller: _usernameController,
                       keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(
-                        labelText: 'Email atau Username',
+                        labelText: 'Email',
                         border: OutlineInputBorder(),
                         filled: true,
                         fillColor: Colors.white,
@@ -173,15 +174,9 @@ class _LoginPageState extends State<LoginPage> {
                         filled: true,
                         fillColor: Colors.white,
                         suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                          ),
+                          icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
                           onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
+                            setState(() => _obscurePassword = !_obscurePassword);
                           },
                         ),
                       ),
@@ -190,7 +185,7 @@ class _LoginPageState extends State<LoginPage> {
                     ElevatedButton(
                       onPressed: _login,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromRGBO(233, 64, 137, 1),
+                        backgroundColor: darkerMintButton,
                         foregroundColor: Colors.white,
                         minimumSize: const Size(double.infinity, 50),
                       ),
@@ -210,7 +205,7 @@ class _LoginPageState extends State<LoginPage> {
               const Padding(
                 padding: EdgeInsets.only(bottom: 12),
                 child: Text(
-                  "Created by Prima Miftakhul Rahma",
+                  "Created by Kelompok 8",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white70,

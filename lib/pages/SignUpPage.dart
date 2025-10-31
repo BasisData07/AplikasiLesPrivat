@@ -1,3 +1,5 @@
+// SignUpPage.dart
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'model/user_model.dart';
@@ -17,72 +19,82 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
+  // Controller baru untuk mata pelajaran
+  final TextEditingController _subjectController = TextEditingController();
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+
+  // PERUBAHAN: Menggunakan String untuk role, default 'murid'
+  String _selectedRole = 'murid';
+
+  static const Color mintHighlight = Color(0xFF3CB371);
+  static const Color darkerMintButton = Color(0xFF2E8B57);
+
+  @override
+  void dispose() {
+    // Pastikan semua controller di-dispose
+    _nameController.dispose();
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _subjectController.dispose();
+    super.dispose();
+  }
 
   Future<void> _signUp() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
+    final prefs = await SharedPreferences.getInstance();
     String name = _nameController.text.trim();
     String username = _usernameController.text.trim();
     String email = _emailController.text.trim();
     String pass = _passwordController.text.trim();
-    String confirmPass = _confirmPasswordController.text.trim();
+    // PERUBAHAN: Ambil data subject jika role adalah guru
+    String? subject =
+        _selectedRole == 'guru' ? _subjectController.text.trim() : null;
 
-    if (pass != confirmPass) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Password dan Konfirmasi Password tidak cocok!"),
-        ),
-      );
-      return;
+    // Simpan data ke SharedPreferences
+    await prefs.setString('name', name);
+    await prefs.setString('username', username);
+    await prefs.setString('email', email);
+    await prefs.setString('password', pass);
+    await prefs.setString('role', _selectedRole);
+    if (subject != null) {
+      await prefs.setString('subject', subject);
     }
-
-    UserModel newUser = UserModel(
-      name: name,
-      username: username,
-      email: email,
-      password: pass,
-    );
-
-    final prefs = await SharedPreferences.getInstance();
-
-    await prefs.setString('name', newUser.name);
-    await prefs.setString('username', newUser.username);
-    await prefs.setString('email', newUser.email);
-    await prefs.setString('password', newUser.password);
     await prefs.setBool('isLoggedIn', false);
 
-    print("User disimpan ke SharedPreferences: $newUser");
-
+    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Akun berhasil dibuat! Silakan login.")),
     );
-
     Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Daftar Akun")),
+      appBar: AppBar(
+        title: const Text("Daftar Akun"),
+        backgroundColor: mintHighlight,
+        foregroundColor: Colors.white,
+      ),
       body: Container(
-        decoration: const BoxDecoration(
-          color: Color.fromARGB(255, 233, 152, 179),
-        ),
+        decoration: const BoxDecoration(color: mintHighlight),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Form(
             key: _formKey,
             child: ListView(
               children: [
-                Image.asset("assets/panda.png", height: 100),
+                Image.asset("assets/panda.png", height: 80),
                 const SizedBox(height: 10),
                 const Text(
-                  "LES MANIA",
+                  "PRIVATE AJA",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 24,
@@ -93,29 +105,61 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 const SizedBox(height: 20),
 
+                // --- Dropdown untuk memilih peran (menggunakan String) ---
+                DropdownButtonFormField<String>(
+                  value: _selectedRole,
+                  decoration: _buildInputDecoration("Daftar Sebagai"),
+                  items: ['murid', 'guru'].map((String role) {
+                    return DropdownMenuItem<String>(
+                      value: role,
+                      child: Text(role == 'murid' ? 'Murid' : 'Guru'),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedRole = newValue!;
+                    });
+                  },
+                ),
+                const SizedBox(height: 12),
+
                 TextFormField(
                   controller: _nameController,
                   decoration: _buildInputDecoration("Nama Lengkap"),
-                  validator: (value) =>
-                      value!.isEmpty ? 'Nama tidak boleh kosong' : null,
+                  validator: (v) => v!.isEmpty ? 'Nama tidak boleh kosong' : null,
                 ),
                 const SizedBox(height: 12),
 
                 TextFormField(
                   controller: _usernameController,
                   decoration: _buildInputDecoration("Username"),
-                  validator: (value) =>
-                      value!.isEmpty ? 'Username tidak boleh kosong' : null,
+                  validator: (v) => v!.isEmpty ? 'Username tidak boleh kosong' : null,
                 ),
                 const SizedBox(height: 12),
+
+                // --- PERUBAHAN: Kolom Subject yang tampil kondisional ---
+                if (_selectedRole == 'guru')
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12.0),
+                    child: TextFormField(
+                      controller: _subjectController,
+                      decoration: _buildInputDecoration("Mata Pelajaran yang Diajar"),
+                      validator: (v) {
+                        if (_selectedRole == 'guru' && (v == null || v.isEmpty)) {
+                          return 'Mata pelajaran wajib diisi untuk guru';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
 
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: _buildInputDecoration("Email"),
-                  validator: (value) {
-                    if (value!.isEmpty) return 'Email tidak boleh kosong';
-                    if (!value.contains('@')) return 'Format email tidak valid';
+                  validator: (v) {
+                    if (v!.isEmpty) return 'Email tidak boleh kosong';
+                    if (!v.contains('@')) return 'Format email tidak valid';
                     return null;
                   },
                 ),
@@ -126,42 +170,26 @@ class _SignUpPageState extends State<SignUpPage> {
                   obscureText: _obscurePassword,
                   decoration: _buildInputDecoration("Password").copyWith(
                     suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                      ),
-                      onPressed: () =>
-                          setState(() => _obscurePassword = !_obscurePassword),
+                      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
-                  validator: (value) =>
-                      value!.length < 6 ? 'Password minimal 6 karakter' : null,
+                  validator: (v) => v!.length < 6 ? 'Password minimal 6 karakter' : null,
                 ),
                 const SizedBox(height: 12),
 
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: _obscureConfirmPassword,
-                  decoration: _buildInputDecoration("Konfirmasi Password")
-                      .copyWith(
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureConfirmPassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                          ),
-                          onPressed: () => setState(
-                            () => _obscureConfirmPassword =
-                                !_obscureConfirmPassword,
-                          ),
-                        ),
-                      ),
-                  validator: (value) {
-                    if (value!.isEmpty)
-                      return 'Konfirmasi password tidak boleh kosong';
-                    if (value != _passwordController.text)
-                      return 'Password tidak cocok';
+                  decoration: _buildInputDecoration("Konfirmasi Password").copyWith(
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility),
+                      onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                    ),
+                  ),
+                  validator: (v) {
+                    if (v!.isEmpty) return 'Konfirmasi password tidak boleh kosong';
+                    if (v != _passwordController.text) return 'Password tidak cocok';
                     return null;
                   },
                 ),
@@ -170,7 +198,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ElevatedButton(
                   onPressed: _signUp,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromRGBO(233, 64, 137, 1),
+                    backgroundColor: darkerMintButton,
                     foregroundColor: Colors.white,
                     minimumSize: const Size(double.infinity, 50),
                   ),
@@ -187,7 +215,7 @@ class _SignUpPageState extends State<SignUpPage> {
   InputDecoration _buildInputDecoration(String label) {
     return InputDecoration(
       labelText: label,
-      border: const OutlineInputBorder(),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
       filled: true,
       fillColor: Colors.white,
     );

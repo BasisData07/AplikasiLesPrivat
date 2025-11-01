@@ -53,7 +53,9 @@ class _LoginPageState extends State<LoginPage> {
     if (username == 'admin' && password == 'admin123') {
       if (context.mounted) {
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => const AdminPage()));
+          context,
+          MaterialPageRoute(builder: (context) => const AdminPage()),
+        );
       }
       return;
     }
@@ -88,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
     final user = UserModel(
       name: prefs.getString('name') ?? "",
       username: prefs.getString('username') ?? "",
-      email: savedEmail!,      // <-- PERBAIKAN DI SINI
+      email: savedEmail!, // <-- PERBAIKAN DI SINI
       password: savedPassword!, // <-- PERBAIKAN DI SINI
       role: prefs.getString('role'),
       subject: prefs.getString('subject'),
@@ -128,8 +130,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    const Color mintBackground = Color(0xFF3CB371);
-    const Color darkerMintButton = Color(0xFF2E8B57);
+    const Color mintBackground = Colors.orange;
+    const Color darkerMintButton = Colors.orangeAccent;
 
     return Scaffold(
       body: Container(
@@ -174,9 +176,15 @@ class _LoginPageState extends State<LoginPage> {
                         filled: true,
                         fillColor: Colors.white,
                         suffixIcon: IconButton(
-                          icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
                           onPressed: () {
-                            setState(() => _obscurePassword = !_obscurePassword);
+                            setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            );
                           },
                         ),
                       ),
@@ -208,7 +216,7 @@ class _LoginPageState extends State<LoginPage> {
                   "Created by Kelompok 8",
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.white70,
+                    color: Colors.white,
                     fontSize: 14,
                     fontStyle: FontStyle.italic,
                   ),

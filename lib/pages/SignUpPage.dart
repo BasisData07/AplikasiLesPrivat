@@ -19,21 +19,14 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-  // Controller baru untuk mata pelajaran
   final TextEditingController _subjectController = TextEditingController();
-
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
-
-  // PERUBAHAN: Menggunakan String untuk role, default 'murid'
+  
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
   String _selectedRole = 'murid';
-
-  static const Color mintHighlight = Color(0xFF3CB371);
-  static const Color darkerMintButton = Color(0xFF2E8B57);
 
   @override
   void dispose() {
-    // Pastikan semua controller di-dispose
     _nameController.dispose();
     _usernameController.dispose();
     _emailController.dispose();
@@ -53,11 +46,9 @@ class _SignUpPageState extends State<SignUpPage> {
     String username = _usernameController.text.trim();
     String email = _emailController.text.trim();
     String pass = _passwordController.text.trim();
-    // PERUBAHAN: Ambil data subject jika role adalah guru
     String? subject =
         _selectedRole == 'guru' ? _subjectController.text.trim() : null;
 
-    // Simpan data ke SharedPreferences
     await prefs.setString('name', name);
     await prefs.setString('username', username);
     await prefs.setString('email', email);
@@ -77,147 +68,608 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isSmallScreen = MediaQuery.of(context).size.width < 600;
+    final bool isMediumScreen = MediaQuery.of(context).size.width < 1000;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Daftar Akun"),
-        backgroundColor: mintHighlight,
-        foregroundColor: Colors.white,
-      ),
-      body: Container(
-        decoration: const BoxDecoration(color: mintHighlight),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: ListView(
-              children: [
-                Image.asset("assets/panda.png", height: 80),
-                const SizedBox(height: 10),
-                const Text(
-                  "PRIVATE AJA",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 2,
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // --- Dropdown untuk memilih peran (menggunakan String) ---
-                DropdownButtonFormField<String>(
-                  value: _selectedRole,
-                  decoration: _buildInputDecoration("Daftar Sebagai"),
-                  items: ['murid', 'guru'].map((String role) {
-                    return DropdownMenuItem<String>(
-                      value: role,
-                      child: Text(role == 'murid' ? 'Murid' : 'Guru'),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _selectedRole = newValue!;
-                    });
-                  },
-                ),
-                const SizedBox(height: 12),
-
-                TextFormField(
-                  controller: _nameController,
-                  decoration: _buildInputDecoration("Nama Lengkap"),
-                  validator: (v) => v!.isEmpty ? 'Nama tidak boleh kosong' : null,
-                ),
-                const SizedBox(height: 12),
-
-                TextFormField(
-                  controller: _usernameController,
-                  decoration: _buildInputDecoration("Username"),
-                  validator: (v) => v!.isEmpty ? 'Username tidak boleh kosong' : null,
-                ),
-                const SizedBox(height: 12),
-
-                // --- PERUBAHAN: Kolom Subject yang tampil kondisional ---
-                if (_selectedRole == 'guru')
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
-                    child: TextFormField(
-                      controller: _subjectController,
-                      decoration: _buildInputDecoration("Mata Pelajaran yang Diajar"),
-                      validator: (v) {
-                        if (_selectedRole == 'guru' && (v == null || v.isEmpty)) {
-                          return 'Mata pelajaran wajib diisi untuk guru';
-                        }
-                        return null;
+      body: Center(
+        child: isSmallScreen
+            ? SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const _Logo(),
+                    _FormRegistrasi(
+                      formKey: _formKey,
+                      nameController: _nameController,
+                      usernameController: _usernameController,
+                      emailController: _emailController,
+                      passwordController: _passwordController,
+                      confirmPasswordController: _confirmPasswordController,
+                      subjectController: _subjectController,
+                      selectedRole: _selectedRole,
+                      onRoleChanged: (newValue) {
+                        setState(() {
+                          _selectedRole = newValue;
+                        });
                       },
+                      onSignUp: _signUp,
                     ),
-                  ),
-
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: _buildInputDecoration("Email"),
-                  validator: (v) {
-                    if (v!.isEmpty) return 'Email tidak boleh kosong';
-                    if (!v.contains('@')) return 'Format email tidak valid';
-                    return null;
-                  },
+                  ],
                 ),
-                const SizedBox(height: 12),
+              )
+            : Container(
+                padding: const EdgeInsets.all(32.0),
+                constraints: const BoxConstraints(maxWidth: 1200),
+                child: isMediumScreen
+                    ? Column(
+                        children: [
+                          const _Logo(),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: _FormRegistrasi(
+                                formKey: _formKey,
+                                nameController: _nameController,
+                                usernameController: _usernameController,
+                                emailController: _emailController,
+                                passwordController: _passwordController,
+                                confirmPasswordController: _confirmPasswordController,
+                                subjectController: _subjectController,
+                                selectedRole: _selectedRole,
+                                onRoleChanged: (newValue) {
+                                  setState(() {
+                                    _selectedRole = newValue;
+                                  });
+                                },
+                                onSignUp: _signUp,
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    : Row(
+                        children: [
+                          const Expanded(child: _Logo()),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: _FormRegistrasi(
+                                formKey: _formKey,
+                                nameController: _nameController,
+                                usernameController: _usernameController,
+                                emailController: _emailController,
+                                passwordController: _passwordController,
+                                confirmPasswordController: _confirmPasswordController,
+                                subjectController: _subjectController,
+                                selectedRole: _selectedRole,
+                                onRoleChanged: (newValue) {
+                                  setState(() {
+                                    _selectedRole = newValue;
+                                  });
+                                },
+                                onSignUp: _signUp,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+      ),
+    );
+  }
+}
 
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  decoration: _buildInputDecoration("Password").copyWith(
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+class _Logo extends StatelessWidget {
+  const _Logo();
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isSmallScreen = MediaQuery.of(context).size.width < 600;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Image.asset('assets/panda.png', height: isSmallScreen ? 100 : 200),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            "DAFTAR AKUN",
+            textAlign: TextAlign.center,
+            style: isSmallScreen
+                ? Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange,
+                      fontSize: 20,
+                    )
+                : Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange,
+                      fontSize: 24,
                     ),
-                  ),
-                  validator: (v) => v!.length < 6 ? 'Password minimal 6 karakter' : null,
-                ),
-                const SizedBox(height: 12),
-
-                TextFormField(
-                  controller: _confirmPasswordController,
-                  obscureText: _obscureConfirmPassword,
-                  decoration: _buildInputDecoration("Konfirmasi Password").copyWith(
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility),
-                      onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
-                    ),
-                  ),
-                  validator: (v) {
-                    if (v!.isEmpty) return 'Konfirmasi password tidak boleh kosong';
-                    if (v != _passwordController.text) return 'Password tidak cocok';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-
-                ElevatedButton(
-                  onPressed: _signUp,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: darkerMintButton,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 50),
-                  ),
-                  child: const Text("Daftar"),
-                ),
-              ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            "Bergabung dengan PRIVATE AJA",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: isSmallScreen ? 14 : 16,
             ),
           ),
+        ),
+        const SizedBox(height: 15),
+        const Padding(
+          padding: EdgeInsets.only(bottom: 12),
+          child: Text(
+            "Created by Kelompok 8",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 14,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FormRegistrasi extends StatefulWidget {
+  final GlobalKey<FormState> formKey;
+  final TextEditingController nameController;
+  final TextEditingController usernameController;
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+  final TextEditingController confirmPasswordController;
+  final TextEditingController subjectController;
+  final String selectedRole;
+  final Function(String) onRoleChanged;
+  final VoidCallback onSignUp;
+
+  const _FormRegistrasi({
+    required this.formKey,
+    required this.nameController,
+    required this.usernameController,
+    required this.emailController,
+    required this.passwordController,
+    required this.confirmPasswordController,
+    required this.subjectController,
+    required this.selectedRole,
+    required this.onRoleChanged,
+    required this.onSignUp,
+  });
+
+  @override
+  State<_FormRegistrasi> createState() => __FormRegistrasiState();
+}
+
+class __FormRegistrasiState extends State<_FormRegistrasi> {
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isSmallScreen = MediaQuery.of(context).size.width < 600;
+    final bool isMediumScreen = MediaQuery.of(context).size.width < 1000;
+
+    return Container(
+      constraints: BoxConstraints(
+        maxWidth: isSmallScreen ? 400 : 600,
+      ),
+      child: Form(
+        key: widget.formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (isSmallScreen) ..._buildMobileLayout(),
+            if (!isSmallScreen) ..._buildDesktopLayout(isMediumScreen),
+            
+            _gap(),
+            
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: Text(
+                    'Daftar',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                onPressed: widget.onSignUp,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  InputDecoration _buildInputDecoration(String label) {
-    return InputDecoration(
-      labelText: label,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-      filled: true,
-      fillColor: Colors.white,
-    );
+  List<Widget> _buildMobileLayout() {
+    return [
+      DropdownButtonFormField<String>(
+        value: widget.selectedRole,
+        decoration: const InputDecoration(
+          labelText: 'Daftar Sebagai',
+          prefixIcon: Icon(Icons.person_outline),
+          border: OutlineInputBorder(),
+        ),
+        items: [
+          DropdownMenuItem(
+            value: 'murid',
+            child: Text('Murid'),
+          ),
+          DropdownMenuItem(
+            value: 'guru',
+            child: Text('Guru'),
+          ),
+        ],
+        onChanged: (String? newValue) {
+          if (newValue != null) {
+            widget.onRoleChanged(newValue);
+          }
+        },
+      ),
+      _gap(),
+      
+      TextFormField(
+        controller: widget.nameController,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Nama lengkap harus diisi';
+          }
+          return null;
+        },
+        decoration: const InputDecoration(
+          labelText: 'Nama Lengkap',
+          hintText: 'Masukkan nama lengkap',
+          prefixIcon: Icon(Icons.person),
+          border: OutlineInputBorder(),
+        ),
+      ),
+      _gap(),
+      
+      TextFormField(
+        controller: widget.usernameController,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Username harus diisi';
+          }
+          return null;
+        },
+        decoration: const InputDecoration(
+          labelText: 'Username',
+          hintText: 'Masukkan username',
+          prefixIcon: Icon(Icons.badge),
+          border: OutlineInputBorder(),
+        ),
+      ),
+      _gap(),
+      
+      if (widget.selectedRole == 'guru')
+        Column(
+          children: [
+            TextFormField(
+              controller: widget.subjectController,
+              validator: (value) {
+                if (widget.selectedRole == 'guru' && (value == null || value.isEmpty)) {
+                  return 'Mata pelajaran wajib diisi untuk guru';
+                }
+                return null;
+              },
+              decoration: const InputDecoration(
+                labelText: 'Mata Pelajaran',
+                hintText: 'Masukkan mata pelajaran yang diajar',
+                prefixIcon: Icon(Icons.book),
+                border: OutlineInputBorder(),
+              ),
+            ),
+            _gap(),
+          ],
+        ),
+      
+      TextFormField(
+        controller: widget.emailController,
+        keyboardType: TextInputType.emailAddress,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Email harus diisi';
+          }
+          if (!value.contains('@')) {
+            return 'Format email tidak valid';
+          }
+          return null;
+        },
+        decoration: const InputDecoration(
+          labelText: 'Email',
+          hintText: 'Masukkan email',
+          prefixIcon: Icon(Icons.email_outlined),
+          border: OutlineInputBorder(),
+        ),
+      ),
+      _gap(),
+      
+      TextFormField(
+        controller: widget.passwordController,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Password harus diisi';
+          }
+          if (value.length < 6) {
+            return 'Password minimal 6 karakter';
+          }
+          return null;
+        },
+        obscureText: !_isPasswordVisible,
+        decoration: InputDecoration(
+          labelText: 'Password',
+          hintText: 'Masukkan password',
+          prefixIcon: const Icon(Icons.lock_outline_rounded),
+          border: const OutlineInputBorder(),
+          suffixIcon: IconButton(
+            icon: Icon(
+              _isPasswordVisible
+                  ? Icons.visibility_off
+                  : Icons.visibility,
+            ),
+            onPressed: () {
+              setState(() {
+                _isPasswordVisible = !_isPasswordVisible;
+              });
+            },
+          ),
+        ),
+      ),
+      _gap(),
+      
+      TextFormField(
+        controller: widget.confirmPasswordController,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Konfirmasi password harus diisi';
+          }
+          if (value != widget.passwordController.text) {
+            return 'Password tidak cocok';
+          }
+          return null;
+        },
+        obscureText: !_isConfirmPasswordVisible,
+        decoration: InputDecoration(
+          labelText: 'Konfirmasi Password',
+          hintText: 'Masukkan ulang password',
+          prefixIcon: const Icon(Icons.lock_reset),
+          border: const OutlineInputBorder(),
+          suffixIcon: IconButton(
+            icon: Icon(
+              _isConfirmPasswordVisible
+                  ? Icons.visibility_off
+                  : Icons.visibility,
+            ),
+            onPressed: () {
+              setState(() {
+                _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+              });
+            },
+          ),
+        ),
+      ),
+    ];
   }
+
+  List<Widget> _buildDesktopLayout(bool isMediumScreen) {
+    return [
+      Row(
+        children: [
+          Expanded(
+            child: DropdownButtonFormField<String>(
+              value: widget.selectedRole,
+              decoration: const InputDecoration(
+                labelText: 'Daftar Sebagai',
+                prefixIcon: Icon(Icons.person_outline),
+                border: OutlineInputBorder(),
+              ),
+              items: [
+                DropdownMenuItem(
+                  value: 'murid',
+                  child: Text('Murid'),
+                ),
+                DropdownMenuItem(
+                  value: 'guru',
+                  child: Text('Guru'),
+                ),
+              ],
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  widget.onRoleChanged(newValue);
+                }
+              },
+            ),
+          ),
+          _gapHorizontal(),
+          Expanded(
+            child: TextFormField(
+              controller: widget.nameController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Nama lengkap harus diisi';
+                }
+                return null;
+              },
+              decoration: const InputDecoration(
+                labelText: 'Nama Lengkap',
+                hintText: 'Masukkan nama lengkap',
+                prefixIcon: Icon(Icons.person),
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ),
+        ],
+      ),
+      _gap(),
+      
+      if (widget.selectedRole == 'guru')
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: widget.usernameController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Username harus diisi';
+                  }
+                  return null;
+                },
+                decoration: const InputDecoration(
+                  labelText: 'Username',
+                  hintText: 'Masukkan username',
+                  prefixIcon: Icon(Icons.badge),
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+            _gapHorizontal(),
+            Expanded(
+              child: TextFormField(
+                controller: widget.subjectController,
+                validator: (value) {
+                  if (widget.selectedRole == 'guru' && (value == null || value.isEmpty)) {
+                    return 'Mata pelajaran wajib diisi';
+                  }
+                  return null;
+                },
+                decoration: const InputDecoration(
+                  labelText: 'Mata Pelajaran',
+                  hintText: 'Mata pelajaran yang diajar',
+                  prefixIcon: Icon(Icons.book),
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+          ],
+        )
+      else
+        TextFormField(
+          controller: widget.usernameController,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Username harus diisi';
+            }
+            return null;
+          },
+          decoration: const InputDecoration(
+            labelText: 'Username',
+            hintText: 'Masukkan username',
+            prefixIcon: Icon(Icons.badge),
+            border: OutlineInputBorder(),
+          ),
+        ),
+      _gap(),
+      
+      TextFormField(
+        controller: widget.emailController,
+        keyboardType: TextInputType.emailAddress,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Email harus diisi';
+          }
+          if (!value.contains('@')) {
+            return 'Format email tidak valid';
+          }
+          return null;
+        },
+        decoration: const InputDecoration(
+          labelText: 'Email',
+          hintText: 'Masukkan email',
+          prefixIcon: Icon(Icons.email_outlined),
+          border: OutlineInputBorder(),
+        ),
+      ),
+      _gap(),
+      
+      Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              controller: widget.passwordController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Password harus diisi';
+                }
+                if (value.length < 6) {
+                  return 'Minimal 6 karakter';
+                }
+                return null;
+              },
+              obscureText: !_isPasswordVisible,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                hintText: 'Masukkan password',
+                prefixIcon: const Icon(Icons.lock_outline_rounded),
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isPasswordVisible
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
+                  },
+                ),
+              ),
+            ),
+          ),
+          _gapHorizontal(),
+          Expanded(
+            child: TextFormField(
+              controller: widget.confirmPasswordController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Konfirmasi password harus diisi';
+                }
+                if (value != widget.passwordController.text) {
+                  return 'Password tidak cocok';
+                }
+                return null;
+              },
+              obscureText: !_isConfirmPasswordVisible,
+              decoration: InputDecoration(
+                labelText: 'Konfirmasi Password',
+                hintText: 'Masukkan ulang password',
+                prefixIcon: const Icon(Icons.lock_reset),
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isConfirmPasswordVisible
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                    });
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ];
+  }
+
+  Widget _gap() => const SizedBox(height: 16);
+  Widget _gapHorizontal() => const SizedBox(width: 16);
 }

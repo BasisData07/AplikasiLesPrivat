@@ -7,7 +7,10 @@
 | NAMA | NIM |
 |--------|--------|
 | **Qolbun Halim H** | 24111814065 |
-| **Muhamad Rifki Maulana** | 24111814006 |
+| **Prima Miftakhul Rahma** | 24111814005 |
+| **Rayhan Wahyu Satrio Wibowo** | 24111814006 |
+| **Pratama Dicky** | 24111814065 |
+| **Wafiq Ulil Abshor A** | 24111814065 |
 
 
 ---
@@ -22,13 +25,10 @@
 
 ## Thanks to
 
-| [<img src="https://avatars.githubusercontent.com/u/208225069?v=4" width="250"/>](https://github.com/rifkimaulana25) | [<img src="https://avatars.githubusercontent.com/u/206008673?v=4" width="250"/>](https://github.com/byeone001) 
-| --- | --- | --- | --- |
-| **Muhamad Rifki Maulana** | **Qolbun Halim Hidayatullah** |
+| [<img src="https://avatars.githubusercontent.com/u/206008673?v=4" width="250"/>](https://github.com/byeone001) | [<img src="https://avatars.githubusercontent.com/u/207866322?v=4" width="250"/>](https://github.com/PrimaRahma) | [<img src="https://avatars.githubusercontent.com/u/207846856?v=4" width="250"/>](https://github.com/RayhanWahyu9) | [<img src="https://avatars.githubusercontent.com/u/207975203?v=4" width="250"/>](https://github.com/pratamadky) | [<img src="https://avatars.githubusercontent.com/u/208254287?v=4" width="250"/>](https://github.com/wafiqulil2603) 
+| --- | --- | --- | --- | --- |
+| **Qolbun Halim Hidayatulloh** | **Prima Miftakhul Rahma** | **Rayhan Wahyu Satrio Wibowo** | **Pratama Dicky** | **Wafiq Ulil Abshor A** |
 
 
-|[<img src="https://avatars.githubusercontent.com/u/208145298?v=4" width="215"/>](https://github.com/Chokycakep) | [<img src="https://avatars.githubusercontent.com/u/208224463?v=4" width="215"/>](https://github.com/SUPERChild973) | [<img src="https://avatars.githubusercontent.com/u/208254287?v=4" width="215"/>](https://github.com/wafiqulil2603) | &nbsp; |
-| --- | --- | --- | --- |
-| **Putu Novita D** | **Muhammad Dava K.R.** | **Wafiq Ulil Absor A.** |
 
 

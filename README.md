@@ -22,7 +22,7 @@
 
 ## Thanks to
 
-| [<img src="https://avatars.githubusercontent.com/u/208225069?v=4" width="250"/>](https://github.com/rifkimaulana25) | [<img_src="https://avatars.githubusercontent.com/u/206008673?v=4" width="250"/>](https://github.com/byeone001) 
+| [<img src="https://avatars.githubusercontent.com/u/208225069?v=4" width="250"/>](https://github.com/rifkimaulana25) | [<img src="https://avatars.githubusercontent.com/u/206008673?v=4" width="250"/>](https://github.com/byeone001) 
 | --- | --- | --- | --- |
 | **Muhamad Rifki Maulana** | **Qolbun Halim Hidayatullah** |
 

@@ -1,7 +1,9 @@
-// lupa_password_page.dart
+// lupa_password.dart
+// VERSI TIDAK AMAN - Perbaikan Error
 
 import 'package:flutter/material.dart';
-import 'package:PRIVATE_AJA/services/auth_service.dart';
+// Ganti path ini jika 'auth_service.dart' Anda ada di folder lain
+import 'services/auth_service.dart'; 
 
 class LupaPassword extends StatefulWidget {
   const LupaPassword({super.key});
@@ -12,34 +14,50 @@ class LupaPassword extends StatefulWidget {
 
 class _LupaPasswordState extends State<LupaPassword> {
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+  
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final RegExp _emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+  // final RegExp _emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$'); // Regex ini tidak dipakai di sini, dipindah ke Form
   
   bool _isLoading = false;
-  bool _emailSent = false;
 
-  void _resetPassword() async {
+  void _updatePassword() async {
     if (_formKey.currentState?.validate() ?? false) {
+      
+      String email = _emailController.text.trim();
+      String newPassword = _newPasswordController.text.trim();
+      String confirmPassword = _confirmPasswordController.text.trim();
+
+      // Validasi apakah password baru dan konfirmasi sama
+      if (newPassword != confirmPassword) {
+        _showMessage('Password Baru dan Konfirmasi Password tidak cocok');
+        return; // Hentikan proses
+      }
+
       setState(() {
         _isLoading = true;
       });
 
-      String email = _emailController.text.trim();
-
       try {
-        final result = await AuthService.lupaPassword(email);
+        // Memanggil fungsi baru yang (tidak aman) dari AuthService
+        final result = await AuthService.updatePasswordTanpaVerifikasi(email, newPassword);
         
         setState(() {
           _isLoading = false;
         });
 
         if (result['success'] == true) {
-          setState(() {
-            _emailSent = true;
+          _showMessage('Password berhasil diperbarui. Silakan login.');
+          // Kembali ke halaman login setelah 2 detik
+          Future.delayed(const Duration(seconds: 2), () {
+            if (context.mounted) {
+              Navigator.pop(context);
+            }
           });
         } else {
           if (context.mounted) {
-            _showMessage(result['message'] ?? 'Gagal mengirim email reset password');
+            _showMessage(result['message'] ?? 'Gagal memperbarui password');
           }
         }
       } catch (e) {
@@ -69,7 +87,7 @@ class _LupaPasswordState extends State<LupaPassword> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Lupa Password'),
+        title: const Text('Reset Password'), // Judul diubah
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
         leading: IconButton(
@@ -79,24 +97,26 @@ class _LupaPasswordState extends State<LupaPassword> {
       ),
       body: Center(
         child: _isLoading
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
+            ? const Center(child: CircularProgressIndicator())
             : isSmallScreen
                 ? SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const _LupaPasswordLogo(),
-                        _LupaPasswordForm(
-                          formKey: _formKey,
-                          emailController: _emailController,
-                          onResetPassword: _resetPassword,
-                          onKembali: _kembaliKeLogin,
-                          isLoading: _isLoading,
-                          emailSent: _emailSent,
-                        ),
-                      ],
+                    child: Padding( // Tambah padding agar tidak mepet
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const _LupaPasswordLogo(),
+                          _LupaPasswordForm(
+                            formKey: _formKey,
+                            emailController: _emailController,
+                            newPasswordController: _newPasswordController,
+                            confirmPasswordController: _confirmPasswordController,
+                            onUpdatePassword: _updatePassword,
+                            onKembali: _kembaliKeLogin,
+                            isLoading: _isLoading,
+                          ),
+                        ],
+                      ),
                     ),
                   )
                 : Container(
@@ -110,10 +130,11 @@ class _LupaPasswordState extends State<LupaPassword> {
                             child: _LupaPasswordForm(
                               formKey: _formKey,
                               emailController: _emailController,
-                              onResetPassword: _resetPassword,
+                              newPasswordController: _newPasswordController,
+                              confirmPasswordController: _confirmPasswordController,
+                              onUpdatePassword: _updatePassword,
                               onKembali: _kembaliKeLogin,
                               isLoading: _isLoading,
-                              emailSent: _emailSent,
                             ),
                           ),
                         ),
@@ -125,13 +146,12 @@ class _LupaPasswordState extends State<LupaPassword> {
   }
 }
 
+// Logo tetap sama, tidak perlu diubah
 class _LupaPasswordLogo extends StatelessWidget {
   const _LupaPasswordLogo();
-
   @override
   Widget build(BuildContext context) {
     final bool isSmallScreen = MediaQuery.of(context).size.width < 600;
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -170,21 +190,25 @@ class _LupaPasswordLogo extends StatelessWidget {
   }
 }
 
+
+// Form diubah
 class _LupaPasswordForm extends StatefulWidget {
   final GlobalKey<FormState> formKey;
   final TextEditingController emailController;
-  final VoidCallback onResetPassword;
+  final TextEditingController newPasswordController;
+  final TextEditingController confirmPasswordController;
+  final VoidCallback onUpdatePassword;
   final VoidCallback onKembali;
   final bool isLoading;
-  final bool emailSent;
 
   const _LupaPasswordForm({
     required this.formKey,
     required this.emailController,
-    required this.onResetPassword,
+    required this.newPasswordController,
+    required this.confirmPasswordController,
+    required this.onUpdatePassword,
     required this.onKembali,
     required this.isLoading,
-    required this.emailSent,
   });
 
   @override
@@ -192,7 +216,10 @@ class _LupaPasswordForm extends StatefulWidget {
 }
 
 class __LupaPasswordFormState extends State<_LupaPasswordForm> {
+  // Regex dipindah ke sini karena hanya dipakai di form ini
   final RegExp _emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -204,11 +231,8 @@ class __LupaPasswordFormState extends State<_LupaPasswordForm> {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (widget.emailSent) ..._buildSuccessState(),
-            if (!widget.emailSent) ..._buildFormState(),
-            
+            ..._buildFormState(), // Hanya ada satu state (form)
             _gap(),
-            
             // Footer
             const Padding(
               padding: EdgeInsets.only(bottom: 12),
@@ -237,7 +261,7 @@ class __LupaPasswordFormState extends State<_LupaPasswordForm> {
       ),
       _gap(),
       const Text(
-        "Masukkan email Anda untuk mereset password",
+        "Masukkan email dan password baru Anda",
         textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: 16,
@@ -247,6 +271,7 @@ class __LupaPasswordFormState extends State<_LupaPasswordForm> {
       _gap(),
       _gap(),
       
+      // Field Email
       TextFormField(
         controller: widget.emailController,
         keyboardType: TextInputType.emailAddress,
@@ -254,13 +279,14 @@ class __LupaPasswordFormState extends State<_LupaPasswordForm> {
           if (value == null || value.isEmpty) {
             return 'Email harus diisi';
           }
-          bool emailValid = _emailRegex.hasMatch(value);
+          // Gunakan regex yang ada di class ini
+          bool emailValid = _emailRegex.hasMatch(value); 
           if (!emailValid) {
             return 'Format email tidak valid';
           }
           return null;
         },
-        decoration: const InputDecoration(
+        decoration: const InputDecoration( // <-- Boleh const di sini
           labelText: 'Email',
           hintText: 'Masukkan email yang terdaftar',
           prefixIcon: Icon(Icons.email_outlined),
@@ -268,8 +294,74 @@ class __LupaPasswordFormState extends State<_LupaPasswordForm> {
         ),
       ),
       _gap(),
+      
+      // Field Password Baru
+      TextFormField(
+        controller: widget.newPasswordController,
+        obscureText: !_isPasswordVisible,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Password baru harus diisi';
+          }
+          if (value.length < 6) {
+            return 'Password minimal 6 karakter';
+          }
+          return null;
+        },
+        decoration: InputDecoration( // <-- Hapus 'const' dari sini
+          labelText: 'Password Baru',
+          hintText: 'Masukkan password baru',
+          prefixIcon: const Icon(Icons.lock_outline_rounded),
+          border: const OutlineInputBorder(),
+          suffixIcon: IconButton(
+            icon: Icon(
+              _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
+            ),
+            onPressed: () {
+              setState(() {
+                _isPasswordVisible = !_isPasswordVisible;
+              });
+            },
+          ),
+        ),
+      ),
+      _gap(),
+
+      // Field Konfirmasi Password Baru
+      TextFormField(
+        controller: widget.confirmPasswordController,
+        obscureText: !_isConfirmPasswordVisible,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Konfirmasi password harus diisi';
+          }
+          if (value != widget.newPasswordController.text) {
+            return 'Password tidak cocok';
+          }
+          return null;
+        },
+        decoration: InputDecoration( // <-- Hapus 'const' dari sini
+          labelText: 'Konfirmasi Password Baru',
+          hintText: 'Ketik ulang password baru',
+          // PERBAIKAN ICON: ganti 'lock_check_outlined' jadi 'lock_outline'
+          prefixIcon: const Icon(Icons.lock_outline), 
+          border: const OutlineInputBorder(),
+          suffixIcon: IconButton(
+            icon: Icon(
+              _isConfirmPasswordVisible ? Icons.visibility_off : Icons.visibility,
+            ),
+            onPressed: () {
+              setState(() {
+                _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+              });
+            },
+          ),
+        ),
+      ),
+      _gap(),
       _gap(),
       
+      // Tombol Simpan
       SizedBox(
         width: double.infinity,
         child: widget.isLoading
@@ -295,7 +387,7 @@ class __LupaPasswordFormState extends State<_LupaPasswordForm> {
                       ),
                     ),
                     SizedBox(width: 12),
-                    Text('Mengirim...'),
+                    Text('Menyimpan...'),
                   ],
                 ),
               )
@@ -308,14 +400,14 @@ class __LupaPasswordFormState extends State<_LupaPasswordForm> {
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                onPressed: widget.onResetPassword,
+                onPressed: widget.onUpdatePassword, // Panggil fungsi update
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.send_outlined),
+                    Icon(Icons.save_outlined),
                     SizedBox(width: 8),
                     Text(
-                      'Kirim Link Reset',
+                      'Simpan Password Baru',
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ],
@@ -328,80 +420,6 @@ class __LupaPasswordFormState extends State<_LupaPasswordForm> {
         onPressed: widget.isLoading ? null : widget.onKembali,
         child: const Text(
           'Kembali ke Login',
-          style: TextStyle(color: Colors.orange),
-        ),
-      ),
-    ];
-  }
-
-  List<Widget> _buildSuccessState() {
-    return [
-      const Icon(
-        Icons.mark_email_read_outlined,
-        size: 80,
-        color: Colors.green,
-      ),
-      _gap(),
-      const Text(
-        "Email Terkirim!",
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: Colors.green,
-        ),
-      ),
-      _gap(),
-      const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.0),
-        child: Text(
-          "Kami telah mengirim link reset password ke email Anda. "
-          "Silakan cek inbox email dan ikuti instruksi untuk membuat password baru.",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.grey,
-            height: 1.5,
-          ),
-        ),
-      ),
-      _gap(),
-      _gap(),
-      
-      SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.symmetric(vertical: 16),
-          ),
-          onPressed: widget.onKembali,
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.check_circle_outline),
-              SizedBox(width: 8),
-              Text(
-                'Kembali ke Login',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        ),
-      ),
-      _gap(),
-      
-      TextButton(
-        onPressed: () {
-          setState(() {
-            // Reset state untuk mengirim ulang
-          });
-        },
-        child: const Text(
-          'Kirim ulang email',
           style: TextStyle(color: Colors.orange),
         ),
       ),

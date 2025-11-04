@@ -2,65 +2,124 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:io'; // Untuk Platform
 import 'package:flutter/foundation.dart'; // Untuk kIsWeb
+import 'dart:async';
 
 class ApiService {
-  
-  // --- PENTING: PILIH BASE URL ANDA ---
-
-  // Dapatkan IP yang benar berdasarkan platform
+  // === KONFIGURASI BASE URL OTOMATIS ===
+  // Akan menyesuaikan platform (web, emulator, atau device fisik)
   static String getBaseUrl() {
     if (kIsWeb) {
-      // Opsi 1: Jika tes di Web (Chrome)
+      // 🟢 Jika dijalankan di browser (Chrome)
       return 'http://localhost:5000/api';
     }
-    
-    // Opsi 2: Jika tes di Emulator Android
-    // Gunakan 10.0.2.2 untuk merujuk ke 'localhost' komputer Anda
-    return 'http://10.0.2.2:5000/api';
 
-    // Opsi 3: Jika tes di HP Fisik (Ganti 192.168... dengan IP Anda)
-    // return 'http://192.168.1.100:5000/api'; 
+    if (Platform.isAndroid) {
+      // 🟢 Jika di emulator Android, gunakan IP khusus
+      return 'http://10.0.2.2:5000/api';
+    }
+
+    if (Platform.isIOS) {
+      // 🟢 Jika di simulator iOS
+      return 'http://127.0.0.1:5000/api';
+    }
+
+    // 🟢 Jika di HP fisik (pastikan pakai IP laptop kamu di jaringan WiFi yang sama)
+    // Ganti IP di bawah ini dengan IP laptop kamu
+    return 'http://192.168.1.8:5000/api'; // ⚠️ GANTI sesuai IP lokal laptop kamu
   }
 
+  // === METHOD POST ===
   static Future<Map<String, dynamic>> post(String endpoint, Map<String, dynamic> data) async {
     final String baseUrl = getBaseUrl();
-    
+    final String fullUrl = '$baseUrl/$endpoint';
+
+    print('🌍 Base URL: $baseUrl');
+    print('🚀 API CALL: POST $fullUrl');
+    print('📦 Data: ${jsonEncode(data)}');
+
     try {
-      print('🚀 API CALL: POST $baseUrl/$endpoint');
-      print('📦 Data: ${jsonEncode(data)}');
-      
-      final response = await http.post(
-        Uri.parse('$baseUrl/$endpoint'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode(data),
-      ).timeout(const Duration(seconds: 15)); // Perpanjang timeout
+      final response = await http
+          .post(
+            Uri.parse(fullUrl),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: jsonEncode(data),
+          )
+          .timeout(const Duration(seconds: 15)); // Timeout 15 detik
 
       print('✅ RESPONSE STATUS: ${response.statusCode}');
       print('📄 RESPONSE BODY: ${response.body}');
-      
-      // PERBAIKAN: Server Node.js kita selalu mengirim JSON, 
-      // bahkan saat error (seperti 400, 404, 500).
-      // Kita harus selalu membaca body-nya.
+
+      // Coba decode JSON dari server
       Map<String, dynamic> responseBody = jsonDecode(response.body);
 
-      // 'success' field dikirim dari Node.js
+      // Jika server mengirim success=true
       if (responseBody['success'] == true) {
         return responseBody;
       } else {
-        // Ini akan melempar error yang bisa dibaca oleh AuthService
-        // (misal: "Email tidak terdaftar")
-        throw Exception(responseBody['message'] ?? 'Terjadi kesalahan');
+        // Jika success=false
+        return {
+          'success': false,
+          'message': responseBody['message'] ?? 'Terjadi kesalahan pada server'
+        };
       }
-
+    } on SocketException catch (_) {
+      print('❌ ERROR: Tidak bisa menjangkau server (SocketException)');
+      return {
+        'success': false,
+        'message':
+            'Tidak bisa terhubung ke server. Pastikan server Node.js berjalan dan perangkat satu jaringan.'
+      };
+    } on FormatException catch (_) {
+      print('❌ ERROR: Response bukan JSON valid');
+      return {
+        'success': false,
+        'message': 'Respon dari server tidak valid (bukan JSON).'
+      };
+    } on HttpException catch (_) {
+      print('❌ ERROR: HTTP Exception');
+      return {
+        'success': false,
+        'message': 'Terjadi kesalahan saat menghubungi server.'
+      };
+    } on TimeoutException catch (_) {
+      print('❌ ERROR: Request timeout');
+      return {
+        'success': false,
+        'message': 'Koneksi ke server terlalu lama (timeout).'
+      };
     } catch (e) {
-      // Ini adalah error jaringan (koneksi ditolak, timeout, dll)
-      print('❌ API ERROR (Jaringan/Koneksi): $e');
-      // 'e' akan berisi "Gagal terhubung ke server: ..."
-      // Kita lempar ulang agar AuthService bisa menangkapnya
-      throw Exception('Gagal terhubung ke server. Pastikan server Node.js berjalan dan baseUrl sudah benar.');
+      print('💥 ERROR UMUM: $e');
+      return {
+        'success': false,
+        'message': 'Gagal terhubung ke server. Pastikan server berjalan.'
+      };
+    }
+  }
+
+  // === METHOD GET (opsional, jika dibutuhkan) ===
+  static Future<Map<String, dynamic>> get(String endpoint) async {
+    final String baseUrl = getBaseUrl();
+    final String fullUrl = '$baseUrl/$endpoint';
+
+    print('🌍 GET Request: $fullUrl');
+
+    try {
+      final response = await http
+          .get(Uri.parse(fullUrl), headers: {
+            'Accept': 'application/json',
+          })
+          .timeout(const Duration(seconds: 15));
+
+      print('✅ RESPONSE STATUS: ${response.statusCode}');
+      print('📄 RESPONSE BODY: ${response.body}');
+
+      return jsonDecode(response.body);
+    } catch (e) {
+      print('💥 ERROR (GET): $e');
+      return {'success': false, 'message': 'Gagal menghubungi server'};
     }
   }
 }

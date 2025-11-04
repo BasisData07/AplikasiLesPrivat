@@ -8,8 +8,8 @@
 |--------|--------|
 | **Qolbun Halim H** | 24111814065 |
 | **Prima Miftakhul Rahma** | 24111814005 |
-| **Rayhan Wahyu Satrio Wibowo** | 24111814006 |
-| **Pratama Dicky** | 24111814065 |
+| **Rayhan Wahyu Satrio Wibowo** | 24111814046 |
+| **Pratama Dicky** | 24111814143 |
 | **Wafiq Ulil Abshor A** | 24111814065 |
 
 

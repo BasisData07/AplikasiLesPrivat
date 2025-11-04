@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 import '../model/user_model.dart';
-import '../login_page.dart';
+import '../../login_page.dart';
 import '../murid/help_center_page.dart';
 import '../murid/terms_page.dart';
 import '../murid/about_me_page.dart';
@@ -28,7 +28,7 @@ class ProfilPage extends StatefulWidget {
 class _ProfilPageState extends State<ProfilPage> {
   static final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
   Map<String, dynamic> _deviceData = <String, dynamic>{};
-  bool _isPasswordVisible = false;
+  final bool _isPasswordVisible = false;
 
   double _rating = 3.0;
   final TextEditingController _feedbackController = TextEditingController();
@@ -362,30 +362,6 @@ class _ProfilPageState extends State<ProfilPage> {
                   subtitle: Text(
                     widget.user.email,
                     style: TextStyle(color: textColor.withAlpha(204)),
-                  ),
-                  dense: true,
-                ),
-                ListTile(
-                  leading: Icon(Icons.lock_outline, size: 22, color: textColor),
-                  title: Text("Password", style: TextStyle(color: textColor)),
-                  subtitle: Text(
-                    _isPasswordVisible
-                        ? widget.user.password
-                        : '•' * widget.user.password.length,
-                    style: TextStyle(color: textColor.withAlpha(204)),
-                  ),
-                  trailing: IconButton(
-                    icon: Icon(
-                      _isPasswordVisible
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                      color: textColor,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isPasswordVisible = !_isPasswordVisible;
-                      });
-                    },
                   ),
                   dense: true,
                 ),

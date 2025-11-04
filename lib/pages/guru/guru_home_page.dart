@@ -62,7 +62,7 @@ class _GuruHomePageState extends State<GuruHomePage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DropdownButtonFormField<String>(
-                    value: selectedDay,
+                    initialValue: selectedDay,
                     decoration: const InputDecoration(labelText: 'Hari'),
                     items: days.map((String day) {
                       return DropdownMenuItem<String>(value: day, child: Text(day));
@@ -126,8 +126,8 @@ class _GuruHomePageState extends State<GuruHomePage> {
           ? FloatingActionButton(
               onPressed: () => _showTambahJadwalDialog(context),
               backgroundColor: mintHighlight,
-              child: const Icon(Icons.add, color: Colors.white),
               tooltip: 'Tambah Jadwal',
+              child: const Icon(Icons.add, color: Colors.white),
             )
           : null,
       bottomNavigationBar: BottomNavigationBar(

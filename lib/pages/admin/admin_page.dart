@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../model/guru_model.dart';
 import '../model/guru_provider.dart';
-import '../login_page.dart';
+import '../../login_page.dart';
 import '../admin/edit_guru_page.dart';
 import '../admin/admin_ulasan_page.dart';
 

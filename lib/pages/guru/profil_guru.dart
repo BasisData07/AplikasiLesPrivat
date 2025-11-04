@@ -11,7 +11,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 // --- PATH IMPORT YANG DIPERBAIKI ---
 import '../model/user_model.dart';
-import '../login_page.dart';
+import '../../login_page.dart';
 import '../murid/help_center_page.dart';
 import '../murid/terms_page.dart';
 import '../murid/about_me_page.dart';
@@ -29,7 +29,7 @@ class GuruProfilPage extends StatefulWidget {
 class _GuruProfilPageState extends State<GuruProfilPage> {
   static final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
   Map<String, dynamic> _deviceData = <String, dynamic>{};
-  bool _isPasswordVisible = false;
+  final bool _isPasswordVisible = false;
 
   double _rating = 3.0;
   final TextEditingController _feedbackController = TextEditingController();
@@ -342,19 +342,6 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
             leading: Icon(Icons.email_outlined, size: 22, color: textColor),
             title: Text("Email", style: TextStyle(color: textColor)),
             subtitle: Text(widget.user.email, style: TextStyle(color: textColor.withAlpha(204))),
-            dense: true,
-          ),
-          ListTile(
-            leading: Icon(Icons.lock_outline, size: 22, color: textColor),
-            title: Text("Password", style: TextStyle(color: textColor)),
-            subtitle: Text(
-              _isPasswordVisible ? widget.user.password : '•' * widget.user.password.length,
-              style: TextStyle(color: textColor.withAlpha(204)),
-            ),
-            trailing: IconButton(
-              icon: Icon(_isPasswordVisible ? Icons.visibility_off : Icons.visibility, color: textColor),
-              onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
-            ),
             dense: true,
           ),
         ],

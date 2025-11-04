@@ -1,5 +1,6 @@
 // main.dart
 
+import 'package:PRIVATE_AJA/utils/connection_test.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -10,9 +11,9 @@ import 'package:flutter/foundation.dart';
 // --- PERBAIKAN UTAMA ADA DI BAGIAN IMPORT INI ---
 // Pastikan semua path ini sesuai dengan struktur folder Anda.
 // Jika file tidak ditemukan, VS Code akan memberi garis bawah merah di sini.
-import 'pages/splash_screen.dart';
-import 'pages/login_page.dart';
-import 'pages/SignUpPage.dart';
+import 'splash_screen.dart';
+import 'login_page.dart';
+import 'SignUpPage.dart';
 import 'pages/murid/home_page.dart';
 import 'pages/model/user_model.dart';
 import 'pages/model/guru_provider.dart';
@@ -22,6 +23,9 @@ import 'pages/model/jadwal_provider.dart'; // <-- Pastikan path ini benar
 void main() async {
   // Pastikan Flutter siap sebelum menjalankan kode async
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Test koneksi saat app start
+  await ConnectionTest.testAllConnections();
 
   // Konfigurasi WebView untuk platform web
   if (kIsWeb) {
@@ -64,11 +68,13 @@ class MyApp extends StatelessWidget {
         '/home': (context) => MyHomePage(
               // User default jika route '/home' diakses langsung
               user: UserModel(
+                id : 0,
                 name: "Guest",
                 username: "guest",
                 email: "guest@privateaja.com",
                 password: "-",
                 role: 'murid', // Role default
+                subject: null,
               ),
             ),
       },

@@ -107,7 +107,7 @@ class _EditGuruPageState extends State<EditGuruPage> {
                   _buildTextField(_gelarController, "Gelar (e.g., S.Pd.)", textColor),
                   _buildTextField(_noTeleponController, "No. Telepon", textColor, keyboardType: TextInputType.phone),
                   DropdownButtonFormField<String>(
-                    value: _selectedLevel,
+                    initialValue: _selectedLevel,
                     decoration: _inputDecoration("Level Mengajar", textColor),
                     dropdownColor: cardColor,
                     items: _levels.map((level) {

@@ -4,6 +4,8 @@ import 'dart:io'; // Untuk Platform
 import 'package:flutter/foundation.dart'; // Untuk kIsWeb
 import 'dart:async';
 
+import 'package:http/http.dart' as client;
+
 class ApiService {
   // === KONFIGURASI BASE URL OTOMATIS ===
   // Akan menyesuaikan platform (web, emulator, atau device fisik)
@@ -122,4 +124,40 @@ class ApiService {
       return {'success': false, 'message': 'Gagal menghubungi server'};
     }
   }
-}
+
+ static Future<Map<String, dynamic>> delete(String endpoint, {Map<String, dynamic>? data}) async {
+    try {
+      print('🗑️ === API DELETE REQUEST ===');
+      final String baseUrl = getBaseUrl();
+      final String fullUrl = '$baseUrl/$endpoint';
+      print('📍 DELETE $fullUrl');
+      if (data != null) {
+        print('📦 Data: ${jsonEncode(data)}');
+      } else {
+        print('📦 No data provided');
+      }
+      
+      final response = await http.delete(
+        Uri.parse(fullUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: data != null ? jsonEncode(data) : null,
+      ).timeout(const Duration(seconds: 10));
+
+      print('✅ === API DELETE RESPONSE ===');
+      print('📡 Status Code: ${response.statusCode}');
+      print('📄 Response Body: ${response.body}');
+      
+      final responseData = jsonDecode(response.body);
+      print('🔍 Parsed Data: $responseData');
+      print('🔚 === END ===');
+      
+      return responseData;
+      
+    } catch (e) {
+      print('❌ === API DELETE ERROR ===');
+      print('💥 Error: $e');
+      print('🔚 === END ===');
+      rethrow;
+    }
+  }
+}  

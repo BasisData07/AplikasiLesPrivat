@@ -5,7 +5,7 @@ class User {
   // Register user baru
   static register(userData, callback) {
     const { name, username, email, password, role, subject } = userData;
-    
+
     // Check if email already exists
     const checkEmailQuery = 'SELECT id FROM users WHERE email = ?';
     db.execute(checkEmailQuery, [email], (err, results) => {
@@ -25,18 +25,18 @@ class User {
         // Hash password dan simpan user
         bcrypt.hash(password, 10, (err, hashedPassword) => {
           if (err) return callback(err, null);
-          
+
           const insertQuery = `
             INSERT INTO users (name, username, email, password, role, subject) 
             VALUES (?, ?, ?, ?, ?, ?)
           `;
-          
+
           db.execute(
-            insertQuery, 
+            insertQuery,
             [name, username, email, hashedPassword, role, subject],
             (err, results) => {
               if (err) return callback(err, null);
-              
+
               // Get user data without password
               const getUserQuery = 'SELECT id, name, username, email, role, subject FROM users WHERE id = ?';
               db.execute(getUserQuery, [results.insertId], (err, userResults) => {
@@ -53,7 +53,7 @@ class User {
   // Login user
   static login(email, password, callback) {
     const query = 'SELECT * FROM users WHERE email = ?';
-    
+
     db.execute(query, [email], (err, results) => {
       if (err) return callback(err, null);
       if (results.length === 0) {
@@ -61,7 +61,7 @@ class User {
       }
 
       const user = results[0];
-      
+
       // Verify password
       bcrypt.compare(password, user.password, (err, isMatch) => {
         if (err) return callback(err, null);
@@ -85,6 +85,24 @@ class User {
         return callback({ message: 'User tidak ditemukan' }, null);
       }
       callback(null, results[0]);
+    });
+  }
+
+  // Delete user by ID
+  static deleteById(userId, callback) {
+    const query = 'DELETE FROM users WHERE id = ?';
+    db.execute(query, [userId], (err, result) => {
+      if (err) return callback(err, null);
+      callback(null, result);
+    });
+  }
+
+  // Get all users
+  static getAll(callback) {
+    const query = 'SELECT id, name, username, email, role, subject, created_at FROM users ORDER BY created_at DESC';
+    db.execute(query, (err, results) => {
+      if (err) return callback(err, null);
+      callback(null, results);
     });
   }
 }

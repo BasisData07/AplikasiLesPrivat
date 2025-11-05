@@ -19,9 +19,17 @@ class AboutMePage extends StatelessWidget {
   Widget build(BuildContext context) {
     // --- PALET WARNA HIJAU MINT ---
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final highlightColor = const Color(0xFF3CB371); // Hijau mint tua sebagai aksen utama
-    final bgColor = isDarkMode ? Colors.grey[900]! : const Color(0xFFF5FFFA); // Latar belakang MintCream yang sangat terang
-    final cardColor = isDarkMode ? Colors.grey[850]! : Colors.white; // Kartu putih bersih untuk kontras
+    final highlightColor = const Color(
+      0xFF3CB371,
+    ); // Hijau mint tua sebagai aksen utama
+    final bgColor = isDarkMode
+        ? Colors.grey[900]!
+        : const Color(
+            0xFFF5FFFA,
+          ); // Latar belakang MintCream yang sangat terang
+    final cardColor = isDarkMode
+        ? Colors.grey[850]!
+        : Colors.white; // Kartu putih bersih untuk kontras
     final textColor = isDarkMode ? Colors.white : Colors.black87;
     final secondaryTextColor = textColor.withAlpha(178);
 
@@ -47,7 +55,10 @@ class AboutMePage extends StatelessWidget {
                     Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: highlightColor, width: 5), // Border diubah
+                        border: Border.all(
+                          color: highlightColor,
+                          width: 5,
+                        ), // Border diubah
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withAlpha(102),
@@ -118,10 +129,19 @@ class AboutMePage extends StatelessWidget {
                         alignment: WrapAlignment.center,
                         children: [
                           _buildSkillChip("Flutter & Dart", highlightColor),
-                          _buildSkillChip("Mobile UI/UX Design", highlightColor),
+                          _buildSkillChip(
+                            "Mobile UI/UX Design",
+                            highlightColor,
+                          ),
                           _buildSkillChip("Problem Solving", highlightColor),
-                          _buildSkillChip("Software Development", highlightColor),
-                          _buildSkillChip("Database Management", highlightColor),
+                          _buildSkillChip(
+                            "Software Development",
+                            highlightColor,
+                          ),
+                          _buildSkillChip(
+                            "Database Management",
+                            highlightColor,
+                          ),
                         ],
                       ),
                     ),
@@ -138,28 +158,34 @@ class AboutMePage extends StatelessWidget {
                           _buildSocialButton(
                             icon: Icons.email,
                             label: "Email",
-                            onTap: () => _launchUrl('mailto:primamifta75@gmail.com'),
+                            onTap: () =>
+                                _launchUrl('mailto:primamifta75@gmail.com'),
                             color: highlightColor,
                             textColor: textColor,
                           ),
                           _buildSocialButton(
                             icon: FontAwesomeIcons.instagram,
                             label: "Instagram",
-                            onTap: () => _launchUrl('https://www.instagram.com/rhma.taa?igsh=MWU2eTkzb2VqdnRxZw=='),
+                            onTap: () => _launchUrl(
+                              'https://www.instagram.com/rhma.taa?igsh=MWU2eTkzb2VqdnRxZw==',
+                            ),
                             color: highlightColor,
                             textColor: textColor,
                           ),
                           _buildSocialButton(
                             icon: FontAwesomeIcons.linkedinIn,
                             label: "LinkedIn",
-                            onTap: () => _launchUrl('https://www.linkedin.com/in/prima-rahma-745507381'),
+                            onTap: () => _launchUrl(
+                              'https://www.linkedin.com/in/prima-rahma-745507318',
+                            ),
                             color: highlightColor,
                             textColor: textColor,
                           ),
                           _buildSocialButton(
                             icon: FontAwesomeIcons.github,
                             label: "GitHub",
-                            onTap: () => _launchUrl('https://github.com/PrimaRahma'),
+                            onTap: () =>
+                                _launchUrl('https://github.com/PrimaRahma'),
                             color: highlightColor,
                             textColor: textColor,
                           ),
@@ -202,14 +228,17 @@ class AboutMePage extends StatelessWidget {
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: highlightColor, // Judul kartu menggunakan warna highlight
+                color:
+                    highlightColor, // Judul kartu menggunakan warna highlight
               ),
             ),
             const SizedBox(height: 12),
             if (content is String)
               Text(
                 content,
-                style: TextStyle(fontSize: 16, height: 1.6, color: textColor),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(height: 1.6, color: textColor),
                 textAlign: TextAlign.justify,
               )
             else if (content is Widget)
@@ -230,7 +259,9 @@ class AboutMePage extends StatelessWidget {
           fontWeight: FontWeight.w500,
         ),
       ),
-      backgroundColor: highlightColor.withAlpha(230), // Chip menggunakan warna highlight
+      backgroundColor: highlightColor.withAlpha(
+        230,
+      ), // Chip menggunakan warna highlight
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       elevation: 3,
       shadowColor: Colors.black.withAlpha(51),

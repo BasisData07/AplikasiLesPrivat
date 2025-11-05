@@ -69,16 +69,7 @@ class AuthService {
     return {};
   }
   
-  // --- FUNGSI LAMA DIHAPUS ---
-  // static Future<Map<String, dynamic>> lupaPassword(String email) async { ... }
-  // static Future<Map<String, dynamic>> resetPassword(String token, String newPassword) async { ... }
-  // --- END FUNGSI LAMA ---
-
-
-  // --- FUNGSI BARU (TIDAK AMAN) DITAMBAHKAN ---
-  // Fungsi ini dipanggil dari 'lupa_password_page.dart' yang baru.
-  // Pastikan endpoint 'auth/update-password-direct' mengarah ke file
-  // 'update_password_direct.php' yang saya berikan sebelumnya.
+ 
   static Future<Map<String, dynamic>> updatePasswordTanpaVerifikasi(String email, String password) async {
     try {
       print('🔒 (INSECURE) Attempting password update for: $email');
@@ -101,5 +92,49 @@ class AuthService {
     }
   }
   // --- END FUNGSI BARU ---
+  
+  // lib/services/auth_service.dart
+
+  static Future<Map<String, dynamic>> deleteAccount(int userId, String email, String password) async {
+    try {
+      print('🗑️ Requesting account deletion for user: $userId');
+      
+      // 🔥 UBAH KE POST
+      final response = await ApiService.post('auth/delete-account', {
+        'userId': userId,
+        'email': email,
+        'password': password,
+      });
+
+      print('📡 Delete account response: ${response['success']}');
+      
+      if (response['success'] == true) {
+        // Logout user setelah akun dihapus
+        await logout();
+        return {'success': true, 'message': response['message']};
+      } else {
+        return {'success': false, 'message': response['message']};
+      }
+    } catch (e) {
+      print('💥 Delete account error: $e');
+      return {'success': false, 'message': 'Gagal terhubung ke server'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> getAllUsers() async {
+    try {
+      print('👥 Requesting all users');
+      final response = await ApiService.get('auth/users');
+
+      if (response['success'] == true) {
+        return {'success': true, 'data': response['data']};
+      } else {
+        return {'success': false, 'message': response['message']};
+      }
+    } catch (e) {
+      print('💥 Get all users error: $e');
+      return {'success': false, 'message': 'Gagal mengambil data pengguna'};
+    }
+  }
 
 }

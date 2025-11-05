@@ -1,12 +1,13 @@
 {
-   "checksum": "0fd964ac4c4b22c551dbadad73564529",
+   "checksum": "2a8a18cb00606342861f4e19044a5257",
+   "checksum_sha256": "caecc4700bffa0a29048337d68d88be73ba9b85579c1a2e8c655587eb402584c",
    "roots": {
       "bookmark_bar": {
          "children": [ {
             "date_added": "13406475012202403",
             "date_last_used": "0",
             "guid": "5d0b9242-4684-468a-a621-0130673b5631",
-            "id": "8",
+            "id": "2",
             "name": "Lenovo Support",
             "type": "url",
             "url": "https://support.lenovo.com/"
@@ -14,7 +15,7 @@
             "date_added": "13406475012202143",
             "date_last_used": "0",
             "guid": "12af4bd9-1d41-455c-b643-080eeb43c4d2",
-            "id": "7",
+            "id": "3",
             "name": "Lenovo",
             "type": "url",
             "url": "https://www.lenovo.com/"
@@ -22,7 +23,7 @@
             "date_added": "13406475012197529",
             "date_last_used": "0",
             "guid": "df726074-20a3-43e2-a78a-fcdc667112ea",
-            "id": "6",
+            "id": "4",
             "name": "McAfee",
             "type": "url",
             "url": "https://www.mcafee.com/consumer/v/browserfav/lenovo.html"
@@ -41,7 +42,7 @@
          "date_last_used": "0",
          "date_modified": "0",
          "guid": "82b081ec-3dd3-529c-8475-ab6c344590dd",
-         "id": "2",
+         "id": "5",
          "name": "Bookmark lain",
          "type": "folder"
       },
@@ -51,7 +52,7 @@
          "date_last_used": "0",
          "date_modified": "0",
          "guid": "4cf2e351-0e85-532b-bb37-df045d8f8d0f",
-         "id": "3",
+         "id": "6",
          "name": "Bookmark seluler",
          "type": "folder"
       }

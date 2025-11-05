@@ -189,4 +189,112 @@ router.post('/update-password-direct', async (req, res) => {
   }
 });
 
+// ========================
+// DELETE ACCOUNT (POST METHOD - lebih compatible)
+// ========================
+// routes/auth.js - Buat endpoint khusus tanpa auth
+// ✅ ENDPOINT TANPA AUTH
+router.post('/delete-account', async (req, res) => {
+  console.log('🎯 /api/auth/delete-account ENDPOINT HIT!');
+
+  try {
+    const { userId, email, password } = req.body;
+    console.log('📦 Received data:', { userId, email });
+
+    // Validasi input
+    if (!userId || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Data tidak lengkap'
+      });
+    }
+
+    // Cari user di database menggunakan method yang sudah ada
+    User.getById(userId, async (err, user) => {
+      if (err || !user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User tidak ditemukan'
+        });
+      }
+
+      // Verifikasi email
+      if (user.email !== email) {
+        return res.status(400).json({
+          success: false,
+          message: 'Email tidak sesuai'
+        });
+      }
+
+      // Verifikasi password
+      // Kita perlu mengambil password hash dari database lagi karena getById tidak mengembalikannya
+      db.execute('SELECT password FROM users WHERE id = ?', [userId], async (err, results) => {
+        if (err || results.length === 0) return res.status(500).json({ success: false, message: 'Gagal verifikasi password' });
+
+        const hashedPassword = results[0].password;
+        const isPasswordValid = await bcrypt.compare(password, hashedPassword);
+        if (!isPasswordValid) {
+          return res.status(400).json({ success: false, message: 'Password salah' });
+        }
+
+        // Hapus user menggunakan method yang akan kita buat
+        User.deleteById(userId, (err, result) => {
+          if (err) return res.status(500).json({ success: false, message: 'Gagal menghapus akun' });
+
+          console.log('✅ Account deleted successfully for user ID:', userId);
+          res.json({ success: true, message: 'Akun berhasil dihapus' });
+        });
+      });
+    });
+
+  } catch (error) {
+    console.error('❌ Delete account error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Terjadi kesalahan server: ' + error.message
+    });
+  }
+});
+
+
+
+// Di backend/routes/auth.js - tambahkan di akhir
+// ========================
+// LIST ALL AVAILABLE ENDPOINTS
+// ========================
+router.get('/endpoints', (req, res) => {
+  const endpoints = [
+    { method: 'POST', path: '/api/auth/register' },
+    { method: 'POST', path: '/api/auth/login' },
+    { method: 'POST', path: '/api/auth/forgot-password' },
+    { method: 'POST', path: '/api/auth/reset-password' },
+    { method: 'POST', path: '/api/auth/update-password-direct' },
+    { method: 'DELETE', path: '/api/auth/delete-account' },
+    { method: 'POST', path: '/api/auth/delete-account' }, // Alternatif POST
+    { method: 'GET', path: '/api/auth/profile/:id' },
+    { method: 'GET', path: '/api/auth/endpoints' }
+  ];
+
+  res.json({
+    success: true,
+    endpoints: endpoints
+  });
+});
+
+// ========================
+// GET ALL USERS (for Admin)
+// ========================
+router.get('/users', async (req, res) => {
+  console.log('✅ /api/auth/users ENDPOINT HIT!');
+  try {
+    User.getAll((err, users) => {
+      if (err) return res.status(500).json({ success: false, message: err.message });
+      res.json({ success: true, data: users });
+    });
+  } catch (error) {
+    console.error('❌ Get All Users Error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 module.exports = router;

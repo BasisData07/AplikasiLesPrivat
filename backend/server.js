@@ -1,76 +1,52 @@
+// File: backend/server.js
+
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
-const ip = require('ip'); // untuk menampilkan alamat IP jaringan
+const dotenv = require('dotenv');
 
-// Import routes
+// Muat variabel lingkungan dari file .env
+dotenv.config();
+
+// Inisialisasi aplikasi Express
+// PENTING: 'app' harus dibuat di sini, sebelum digunakan.
+const app = express();
+
+// Middleware
+app.use(cors()); // Mengizinkan request dari domain lain (frontend Flutter Anda)
+app.use(express.json()); // Mengizinkan aplikasi membaca body request dalam format JSON
+
+// Routes
+// Impor file route yang sudah Anda buat
 const authRoutes = require('./routes/auth');
 
-const app = express();
-const PORT = process.env.PORT || 5000;
-
-// ============================
-// 🔥 CORS Configuration (lebih permisif untuk development)
-// ============================
-app.use(cors({
-  origin: '*', // ubah ke domain tertentu jika produksi
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
-}));
-
-// ============================
-// Middleware
-// ============================
-app.use(express.json()); // parsing body JSON
-
-// ============================
-// Routes
-// ============================
-console.log('✅ Registering /api/auth routes...');
+// Gunakan route tersebut dengan prefix '/api/auth'
+// Semua request yang diawali '/api/auth' akan diarahkan ke auth.js
 app.use('/api/auth', authRoutes);
 
-// ============================
-// Test route
-// ============================
-app.get('/', (req, res) => {
-  res.json({ 
-    message: '✅ Private Aja API is running!',
-    timestamp: new Date().toISOString()
-  });
+// Route sederhana untuk root URL, untuk memastikan server berjalan
+app.get('/api', (req, res) => {
+  res.json({ message: 'Selamat datang di API Aplikasi Les Privat!' });
 });
 
-// ============================
-// Handle preflight (OPTIONS)
-// ============================
-app.options('*', cors());
+// Tentukan port dari environment variable atau default ke 5000
+const PORT = process.env.PORT || 5000;
 
-// ============================
-// 404 Handler (endpoint tidak ditemukan)
-// ============================
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Endpoint tidak ditemukan'
-  });
-});
+// Jalankan server
+app.listen(PORT, () => {
+  console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
 
-// ============================
-// Global Error Handler
-// ============================
-app.use((err, req, res, next) => {
-  console.error('🔥 SERVER ERROR:', err);
-  res.status(500).json({
-    success: false,
-    message: 'Internal server error',
-    error: err.message
-  });
-});
+  // =================================================================
+  // KODE UNTUK MELIHAT ENDPOINT SEBAIKNYA DITARUH DI SINI
+  // Ini akan dieksekusi setelah server siap dan semua route terdaftar.
+  // =================================================================
+  console.log('✅ Endpoint yang terdaftar:');
 
-// ============================
-// Jalankan server (akses jaringan lokal juga)
-// ============================
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
-  console.log(`🌐 Local:   http://localhost:${PORT}`);
-  console.log(`🌐 Network: http://${ip.address()}:${PORT}`);
+  // Cek apakah _router sudah ada sebelum diakses
+  if (app._router && app._router.stack) {
+    app._router.stack.forEach((middleware) => {
+      if (middleware.route) { // Hanya tampilkan yang merupakan route
+        console.log(`   - ${Object.keys(middleware.route.methods).join(', ').toUpperCase()} ${middleware.route.path}`);
+      }
+    });
+  }
 });

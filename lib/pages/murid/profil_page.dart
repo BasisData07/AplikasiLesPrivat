@@ -1,3 +1,4 @@
+import 'package:PRIVATE_AJA/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
@@ -56,12 +57,15 @@ class _ProfilPageState extends State<ProfilPage> {
         deviceData = _readWebBrowserInfo(await deviceInfoPlugin.webBrowserInfo);
       } else {
         deviceData = switch (defaultTargetPlatform) {
-          TargetPlatform.android =>
-              _readAndroidBuildData(await deviceInfoPlugin.androidInfo),
-          TargetPlatform.iOS =>
-              _readIosDeviceInfo(await deviceInfoPlugin.iosInfo),
-          TargetPlatform.windows =>
-              _readWindowsDeviceInfo(await deviceInfoPlugin.windowsInfo),
+          TargetPlatform.android => _readAndroidBuildData(
+            await deviceInfoPlugin.androidInfo,
+          ),
+          TargetPlatform.iOS => _readIosDeviceInfo(
+            await deviceInfoPlugin.iosInfo,
+          ),
+          TargetPlatform.windows => _readWindowsDeviceInfo(
+            await deviceInfoPlugin.windowsInfo,
+          ),
           _ => <String, dynamic>{'Error': 'Platform tidak didukung'},
         };
       }
@@ -268,6 +272,171 @@ class _ProfilPageState extends State<ProfilPage> {
     );
   }
 
+  // Method untuk show dialog konfirmasi
+  void _showDeleteAccountDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Hapus Akun?"),
+          content: Text(
+            "Tindakan ini akan menghapus akun dan semua data Anda secara permanen. "
+            "Anda tidak dapat mengembalikan akun setelah dihapus. "
+            "Apakah Anda yakin ingin melanjutkan?",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Batal", style: TextStyle(color: Colors.grey)),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _showPasswordVerificationDialog();
+              },
+              child: Text("Lanjutkan", style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Dialog verifikasi password
+  void _showPasswordVerificationDialog() {
+    final passwordController = TextEditingController();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text("Verifikasi Password"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Masukkan password Anda untuk konfirmasi penghapusan akun:",
+                  ),
+                  SizedBox(height: 16),
+                  TextFormField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text("Batal"),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                  onPressed: () async {
+                    final password = passwordController.text.trim();
+                    if (password.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Password harus diisi")),
+                      );
+                      return;
+                    }
+
+                    // Panggil API hapus akun
+                    await _deleteAccount(password);
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    "Hapus Akun",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Method hapus akun
+  Future<void> _deleteAccount(String password) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text("Menghapus akun..."),
+            ],
+          ),
+        );
+      },
+    );
+
+    try {
+      final result = await AuthService.deleteAccount(
+        widget.user.id,
+        widget.user.email,
+        password,
+      );
+
+      // Simpan context SEBELUM menutup dialog loading.
+      // Ini adalah context yang akan kita gunakan untuk navigasi dan snackbar.
+      final currentContext = context;
+
+      if (context.mounted) {
+        Navigator.pop(context); // Close loading dialog
+      }
+
+      if (result['success'] == true) {
+        // PENTING: Lakukan navigasi dan tampilkan snackbar menggunakan context yang sudah disimpan.
+        // Pastikan context masih valid sebelum digunakan.
+        if (currentContext.mounted) {
+          // Navigasi ke halaman login dan hapus semua halaman sebelumnya.
+          Navigator.of(currentContext).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+            (route) => false,
+          );
+
+          // Tampilkan notifikasi setelah navigasi (atau bisa juga sebelumnya).
+          // Menampilkannya setelahnya kadang lebih stabil.
+          ScaffoldMessenger.of(currentContext).showSnackBar(
+            const SnackBar(
+              content: Text("Akun berhasil dihapus"),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        if (currentContext.mounted) {
+          ScaffoldMessenger.of(currentContext).showSnackBar(
+            SnackBar(
+              content: Text(result['message'] ?? "Gagal menghapus akun"),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // Jika terjadi error, pastikan dialog ditutup dan pesan ditampilkan.
+      // Kita tidak perlu menyimpan context di sini karena tidak ada navigasi.
+      if (!context.mounted) return;
+      Navigator.pop(context); // Close loading dialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // WARNA DIUBAH DI SINI
@@ -469,6 +638,28 @@ class _ProfilPageState extends State<ProfilPage> {
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 // WARNA DIUBAH DI SINI
+                backgroundColor: Colors.red,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: () {
+                _showDeleteAccountDialog();
+              },
+              icon: const Icon(Icons.logout, color: Colors.white),
+              label: const Text(
+                "Delete Akun",
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                // WARNA DIUBAH DI SINI
                 backgroundColor: mintHighlight,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
@@ -518,7 +709,8 @@ class _ProfilPageState extends State<ProfilPage> {
         subtitle: value != null
             ? Text(value, style: TextStyle(color: textColor.withAlpha(204)))
             : null,
-        trailing: trailing ??
+        trailing:
+            trailing ??
             (onTap != null
                 ? Icon(Icons.arrow_forward_ios, size: 16, color: textColor)
                 : null),

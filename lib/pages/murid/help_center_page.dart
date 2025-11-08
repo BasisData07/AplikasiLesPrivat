@@ -41,13 +41,13 @@ class _HelpCenterPageState extends State<HelpCenterPage> {
   @override
   Widget build(BuildContext context) {
     // Definisikan warna tema hijau mint
-    const Color mintHighlight = Color(0xFF3CB371);
+    const Color mintHighlight = Colors.orange;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pusat Bantuan'),
         // WARNA DIUBAH DI SINI
-        backgroundColor: mintHighlight,
+        backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
       ),
       body: WebViewWidget(controller: _controller),

@@ -1,52 +1,47 @@
 // File: backend/server.js
 
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
+// --- 1. IMPOR SEMUA DI ATAS ---
+import express, { json } from 'express';
+import cors from 'cors';
+import { config } from 'dotenv';
 
-// Muat variabel lingkungan dari file .env
-dotenv.config();
+// Impor routes (sesuai standar ESM, diakhiri .js)
+import authRoutes from './routes/auth.js';
+import jadwalRoutes from './routes/jadwal.js';
+import guruDataRoutes from './routes/guru_data.js';
+import mapelRoutes from './routes/mapel.js'; // [TAMBAHAN] Mendaftarkan route mapel
 
-// Inisialisasi aplikasi Express
-// PENTING: 'app' harus dibuat di sini, sebelum digunakan.
-const app = express();
+// --- 2. INISIALISASI ---
+config(); // Muat variabel .env
+const app = express(); // Buat aplikasi express
 
-// Middleware
-app.use(cors()); // Mengizinkan request dari domain lain (frontend Flutter Anda)
-app.use(express.json()); // Mengizinkan aplikasi membaca body request dalam format JSON
+// --- 3. MIDDLEWARE ---
+app.use(cors()); // Izinkan cross-origin
+app.use(json()); // Izinkan body parser JSON
 
-// Routes
-// Impor file route yang sudah Anda buat
-const authRoutes = require('./routes/auth');
-
-// Gunakan route tersebut dengan prefix '/api/auth'
-// Semua request yang diawali '/api/auth' akan diarahkan ke auth.js
+// --- 4. ROUTES (Path SUDAH DIPERBAIKI) ---
+// [BENAHI] Path API tidak boleh diakhiri .js
 app.use('/api/auth', authRoutes);
+app.use('/api/jadwal', jadwalRoutes);
+app.use('/api/guru-data', guruDataRoutes);
+app.use('/api/mapel', mapelRoutes); // [TAMBAHAN] Gunakan route mapel
 
-// Route sederhana untuk root URL, untuk memastikan server berjalan
+// Route root untuk tes
 app.get('/api', (req, res) => {
-  res.json({ message: 'Selamat datang di API Aplikasi Les Privat!' });
+  res.json({ message: 'Selamat datang di API Aplikasi Les Privat!' });
 });
 
-// Tentukan port dari environment variable atau default ke 5000
+// --- 5. JALANKAN SERVER ---
 const PORT = process.env.PORT || 5000;
 
-// Jalankan server
 app.listen(PORT, () => {
-  console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
-
-  // =================================================================
-  // KODE UNTUK MELIHAT ENDPOINT SEBAIKNYA DITARUH DI SINI
-  // Ini akan dieksekusi setelah server siap dan semua route terdaftar.
-  // =================================================================
-  console.log('✅ Endpoint yang terdaftar:');
-
-  // Cek apakah _router sudah ada sebelum diakses
-  if (app._router && app._router.stack) {
-    app._router.stack.forEach((middleware) => {
-      if (middleware.route) { // Hanya tampilkan yang merupakan route
-        console.log(`   - ${Object.keys(middleware.route.methods).join(', ').toUpperCase()} ${middleware.route.path}`);
-      }
-    });
-  }
+  console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
+  
+  // [BENAHI] Logger disederhanakan agar jelas
+  console.log('✅ Rute API yang terdaftar:');
+  console.log(`   - /api`);
+  console.log(`   - /api/auth/... (dari auth.js)`);
+  console.log(`   - /api/jadwal/... (dari jadwal.js)`);
+  console.log(`   - /api/guru-data/... (dari guru_data.js)`);
+  console.log(`   - /api/mapel/... (dari mapel.js)`);
 });

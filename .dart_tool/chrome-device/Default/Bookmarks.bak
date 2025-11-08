@@ -1,48 +1,39 @@
 {
-   "checksum": "e7fb4b3644a61fb94adc847b5b42dfad",
+   "checksum": "2a8a18cb00606342861f4e19044a5257",
+   "checksum_sha256": "caecc4700bffa0a29048337d68d88be73ba9b85579c1a2e8c655587eb402584c",
    "roots": {
       "bookmark_bar": {
          "children": [ {
             "date_added": "13406475012202403",
             "date_last_used": "0",
             "guid": "5d0b9242-4684-468a-a621-0130673b5631",
-            "id": "8",
+            "id": "2",
             "name": "Lenovo Support",
-            "show_icon": false,
-            "source": "oem_preload",
             "type": "url",
-            "url": "https://support.lenovo.com/",
-            "visit_count": 0
+            "url": "https://support.lenovo.com/"
          }, {
             "date_added": "13406475012202143",
             "date_last_used": "0",
             "guid": "12af4bd9-1d41-455c-b643-080eeb43c4d2",
-            "id": "7",
+            "id": "3",
             "name": "Lenovo",
-            "show_icon": false,
-            "source": "oem_preload",
             "type": "url",
-            "url": "https://www.lenovo.com/",
-            "visit_count": 0
+            "url": "https://www.lenovo.com/"
          }, {
             "date_added": "13406475012197529",
             "date_last_used": "0",
             "guid": "df726074-20a3-43e2-a78a-fcdc667112ea",
-            "id": "6",
+            "id": "4",
             "name": "McAfee",
-            "show_icon": false,
-            "source": "oem_preload",
             "type": "url",
-            "url": "https://www.mcafee.com/consumer/v/browserfav/lenovo.html",
-            "visit_count": 0
+            "url": "https://www.mcafee.com/consumer/v/browserfav/lenovo.html"
          } ],
          "date_added": "13406475011356459",
          "date_last_used": "0",
          "date_modified": "13406475012202403",
          "guid": "0bc5d13f-2cba-5d74-951f-3f233fe6c908",
          "id": "1",
-         "name": "Bilah favorit",
-         "source": "unknown",
+         "name": "Bilah bookmark",
          "type": "folder"
       },
       "other": {
@@ -51,9 +42,8 @@
          "date_last_used": "0",
          "date_modified": "0",
          "guid": "82b081ec-3dd3-529c-8475-ab6c344590dd",
-         "id": "2",
-         "name": "Favorit lainnya",
-         "source": "unknown",
+         "id": "5",
+         "name": "Bookmark lain",
          "type": "folder"
       },
       "synced": {
@@ -62,12 +52,10 @@
          "date_last_used": "0",
          "date_modified": "0",
          "guid": "4cf2e351-0e85-532b-bb37-df045d8f8d0f",
-         "id": "3",
-         "name": "Favorit seluler",
-         "source": "unknown",
+         "id": "6",
+         "name": "Bookmark seluler",
          "type": "folder"
       }
    },
-   "sync_metadata": "CkEKHgiIgQISCNFycz+aAQAAKg4QABgBIAAoBjAAOABAABIAKhhNdTBUaGZCZlVpMys3enF3ZWVDU2FRPT1IA6AGDBKOAQgBEokBChx5eEovNmZ2a2VjcjdrcDVFUXpCNHRXTHBkYkU9EiQyYTc3OTVhMy0wYWQ2LTVjZDctOGQ1ZS02NDU1ZmYzMWY3MjkYACAAKAAwh+Dg9JAzOJ7p4PSQM0Ce6eD0kDNKHGFSQ1dMZ2hGOWI1SW5xS0lEdnVKL2p2UWtGYz1aAGUAAAAAwj4CYAASjgEIAhKJAQocWWNTVG9udkVTUHdxQ3M0TDJjclZodjY4TDk4PRIkZDQ4NTI2ZmMtZWNjZS01MDQwLWJmOWUtMDA2NDU0ZDJlNzk3GAAgACgAMIjg4PSQMzjM6eD0kDNAzOng9JAzShxvUFZraHdCUmJWNjVLQ1dSMitJT05IV29PdTg9WgBlAAAAAMI+AmAAEo4BCAMSiQEKHG5qZ0R1ODhlQ3J2WHA4NnBEN2ZIR2NxRnA4OD0SJDJmM2QzZWMyLWM4MWYtNTY4YS1iMGFkLTdkOWQ3MjY0NThjOBgAIAAoADCO4OD0kDM43erg9JAzQN3q4PSQM0oceXpOQjAxY241NEE3Y1JVMHVUKy9QZ21UdFVvPVoAZQAAAADCPgJgADAAOAA=",
    "version": 1
 }

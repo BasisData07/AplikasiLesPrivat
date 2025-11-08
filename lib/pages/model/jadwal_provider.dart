@@ -1,48 +1,137 @@
-// lib/pages/model/jadwal_provider.dart
+import 'dart:async';
 
+import 'package:PRIVATE_AJA/pages/model/guru_mapel_model.dart';
+import 'package:PRIVATE_AJA/pages/model/jadwal_les_model.dart';
+import 'package:PRIVATE_AJA/repositories/jadwal-repositoris.dart';
 import 'package:flutter/material.dart';
-import 'jadwal_model.dart';
+// Sesuaikan path-path ini dengan struktur folder Anda
 
-class JadwalProvider extends ChangeNotifier {
-  final Map<String, List<JadwalSlot>> _jadwalDatabase = {
-    'anisa.putri@email.com': [
-      JadwalSlot(hari: "Senin", tanggal: "27 Okt 2025", jam: "15:00 - 16:00"),
-      JadwalSlot(hari: "Senin", tanggal: "27 Okt 2025", jam: "16:00 - 17:00", isBooked: true),
-      JadwalSlot(hari: "Selasa", tanggal: "28 Okt 2025", jam: "15:00 - 16:00"),
-    ],
-    'citra.dewi@email.com': [
-      JadwalSlot(hari: "Rabu", tanggal: "29 Okt 2025", jam: "19:00 - 20:00"),
-    ],
-    'eka.wijaya@email.com': [
-       JadwalSlot(hari: "Jumat", tanggal: "31 Okt 2025", jam: "14:00 - 15:00", isBooked: true),
-    ]
-  };
 
-  List<JadwalSlot> getJadwalForGuru(String guruEmail) {
-    _jadwalDatabase.putIfAbsent(guruEmail, () => []);
-    return _jadwalDatabase[guruEmail]!;
+// Provider adalah lapisan STATE. Ia MENYIMPAN data.
+class JadwalProvider with ChangeNotifier {
+  // Buat instance dari Repository
+  final JadwalRepository _jadwalRepository = JadwalRepository();
+
+  // --- State untuk Halaman "Jadwal Saya" (Guru) ---
+  // Kita gunakan List<Map> karena datanya (dari 'getJadwalMilikGuru')
+  // adalah data mentah yang spesifik untuk guru
+  List<Map<String, dynamic>> _jadwalMilikGuru = [];
+  bool _isLoadingJadwalGuru = false;
+  
+  List<Map<String, dynamic>> get jadwalMilikGuru => _jadwalMilikGuru;
+  bool get isLoadingJadwalGuru => _isLoadingJadwalGuru;
+
+  // --- State untuk Halaman "Buat Jadwal" (Guru) ---
+  List<GuruMapelModel> _mapelMilikGuru = [];
+  bool _isLoadingMapelGuru = false;
+
+  List<GuruMapelModel> get mapelMilikGuru => _mapelMilikGuru;
+  bool get isLoadingMapelGuru => _isLoadingMapelGuru;
+
+  // --- State untuk Halaman Beranda Murid ---
+  List<JadwalLesModel> _jadwalBeranda = [];
+  bool _isLoadingBeranda = false;
+
+  List<JadwalLesModel> get jadwalBeranda => _jadwalBeranda;
+  bool get isLoadingBeranda => _isLoadingBeranda;
+
+  // === Method untuk Halaman "Jadwal Saya" (Guru) ===
+  Future<void> fetchJadwalMilikGuru(String guruId) async {
+    _isLoadingJadwalGuru = true;
+    notifyListeners();
+    
+    try {
+      // Panggil Repository
+      _jadwalMilikGuru = await _jadwalRepository.getJadwalMilikGuru(guruId);
+    } catch (e) {
+      print("Error fetchJadwalMilikGuru: $e");
+      // Handle error, mungkin tampilkan pesan
+    }
+    
+    _isLoadingJadwalGuru = false;
+    notifyListeners();
   }
 
-  void toggleJadwalStatus(String guruEmail, int jadwalIndex) {
-    if (_jadwalDatabase.containsKey(guruEmail)) {
-      final jadwalGuru = _jadwalDatabase[guruEmail]!;
-      if (jadwalIndex >= 0 && jadwalIndex < jadwalGuru.length) {
-        jadwalGuru[jadwalIndex].isBooked = !jadwalGuru[jadwalIndex].isBooked;
-        notifyListeners();
+  // === Method untuk Halaman "Buat Jadwal" (Guru) ===
+  Future<void> fetchMapelGuru(String guruId) async {
+    _isLoadingMapelGuru = true;
+    notifyListeners();
+    
+    try {
+      _mapelMilikGuru = await _jadwalRepository.getMapelMilikGuru(guruId);
+    } catch (e) {
+      print("Error fetchMapelGuru: $e");
+    }
+    
+    _isLoadingMapelGuru = false;
+    notifyListeners();
+  }
+  
+  // === Method (CREATE) ===
+  Future<bool> createJadwalBaru({
+    required int idGuruMapel, 
+    required String hari,
+    required String jamMulai, 
+    required String jamSelesai, 
+  }) async {
+    try {
+      final response = await _jadwalRepository.createJadwal(
+        idGuruMapel: idGuruMapel,
+        hari: hari,
+        jamMulai: jamMulai,
+        jamSelesai: jamSelesai,
+      );
+      // Jika sukses, refresh daftar jadwal
+      if (response['success'] == true) {
+        // Kita tidak bisa me-refresh karena kita tidak tahu 'guruId' di sini
+        // Refresh akan dilakukan secara manual oleh UI
+        return true;
       }
+      return false;
+    } catch (e) {
+      print(e);
+      return false;
     }
   }
 
-  // --- FUNGSI YANG HILANG ADA DI SINI ---
-  // Tambahkan fungsi ini ke dalam kelas JadwalProvider Anda
-  void tambahJadwal(String guruEmail, JadwalSlot jadwalBaru) {
-    // Pastikan list untuk guru tersebut ada
-    _jadwalDatabase.putIfAbsent(guruEmail, () => []);
+  // === Method (DELETE) ===
+  Future<bool> deleteJadwal(int jadwalId, String guruIdPemilik) async {
+    bool sukses = false;
+    try {
+      final response = await _jadwalRepository.deleteJadwal(
+        jadwalId: jadwalId,
+        guruIdPemilik: guruIdPemilik,
+      );
+      
+      if (response['success'] == true) {
+        // Jika sukses, HAPUS item dari list state
+        _jadwalMilikGuru.removeWhere((jadwal) => jadwal['id'] == jadwalId);
+        sukses = true;
+      }
+    } catch (e) {
+      print("Error deleteJadwal: $e");
+    }
     
-    // Tambahkan jadwal baru ke list
-    _jadwalDatabase[guruEmail]!.add(jadwalBaru);
-    
-    // Beri tahu UI untuk update
+    notifyListeners(); // Update UI
+    return sukses;
+  }
+
+  // === Method untuk Halaman Beranda Murid ===
+  Future<void> fetchJadwalUntukBeranda() async {
+    _isLoadingBeranda = true;
+    notifyListeners();
+
+    try {
+      // Panggil Repository
+      _jadwalBeranda = await _jadwalRepository.getJadwalUntukBerandaMurid();
+    } catch (e) {
+      print("Error fetchJadwalUntukBeranda: $e");
+      _jadwalBeranda = []; // Kosongkan list jika error
+    }
+
+    _isLoadingBeranda = false;
     notifyListeners();
   }
+
+  getJadwalForGuru(String email) {}
 }

@@ -54,7 +54,7 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       // DIUBAH DI SINI: Warna latar belakang diubah menjadi hijau mint yang elegan
-      backgroundColor: const Color.fromARGB(255, 86, 218, 143),
+      backgroundColor: Colors.orange,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

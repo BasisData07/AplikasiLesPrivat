@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:PRIVATE_AJA/pages/model/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_service.dart';
 
@@ -92,34 +93,40 @@ class AuthService {
     }
   }
   // --- END FUNGSI BARU ---
-  
-  // lib/services/auth_service.dart
+  // Di dalam file: auth_service.dart
 
-  static Future<Map<String, dynamic>> deleteAccount(int userId, String email, String password) async {
-    try {
-      print('🗑️ Requesting account deletion for user: $userId');
-      
-      // 🔥 UBAH KE POST
-      final response = await ApiService.post('auth/delete-account', {
-        'userId': userId,
-        'email': email,
-        'password': password,
-      });
+Future<Map<String, dynamic>> deleteAccount({
+  required UserModel currentUser, // Berisi ID dan ROLE
+  required String password,
+}) async {
+  try {
+    print('🗑️ Requesting account deletion for user: ${currentUser.id}');
+    
+    // Siapkan data yang BENAR untuk backend
+    final data = {
+      'userId': currentUser.id,
+      'role': currentUser.role,     // Mengirim 'role' (BUKAN 'email')
+      'password': password,
+    };
 
-      print('📡 Delete account response: ${response['success']}');
-      
-      if (response['success'] == true) {
-        // Logout user setelah akun dihapus
-        await logout();
-        return {'success': true, 'message': response['message']};
-      } else {
-        return {'success': false, 'message': response['message']};
-      }
-    } catch (e) {
-      print('💥 Delete account error: $e');
-      return {'success': false, 'message': 'Gagal terhubung ke server'};
+    // Panggil ApiService.post
+    final response = await ApiService.post('auth/delete-account', data);
+
+    print('📡 Delete account response: ${response['success']}');
+    
+    if (response['success'] == true) {
+      // ... (logika logout) ...
+      return {'success': true, 'message': response['message']};
+    } else {
+      return {'success': false, 'message': response['message']};
     }
+  } catch (e) {
+    print('💥 Delete account error: $e');
+    return {'success': false, 'message': 'Gagal terhubung ke server'};
   }
+}
+  
+
 
   static Future<Map<String, dynamic>> getAllUsers() async {
     try {

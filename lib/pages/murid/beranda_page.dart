@@ -1,9 +1,16 @@
+// lib/pages/murid/beranda_page.dart
+import 'package:PRIVATE_AJA/pages/model/jadwal_les_model.dart';
+import 'package:PRIVATE_AJA/pages/model/jadwal_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+// Import yang SUDAH ADA
 import '../model/guru_model.dart';
 import '../model/user_model.dart';
 import '../model/guru_provider.dart';
 import '../murid/detail_guru.dart';
+
+// Import BARU (Ganti path-nya jika perlu)
 
 class BerandaPage extends StatefulWidget {
   final UserModel user;
@@ -25,10 +32,22 @@ class _BerandaPageState extends State<BerandaPage> {
   String _searchQuery = "";
   String _selectedLevel = "Semua";
 
-  // Palet warna tema hijau mint
-  static const Color mintHighlight = Color(0xFF3CB371);
+  // Palet warna tema
+  static const Color mintHighlight = Colors.orange;
   static const Color lightMintBackground = Color(0xFFF5FFFA);
-  static const Color lightMintAccent = Color(0xFF98FB98);
+  static const Color lightMintAccent = Colors.orangeAccent;
+
+  @override
+  void initState() {
+    super.initState();
+    // PENTING: Ambil data jadwal saat halaman dibuka
+    // (Saya asumsikan GuruProvider sudah diambil di level yang lebih tinggi)
+    Future.microtask(() =>
+        Provider.of<JadwalProvider>(context, listen: false)
+            .fetchJadwalUntukBeranda());
+  }
+
+  // == Bagian Fungsi Helper (Filter, Search, etc.) ==
 
   ImageProvider getImage(String path) {
     try {
@@ -40,6 +59,7 @@ class _BerandaPageState extends State<BerandaPage> {
     }
   }
 
+  // --- Fungsi untuk GURU (dari kode lama Anda) ---
   List<Guru> getRecommendedTeachers(List<Guru> guruList, String level) {
     return guruList.where((g) => g.level == level && g.rating >= 4.5).toList();
   }
@@ -58,6 +78,106 @@ class _BerandaPageState extends State<BerandaPage> {
     }).toList();
   }
 
+  // == Bagian Widget Builder ==
+
+  // WIDGET BARU: Untuk menampilkan daftar JADWAL LES
+  Widget _buildJadwalSection(JadwalProvider jadwalProvider) {
+    final textColor = widget.isDarkMode ? Colors.white : Colors.black87;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle("Jadwal Les Terbaru"),
+        if (jadwalProvider.isLoadingBeranda)
+          const Center(child: CircularProgressIndicator()),
+        if (!jadwalProvider.isLoadingBeranda &&
+            jadwalProvider.jadwalBeranda.isEmpty)
+          const Center(child: Text("Belum ada jadwal les.")),
+        if (!jadwalProvider.isLoadingBeranda &&
+            jadwalProvider.jadwalBeranda.isNotEmpty)
+          SizedBox(
+            height: 150, // Tinggi container list horizontal
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: jadwalProvider.jadwalBeranda.length,
+              itemBuilder: (context, index) {
+                final jadwal = jadwalProvider.jadwalBeranda[index];
+                // Buat card kecil untuk jadwal
+                return _buildJadwalCard(jadwal, textColor);
+              },
+            ),
+          ),
+      ],
+    );
+  }
+
+  // WIDGET BARU: Card untuk JADWAL LES (versi horizontal/kecil)
+  Widget _buildJadwalCard(JadwalLesModel jadwal, Color textColor) {
+    final cardColor = widget.isDarkMode ? Colors.grey[850] : Colors.white;
+    final subTextColor = widget.isDarkMode ? Colors.white70 : Colors.grey[600];
+
+    return SizedBox(
+      width: 250, // Lebar card
+      child: Card(
+        color: cardColor,
+        elevation: 2,
+        margin: const EdgeInsets.only(right: 12, bottom: 8, top: 4),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+          side: widget.isDarkMode
+              ? BorderSide(color: mintHighlight.withAlpha(77))
+              : BorderSide.none,
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(15),
+          onTap: () {
+            // TODO: Nanti bisa navigasi ke detail jadwal
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  jadwal.namaMapel, // Judul adalah Mapel
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: textColor,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
+                _buildInfoRow(
+                  Icons.person_outline,
+                  jadwal.namaGuru, // Sub-info adalah Guru
+                  subTextColor,
+                ),
+                const SizedBox(height: 6),
+                _buildInfoRow(
+                  Icons.calendar_today_outlined,
+                  jadwal.hari,
+                  subTextColor,
+                ),
+                const SizedBox(height: 6),
+                _buildInfoRow(
+                  Icons.access_time_outlined,
+                  "${jadwal.jamMulai} - ${jadwal.jamSelesai}",
+                  subTextColor,
+                  textColor:
+                      widget.isDarkMode ? lightMintAccent : mintHighlight,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // WIDGET LAMA: Filter chips untuk GURU
   Widget _buildFilterChips() {
     final levels = ["Semua", "SD", "SMP", "SMA/SMK"];
     return SizedBox(
@@ -78,10 +198,8 @@ class _BerandaPageState extends State<BerandaPage> {
                   });
                 }
               },
-              backgroundColor: widget.isDarkMode
-                  ? Colors.grey[800]
-                  : Colors.white,
-              // WARNA DIUBAH DI SINI
+              backgroundColor:
+                  widget.isDarkMode ? Colors.grey[800] : Colors.white,
               selectedColor: mintHighlight,
               labelStyle: TextStyle(
                 color: isSelected
@@ -105,6 +223,7 @@ class _BerandaPageState extends State<BerandaPage> {
     );
   }
 
+  // WIDGET LAMA: Membangun list GURU
   Widget buildGuruList(List<Guru> teachers) {
     if (teachers.isEmpty) {
       return Padding(
@@ -120,18 +239,18 @@ class _BerandaPageState extends State<BerandaPage> {
         ),
       );
     }
-
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: teachers.length,
       itemBuilder: (context, index) {
         final guru = teachers[index];
-        return _buildGuruCard(guru);
+        return _buildGuruCard(guru); // Memanggil card GURU
       },
     );
   }
 
+  // WIDGET LAMA: Card untuk GURU
   Widget _buildGuruCard(Guru guru) {
     final cardColor = widget.isDarkMode ? Colors.grey[850] : Colors.white;
     final textColor = widget.isDarkMode ? Colors.white : Colors.black87;
@@ -143,7 +262,6 @@ class _BerandaPageState extends State<BerandaPage> {
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
-        // WARNA DIUBAH DI SINI
         side: widget.isDarkMode
             ? BorderSide(color: mintHighlight.withAlpha(77))
             : BorderSide.none,
@@ -226,10 +344,8 @@ class _BerandaPageState extends State<BerandaPage> {
                 Icons.price_change_outlined,
                 "Rp ${guru.price}K / jam",
                 subTextColor,
-                // WARNA DIUBAH DI SINI
-                textColor: widget.isDarkMode
-                    ? lightMintAccent
-                    : mintHighlight,
+                textColor:
+                    widget.isDarkMode ? lightMintAccent : mintHighlight,
               ),
             ],
           ),
@@ -238,6 +354,7 @@ class _BerandaPageState extends State<BerandaPage> {
     );
   }
 
+  // WIDGET LAMA: Info row (dipakai oleh kedua card)
   Widget _buildInfoRow(
     IconData icon,
     String text,
@@ -260,7 +377,10 @@ class _BerandaPageState extends State<BerandaPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Ambil KEDUA provider
     final guruProvider = context.watch<GuruProvider>();
+    final jadwalProvider = context.watch<JadwalProvider>(); // BARU
+
     final allGurus = guruProvider.guruList;
     final textColor = widget.isDarkMode ? Colors.white : Colors.black;
 
@@ -271,7 +391,6 @@ class _BerandaPageState extends State<BerandaPage> {
     final searchResults = getSearchResults(filteredGurus);
 
     return Scaffold(
-      // WARNA DIUBAH DI SINI
       backgroundColor: widget.isDarkMode
           ? Colors.grey[900]
           : lightMintBackground,
@@ -305,10 +424,19 @@ class _BerandaPageState extends State<BerandaPage> {
               },
             ),
             const SizedBox(height: 16),
+            
+            // BAGIAN BARU DITAMBAHKAN DI SINI
+            _buildJadwalSection(jadwalProvider),
+            
+            const SizedBox(height: 20),
+
+            // BAGIAN LAMA (FILTER DAN LIST GURU) DIMULAI DARI SINI
+            _buildSectionTitle("Cari Guru Berdasarkan Jenjang"),
             _buildFilterChips(),
             const SizedBox(height: 20),
+            
             if (_searchQuery.isNotEmpty) ...[
-              _buildSectionTitle("Hasil Pencarian"),
+              _buildSectionTitle("Hasil Pencarian Guru"),
               buildGuruList(searchResults),
             ] else if (_selectedLevel != "Semua") ...[
               _buildSectionTitle("Menampilkan Guru Jenjang $_selectedLevel"),
@@ -332,6 +460,7 @@ class _BerandaPageState extends State<BerandaPage> {
     );
   }
 
+  // WIDGET LAMA: Judul Section
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
@@ -340,7 +469,6 @@ class _BerandaPageState extends State<BerandaPage> {
         style: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.bold,
-          // WARNA DIUBAH DI SINI
           color: widget.isDarkMode ? lightMintAccent : mintHighlight,
         ),
       ),

@@ -24,7 +24,7 @@ class DetailGuruPage extends StatelessWidget {
     required this.user,
   });
 
-  static const Color mintHighlight = Color(0xFF3CB371);
+  static const Color mintHighlight = Colors.orange;
   static const Color lightMintBackground = Color(0xFFF5FFFA);
 
   ImageProvider getImage(String path) {
@@ -55,6 +55,12 @@ class DetailGuruPage extends StatelessWidget {
       }
     }
   }
+
+  // @override
+  // Widget build(BuildContext context) { ... }
+  // Kode build method di bawah ini saya aktifkan kembali,
+  // namun karena ada error `throw UnimplementedError()` di atasnya,
+  // saya akan mengomentari bagian yang menyebabkan error tersebut.
 
   @override
   Widget build(BuildContext context) {

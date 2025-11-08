@@ -365,77 +365,89 @@ class _ProfilPageState extends State<ProfilPage> {
   }
 
   // Method hapus akun
-  Future<void> _deleteAccount(String password) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Row(
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(width: 20),
-              Text("Menghapus akun..."),
-            ],
+  // Ini adalah fungsi di dalam file UI Anda
+
+Future<void> _deleteAccount(String password) async {
+  // Tampilkan dialog loading
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        content: Row(
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(width: 20),
+            Text("Menghapus akun..."),
+          ],
+        ),
+      );
+    },
+  );
+
+  // Simpan context untuk digunakan setelah 'await'
+  final currentContext = context;
+
+  try {
+    //
+    // =========================================================
+    // ⬇️⬇️ INI ADALAH BARIS YANG DIPERBAIKI ⬇️⬇️
+    //
+    // Kita memanggil 'AuthService' dengan parameter 'currentUser' (yang berisi ID dan ROLE)
+    // dan 'password' (yang diinput oleh pengguna).
+    //
+    final authService = AuthService();
+    final result = await authService.deleteAccount(
+      currentUser: widget.user, // 'widget.user' adalah UserModel yang Anda dapatkan saat login
+      password: password,       // 'password' adalah parameter dari fungsi _deleteAccount
+    );
+    //
+    // ⬆️⬆️ BARIS YANG DIPERBAIKI SELESAI ⬆️⬆️
+    // =========================================================
+    //
+
+    // Tutup dialog loading
+    if (currentContext.mounted) {
+      Navigator.pop(currentContext);
+    }
+
+    if (result['success'] == true) {
+      // Jika sukses, lempar ke halaman Login
+      if (currentContext.mounted) {
+        Navigator.of(currentContext).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+          (route) => false,
+        );
+
+        // Tampilkan notifikasi sukses
+        ScaffoldMessenger.of(currentContext).showSnackBar(
+          const SnackBar(
+            content: Text("Akun berhasil dihapus"),
+            backgroundColor: Colors.green,
           ),
         );
-      },
-    );
-
-    try {
-      final result = await AuthService.deleteAccount(
-        widget.user.id,
-        widget.user.email,
-        password,
-      );
-
-      // Simpan context SEBELUM menutup dialog loading.
-      // Ini adalah context yang akan kita gunakan untuk navigasi dan snackbar.
-      final currentContext = context;
-
-      if (context.mounted) {
-        Navigator.pop(context); // Close loading dialog
       }
-
-      if (result['success'] == true) {
-        // PENTING: Lakukan navigasi dan tampilkan snackbar menggunakan context yang sudah disimpan.
-        // Pastikan context masih valid sebelum digunakan.
-        if (currentContext.mounted) {
-          // Navigasi ke halaman login dan hapus semua halaman sebelumnya.
-          Navigator.of(currentContext).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const LoginPage()),
-            (route) => false,
-          );
-
-          // Tampilkan notifikasi setelah navigasi (atau bisa juga sebelumnya).
-          // Menampilkannya setelahnya kadang lebih stabil.
-          ScaffoldMessenger.of(currentContext).showSnackBar(
-            const SnackBar(
-              content: Text("Akun berhasil dihapus"),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
-      } else {
-        if (currentContext.mounted) {
-          ScaffoldMessenger.of(currentContext).showSnackBar(
-            SnackBar(
-              content: Text(result['message'] ?? "Gagal menghapus akun"),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+    } else {
+      // Jika gagal (misal: "Password salah")
+      if (currentContext.mounted) {
+        ScaffoldMessenger.of(currentContext).showSnackBar(
+          SnackBar(
+            content: Text(result['message'] ?? "Gagal menghapus akun"),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
-    } catch (e) {
-      // Jika terjadi error, pastikan dialog ditutup dan pesan ditampilkan.
-      // Kita tidak perlu menyimpan context di sini karena tidak ada navigasi.
-      if (!context.mounted) return;
-      Navigator.pop(context); // Close loading dialog
-      ScaffoldMessenger.of(context).showSnackBar(
+    }
+  } catch (e) {
+    // Jika terjadi error (misal: tidak ada koneksi)
+    if (currentContext.mounted) {
+      Navigator.pop(currentContext); // Tutup dialog loading
+      ScaffoldMessenger.of(currentContext).showSnackBar(
         SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
       );
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {

@@ -1,300 +1,256 @@
-// ========================
-// FILE: backend/routes/auth.js
-// ========================
+import { Router } from 'express';
+const router = Router();
 
-const express = require('express');
-const router = express.Router();
-const User = require('../models/User');
-const bcrypt = require('bcryptjs');
-const db = require('../config/database'); // ✅ Mengacu ke database.js
+// [BENAHI 1] Impor 'User.js' (File ESM)
+// Impor 'default export' (yaitu 'class User')
+import User from '../models/User.js';
+// 'Bongkar' static method dari class tersebut. Ini sudah benar.
+const { register, login, getGuruById, getPenggunaById, deleteGuruById, deletePenggunaById, getAll } = User;
 
-console.log('✅ routes/auth.js loaded');
+// [BENAHI 2] Impor 'bcryptjs' (Paket CJS)
+// Paket ini masih CJS, jadi kita TETAP pakai 'workaround' CJS-ke-ESM. Ini sudah benar.
+import bcryptjs from 'bcryptjs';
+const { hash, compare } = bcryptjs;
+
+// [BENAHI 3] Impor 'database.js' (File ESM)
+// Kita sudah buat 'named export' bernama 'execute', jadi kita impor langsung.
+import { execute } from '../config/database.js';
+
+console.log('✅ routes/auth.js loaded (Custom ID & No-Token Logic)');
 
 // ========================
-// REGISTER
+// REGISTER (Bersih tanpa lokasi_id)
 // ========================
 router.post('/register', async (req, res) => {
-  try {
-    const { name, username, email, password, role, subject } = req.body;
+  try {
+    const { name, username, email, password, role, subject } = req.body;
 
-    if (!name || !username || !email || !password) {
-      return res.status(400).json({ success: false, message: 'Semua field harus diisi' });
-    }
+    if (!name || !username || !email || !password || !role) {
+      return res.status(400).json({ success: false, message: 'Semua field dasar harus diisi' });
+    }
 
-    User.register({ name, username, email, password, role, subject }, (err, user) => {
-      if (err) return res.status(400).json({ success: false, message: err.message });
-      res.status(201).json({ success: true, message: 'Registrasi berhasil', data: user });
-    });
-  } catch (error) {
-    console.error('❌ Register Error:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
+    if (role === 'guru' && (!subject || subject.trim() === '')) {
+      return res.status(400).json({ success: false, message: 'Guru harus mengisi mata pelajaran' });
+    }
+    
+    register({ name, username, email, password, role, subject }, (err, user) => {
+      if (err) return res.status(400).json({ success: false, message: err.message });
+      res.status(201).json({ success: true, message: 'Registrasi berhasil', data: user });
+    });
+  } catch (error) {
+    console.error('❌ Register Error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
 });
 
 // ========================
 // LOGIN
 // ========================
 router.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-    if (!email || !password)
-      return res.status(400).json({ success: false, message: 'Email dan password harus diisi' });
+    if (!email || !password)
+      return res.status(400).json({ success: false, message: 'Email dan password harus diisi' });
 
-    if (email === 'admin@privateaja.com' && password === 'admin123') {
-      return res.json({
-        success: true,
-        message: 'Login admin berhasil',
-        data: {
-          id: 0,
-          name: 'Administrator',
-          username: 'admin',
-          email: 'admin@privateaja.com',
-          role: 'admin',
-          subject: null
-        }
-      });
-    }
+    if (email === 'admin@privateaja.com' && password === 'admin123') {
+      return res.json({
+        success: true, message: 'Login admin berhasil',
+        data: { id: 0, name: 'Administrator', username: 'admin', email: 'admin@privateaja.com', role: 'admin', subject: null }
+      });
+    }
 
-    User.login(email, password, (err, user) => {
-      if (err) return res.status(400).json({ success: false, message: err.message });
-      res.json({ success: true, message: 'Login berhasil', data: user });
-    });
-  } catch (error) {
-    console.error('❌ Login Error:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
+    login(email, password, (err, user) => {
+      if (err) return res.status(400).json({ success: false, message: err.message });
+      res.json({ success: true, message: 'Login berhasil', data: user });
+    });
+  } catch (error) {
+    console.error('❌ Login Error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
 });
 
 // ========================
-// GET PROFILE
+// GET PROFILE (MODIFIED)
 // ========================
-router.get('/profile/:id', async (req, res) => {
-  try {
-    const userId = req.params.id;
-    User.getById(userId, (err, user) => {
-      if (err) return res.status(404).json({ success: false, message: err.message });
-      res.json({ success: true, data: user });
-    });
-  } catch (error) {
-    console.error('❌ Profile Error:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
+router.get('/profile/:role/:id', async (req, res) => {
+  try {
+    const { role, id } = req.params;
+
+    if (role === 'guru') {
+      getGuruById(id, (err, user) => {
+        if (err) return res.status(404).json({ success: false, message: err.message });
+        res.json({ success: true, data: user });
+      });
+    } else if (role === 'murid') {
+      getPenggunaById(id, (err, user) => {
+        if (err) return res.status(404).json({ success: false, message: err.message });
+        res.json({ success: true, data: user });
+      });
+    } else {
+      return res.status(400).json({ success: false, message: 'Role tidak valid (harus guru atau murid)' });
+    }
+
+  } catch (error) {
+    console.error('❌ Profile Error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
 });
 
 // ========================
-// FORGOT PASSWORD
-// ========================
-router.post('/forgot-password', async (req, res) => {
-  try {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ success: false, message: 'Email harus diisi' });
-
-    const checkEmailQuery = 'SELECT * FROM users WHERE email = ?';
-    db.execute(checkEmailQuery, [email], (err, results) => {
-      if (err) return res.status(500).json({ success: false, message: 'Database error' });
-      if (results.length === 0)
-        return res.status(404).json({ success: false, message: 'Email tidak terdaftar' });
-
-      const resetToken = Math.random().toString(36).substring(2) + Date.now().toString(36);
-      const saveTokenQuery = `
-        INSERT INTO reset_tokens (email, token, expires_at)
-        VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 1 HOUR))
-      `;
-
-      db.execute(saveTokenQuery, [email, resetToken], (err2) => {
-        if (err2)
-          return res.status(500).json({ success: false, message: 'Gagal membuat token reset' });
-
-        console.log('📧 Token reset untuk', email, ':', resetToken);
-        res.json({
-          success: true,
-          message: 'Link reset password telah dikirim ke email Anda',
-          token: resetToken // hanya untuk dev/test
-        });
-      });
-    });
-  } catch (error) {
-    console.error('❌ Forgot Password Error:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
-
-// ========================
-// RESET PASSWORD DENGAN TOKEN
-// ========================
-router.post('/reset-password', async (req, res) => {
-  try {
-    const { token, newPassword } = req.body;
-    if (!token || !newPassword)
-      return res.status(400).json({ success: false, message: 'Token dan password baru harus diisi' });
-
-    const verifyTokenQuery = `
-      SELECT * FROM reset_tokens
-      WHERE token = ? AND expires_at > NOW() AND used = 0
-    `;
-
-    db.execute(verifyTokenQuery, [token], (err, results) => {
-      if (err) return res.status(500).json({ success: false, message: 'Database error' });
-      if (results.length === 0)
-        return res.status(400).json({ success: false, message: 'Token tidak valid atau kadaluarsa' });
-
-      const email = results[0].email;
-      bcrypt.hash(newPassword, 10, (err, hashedPassword) => {
-        if (err) return res.status(500).json({ success: false, message: 'Gagal mengenkripsi password' });
-
-        const updatePasswordQuery = 'UPDATE users SET password = ? WHERE email = ?';
-        db.execute(updatePasswordQuery, [hashedPassword, email], (err2) => {
-          if (err2) return res.status(500).json({ success: false, message: 'Gagal mengupdate password' });
-          db.execute('UPDATE reset_tokens SET used = 1 WHERE token = ?', [token]);
-          res.json({ success: true, message: 'Password berhasil direset' });
-        });
-      });
-    });
-  } catch (error) {
-    console.error('❌ Reset Password Error:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
-
-// ========================
-// UPDATE PASSWORD LANGSUNG TANPA TOKEN
+// UPDATE PASSWORD LANGSUNG (MODIFIED)
 // ========================
 router.post('/update-password-direct', async (req, res) => {
-  console.log('🔥 Route /update-password-direct dipanggil');
+  console.log('🔥 Route /update-password-direct (Lupa Password) dipanggil');
 
-  try {
-    const { email, new_password } = req.body;
-    if (!email || !new_password)
-      return res.status(400).json({ success: false, message: 'Email dan password baru harus diisi' });
+  try {
+    const { email, new_password } = req.body; 
+    if (!email || !new_password)
+      return res.status(400).json({ success: false, message: 'Email dan password baru harus diisi' });
 
-    const checkQuery = 'SELECT * FROM users WHERE email = ?';
-    db.execute(checkQuery, [email], async (err, results) => {
-      if (err) return res.status(500).json({ success: false, message: 'Database error' });
-      if (results.length === 0)
-        return res.status(404).json({ success: false, message: 'Email tidak ditemukan' });
+    const hashed = await hash(new_password, 10);
 
-      const hashed = await bcrypt.hash(new_password, 10);
-      const updateQuery = 'UPDATE users SET password = ? WHERE email = ?';
-      db.execute(updateQuery, [hashed, email], (err2) => {
-        if (err2)
-          return res.status(500).json({ success: false, message: 'Gagal update password' });
+    // 1. Cek & update guru
+    const checkGuruQuery = 'SELECT guru_id FROM akun_guru WHERE email = ?';
+    execute(checkGuruQuery, [email], async (err, guruResults) => {
+      if (err) return res.status(500).json({ success: false, message: 'Database error (guru check)' });
 
-        return res.json({ success: true, message: 'Password berhasil diperbarui!' });
-      });
-    });
-  } catch (error) {
-    console.error('❌ Update Password Direct Error:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
+      if (guruResults.length > 0) {
+        // Ditemukan di guru, update
+        const updateQuery = 'UPDATE akun_guru SET password = ? WHERE email = ?';
+        execute(updateQuery, [hashed, email], (err2) => {
+          if (err2) return res.status(500).json({ success: false, message: 'Gagal update password guru' });
+          return res.json({ success: true, message: 'Password guru berhasil diperbarui!' });
+        });
+      } else {
+        // 2. Jika tidak ada, Cek & update pengguna (murid)
+        const checkPenggunaQuery = 'SELECT pengguna_id FROM akun_pengguna WHERE email = ?';
+        execute(checkPenggunaQuery, [email], async (err, muridResults) => {
+          if (err) return res.status(500).json({ success: false, message: 'Database error (murid check)' });
+          
+          if (muridResults.length > 0) {
+            // Ditemukan di pengguna, update
+            const updateQuery = 'UPDATE akun_pengguna SET password = ? WHERE email = ?';
+            execute(updateQuery, [hashed, email], (err2) => {
+              if (err2) return res.status(500).json({ success: false, message: 'Gagal update password murid' });
+              return res.json({ success: true, message: 'Password murid berhasil diperbarui!' });
+            });
+          } else {
+            // 3. Tidak ada di kedua tabel
+            return res.status(404).json({ success: false, message: 'Email tidak ditemukan' });
+          }
+        });
+      }
+    });
+  } catch (error) {
+    console.error('❌ Update Password Direct Error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
 });
 
 // ========================
-// DELETE ACCOUNT (POST METHOD - lebih compatible)
+// DELETE ACCOUNT (POST METHOD - VERSI BARU)
 // ========================
-// routes/auth.js - Buat endpoint khusus tanpa auth
-// ✅ ENDPOINT TANPA AUTH
 router.post('/delete-account', async (req, res) => {
-  console.log('🎯 /api/auth/delete-account ENDPOINT HIT!');
+  console.log('🎯 /api/auth/delete-account ENDPOINT HIT!');
 
-  try {
-    const { userId, email, password } = req.body;
-    console.log('📦 Received data:', { userId, email });
+  try {
+    const { userId, role, password } = req.body;
+    console.log('📦 Received data:', { userId, role });
 
-    // Validasi input
-    if (!userId || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Data tidak lengkap'
-      });
-    }
+    if (!userId || !role || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Data tidak lengkap (membutuhkan userId, role, dan password)',
+      });
+    }
 
-    // Cari user di database menggunakan method yang sudah ada
-    User.getById(userId, async (err, user) => {
-      if (err || !user) {
-        return res.status(404).json({
-          success: false,
-          message: 'User tidak ditemukan'
-        });
-      }
+    if (role === 'guru') {
+      // --- Logika Hapus Guru ---
+      const getQuery = 'SELECT * FROM akun_guru WHERE guru_id = ?';
+      execute(getQuery, [userId], async (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'DB error (get guru)' });
+        if (results.length === 0) return res.status(404).json({ success: false, message: 'User guru tidak ditemukan' });
 
-      // Verifikasi email
-      if (user.email !== email) {
-        return res.status(400).json({
-          success: false,
-          message: 'Email tidak sesuai'
-        });
-      }
+        const user = results[0];
 
-      // Verifikasi password
-      // Kita perlu mengambil password hash dari database lagi karena getById tidak mengembalikannya
-      db.execute('SELECT password FROM users WHERE id = ?', [userId], async (err, results) => {
-        if (err || results.length === 0) return res.status(500).json({ success: false, message: 'Gagal verifikasi password' });
+        const isPasswordValid = await compare(password, user.password);
+        if (!isPasswordValid) {
+          return res.status(400).json({ success: false, message: 'Password salah' });
+        }
 
-        const hashedPassword = results[0].password;
-        const isPasswordValid = await bcrypt.compare(password, hashedPassword);
-        if (!isPasswordValid) {
-          return res.status(400).json({ success: false, message: 'Password salah' });
-        }
+        deleteGuruById(userId, (err, result) => {
+           if (err) return res.status(500).json({ success: false, message: 'Gagal menghapus akun guru' });
+          res.json({ success: true, message: 'Akun guru berhasil dihapus' });
+        });
+      });
 
-        // Hapus user menggunakan method yang akan kita buat
-        User.deleteById(userId, (err, result) => {
-          if (err) return res.status(500).json({ success: false, message: 'Gagal menghapus akun' });
+    } else if (role === 'murid') {
+      // --- Logika Hapus Murid (Pengguna) ---
+      const getQuery = 'SELECT * FROM akun_pengguna WHERE pengguna_id = ?';
+      
+      execute(getQuery, [userId], async (err, results) => {
+        if (err) return res.status(500).json({ success: false, message: 'DB error (get pengguna)' });
+        if (results.length === 0) return res.status(404).json({ success: false, message: 'User murid tidak ditemukan' });
 
-          console.log('✅ Account deleted successfully for user ID:', userId);
-          res.json({ success: true, message: 'Akun berhasil dihapus' });
-        });
-      });
-    });
+        const user = results[0];
 
-  } catch (error) {
-    console.error('❌ Delete account error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Terjadi kesalahan server: ' + error.message
-    });
-  }
+        const isPasswordValid = await compare(password, user.password);
+        if (!isPasswordValid) {
+          return res.status(400).json({ success: false, message: 'Password salah' });
+        }
+
+        deletePenggunaById(userId, (err, result) => {
+          if (err) return res.status(500).json({ success: false, message: 'Gagal menghapus akun murid' });
+          res.json({ success: true, message: 'Akun murid berhasil dihapus' });
+        });
+      });
+      
+    } else {
+      return res.status(400).json({ success: false, message: 'Role tidak valid' });
+    }
+
+  } catch (error) {
+    console.error('❌ Delete account error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Terjadi kesalahan server: ' + error.message,
+    });
+  }
 });
 
-
-
-// Di backend/routes/auth.js - tambahkan di akhir
 // ========================
-// LIST ALL AVAILABLE ENDPOINTS
+// LIST ALL AVAILABLE ENDPOINTS (MODIFIED)
 // ========================
 router.get('/endpoints', (req, res) => {
-  const endpoints = [
-    { method: 'POST', path: '/api/auth/register' },
-    { method: 'POST', path: '/api/auth/login' },
-    { method: 'POST', path: '/api/auth/forgot-password' },
-    { method: 'POST', path: '/api/auth/reset-password' },
-    { method: 'POST', path: '/api/auth/update-password-direct' },
-    { method: 'DELETE', path: '/api/auth/delete-account' },
-    { method: 'POST', path: '/api/auth/delete-account' }, // Alternatif POST
-    { method: 'GET', path: '/api/auth/profile/:id' },
-    { method: 'GET', path: '/api/auth/endpoints' }
-  ];
-
-  res.json({
-    success: true,
-    endpoints: endpoints
-  });
+  const endpoints = [
+    { method: 'POST', path: '/api/auth/register' },
+    { method: 'POST', path: '/api/auth/login' },
+    { method: 'POST', path: '/api/auth/update-password-direct' }, 
+    { method: 'DELETE', path: '/api/auth/delete-account' },
+    { method: 'POST', path: '/api/auth/delete-account' }, 
+    { method: 'GET', path: '/api/auth/profile/:role/:id' }, 
+    { method: 'GET', path: '/api/auth/endpoints' },
+    { method: 'GET', path: '/api/auth/users' }
+  ];
+  res.json({ success: true, endpoints: endpoints });
 });
 
 // ========================
 // GET ALL USERS (for Admin)
 // ========================
 router.get('/users', async (req, res) => {
-  console.log('✅ /api/auth/users ENDPOINT HIT!');
-  try {
-    User.getAll((err, users) => {
-      if (err) return res.status(500).json({ success: false, message: err.message });
-      res.json({ success: true, data: users });
-    });
-  } catch (error) {
-    console.error('❌ Get All Users Error:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
+  console.log('✅ /api/auth/users ENDPOINT HIT!');
+  try {
+    getAll((err, users) => {
+      if (err) return res.status(500).json({ success: false, message: err.message });
+      res.json({ success: true, data: users });
+    });
+  } catch (error) {
+    console.error('❌ Get All Users Error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  } // [BENAHI 5] Menghapus 'Li' dari 'Li }'
 });
 
-module.exports = router;
+// [BENAHI 4] Menggunakan 'export default' ESM, bukan 'module.exports'
+export default router;

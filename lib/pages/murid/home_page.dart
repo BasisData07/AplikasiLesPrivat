@@ -90,8 +90,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     // Definisi warna berdasarkan _isDarkMode
     final bgColor = _isDarkMode ? Colors.grey[900] : Colors.white;
-    final mintGreen = const Color(0xFF98FB98);
-    final darkerMintGreen = const Color(0xFF3CB371);
+    final mintGreen = Colors.orangeAccent;
+    final darkerMintGreen = Colors.orange;
     final gradientColors = _isDarkMode
         ? [Colors.grey[800]!, Colors.black]
         : [mintGreen, darkerMintGreen];

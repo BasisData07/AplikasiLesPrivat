@@ -155,6 +155,9 @@
          "cd4688a9-e888-48ea-ad81-76193d56b1be.AutoOpen.PersistentChat": 1,
          "cd4688a9-e888-48ea-ad81-76193d56b1be.Bubble": 1,
          "cd4688a9-e888-48ea-ad81-76193d56b1be.IsCompeteAISite.Bubble": 1,
+         "cd4688a9-e888-48ea-ad81-76193d56b1be.IsCopilotJitEduAcademicAI.Bubble": 1,
+         "cd4688a9-e888-48ea-ad81-76193d56b1be.IsCopilotJitEduArticleAI.Bubble": 1,
+         "cd4688a9-e888-48ea-ad81-76193d56b1be.IsCopilotJitEduStudyAI.Bubble": 1,
          "cd4688a9-e888-48ea-ad81-76193d56b1be.IsKnowledgeCardQuery.Bubble": 1,
          "cd4688a9-e888-48ea-ad81-76193d56b1be.IsMsnArticleUrlFromNtpP1P2.Bubble": 1,
          "cd4688a9-e888-48ea-ad81-76193d56b1be.IsShoppingNotificationNudge.Bubble": 1,
@@ -188,6 +191,6 @@
    },
    "SuppressedExperiences": [  ],
    "TimeDelta": 5000000,
-   "baseConfigVersion": "32.0.3",
-   "configVersion": "32.0.3"
+   "baseConfigVersion": "36.0.0",
+   "configVersion": "36.0.0"
 }

@@ -154,3 +154,13 @@
 2025-11-01 12:50:21.551: [INFO][Sync]     Configuration completed, state: 7
 2025-11-01 12:50:21.552: [INFO][Sync] Configured DataTypeManager: Ok
 2025-11-01 12:50:21.562: [INFO][SyncEngineBackend::DoStartSyncing] Start syncing
+2025-11-06 08:25:26.481: [INFO][Sync] SyncState after authenticated was: FeatureNotRequestedNotSetup
+2025-11-06 08:25:27.312: [INFO][Sync] Try to start sync engine
+2025-11-06 08:25:27.366: [INFO][SyncManagerImpl::NudgeForInitialDownload] Initial download nudge for Encryption Keys
+2025-11-06 08:25:27.366: [INFO][SyncEngineBackend::LoadAndConnectNigoriController] Load and connect Nigori controller
+2025-11-06 08:25:27.367: [INFO][SyncEngineBackend::DoInitialize] Control Types added: Encryption Keys
+2025-11-06 08:25:27.367: [INFO][SyncManagerImpl::ConfigureSyncer] Types to download: Encryption Keys with reason: 3
+2025-11-06 08:25:27.369: [INFO][SyncSchedulerImpl::DoConfigurationSyncCycleJob] Configure job was blocked
+2025-11-06 08:25:27.651: [INFO][SyncAuthManager::SetLastAuthError] Current auth error: None
+2025-11-06 08:25:27.651: [INFO][SyncAuthManager::EdgeLogTokenErrorState] Token error with: None for account type: MSA
+2025-11-06 08:25:27.651: [INFO][Sync] Credentials changed for: EdgeSyncScopeNew

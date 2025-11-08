@@ -15,6 +15,7 @@ class JadwalRepository {
   // === (READ) Untuk Beranda Murid ===
   Future<List<JadwalLesModel>> getJadwalUntukBerandaMurid() async {
     try {
+      
       final response = await ApiService.get('jadwal/all');
       if (response['success'] == true) {
         List<JadwalLesModel> jadwalList = (response['data'] as List)

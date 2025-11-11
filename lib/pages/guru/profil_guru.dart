@@ -1,5 +1,7 @@
 // lib/pages/guru/profil_guru.dart
 
+import 'dart:io'; // --- BARU ---
+import 'package:image_picker/image_picker.dart'; // --- BARU ---
 import 'package:PRIVATE_AJA/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -38,6 +40,11 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
   static const Color mintHighlight = Color(0xFF3CB371);
   static const Color lightMintBackground = Color(0xFFF5FFFA);
 
+  // --- BARU: Untuk Image Picker ---
+  final ImagePicker _picker = ImagePicker();
+  bool _isUploading = false;
+  // --- END BARU ---
+
   @override
   void initState() {
     super.initState();
@@ -57,12 +64,15 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
         deviceData = _readWebBrowserInfo(await deviceInfoPlugin.webBrowserInfo);
       } else {
         deviceData = switch (defaultTargetPlatform) {
-          TargetPlatform.android =>
-              _readAndroidBuildData(await deviceInfoPlugin.androidInfo),
-          TargetPlatform.iOS =>
-              _readIosDeviceInfo(await deviceInfoPlugin.iosInfo),
-          TargetPlatform.windows =>
-              _readWindowsDeviceInfo(await deviceInfoPlugin.windowsInfo),
+          TargetPlatform.android => _readAndroidBuildData(
+              await deviceInfoPlugin.androidInfo,
+            ),
+          TargetPlatform.iOS => _readIosDeviceInfo(
+              await deviceInfoPlugin.iosInfo,
+            ),
+          TargetPlatform.windows => _readWindowsDeviceInfo(
+              await deviceInfoPlugin.windowsInfo,
+            ),
           _ => <String, dynamic>{'Error': 'Platform tidak didukung'},
         };
       }
@@ -75,6 +85,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
     });
   }
 
+  // ... [Fungsi _read...Data() dan _getDeviceIcon() tetap sama] ...
   Map<String, dynamic> _readAndroidBuildData(AndroidDeviceInfo build) {
     return <String, dynamic>{
       'OS Version': build.version.release,
@@ -213,7 +224,10 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: const Text("Ya, Keluar", style: TextStyle(color: Colors.white)),
+              child: const Text(
+                "Ya, Keluar",
+                style: TextStyle(color: Colors.white),
+              ),
               onPressed: () async {
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.clear();
@@ -230,13 +244,106 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
     );
   }
 
+  // --- BARU: Fungsi untuk pilih sumber gambar ---
+  void _showImageSourceDialog() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Galeri'),
+                onTap: () {
+                  _pickAndUploadImage(ImageSource.gallery);
+                  Navigator.of(context).pop();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Kamera'),
+                onTap: () {
+                  _pickAndUploadImage(ImageSource.camera);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // --- BARU: Fungsi untuk ambil dan upload gambar ---
+Future<void> _pickAndUploadImage(ImageSource source) async {
+  final XFile? pickedFile = await _picker.pickImage(
+    source: source,
+    imageQuality: 80, 
+    maxWidth: 800, 
+  );
+
+  if (pickedFile == null) {
+    return; // User membatalkan
+  }
+
+  setState(() {
+    _isUploading = true;
+  });
+
+  final authService = AuthService();
+  final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+  try {
+    // --- PERBAIKAN DI SINI ---
+    final result = await authService.uploadProfilePicture(
+      pickedFile, // ← HAPUS "as XFile"
+      widget.user.id.toString(), 
+    );
+
+    if (result['success'] == true) {
+      final newImageUrl = result['url'];
+      setState(() {
+        widget.user.foto_profil_guru = newImageUrl;
+      });
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(
+          content: Text("Foto profil berhasil diperbarui!"),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text(result['message'] ?? "Gagal mengunggah foto."),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  } catch (e) {
+    scaffoldMessenger.showSnackBar(
+      SnackBar(
+        content: Text("Terjadi error: $e"),
+        backgroundColor: Colors.red,
+      ),
+    );
+  } finally {
+    setState(() {
+      _isUploading = false;
+    });
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDarkMode ? Colors.grey[900] : lightMintBackground;
     final cardColor = isDarkMode ? Colors.grey[800]! : Colors.white;
     final textColor = isDarkMode ? Colors.white : Colors.black87;
-    final String formattedDate = DateFormat('EEEE, dd MMMM yyyy', 'id_ID').format(DateTime.now());
+    final String formattedDate = DateFormat(
+      'EEEE, dd MMMM yyyy',
+      'id_ID',
+    ).format(DateTime.now());
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -248,7 +355,13 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
             style: TextStyle(fontSize: 16, color: textColor.withAlpha(204)),
           ),
           const SizedBox(height: 20),
-          _buildAccountInfoCard(cardColor, textColor),
+
+          // --- BARU: Header Profil (Avatar & Nama) ---
+          _buildProfileHeader(textColor),
+          const SizedBox(height: 20),
+          // --- END BARU ---
+
+          _buildAccountInfoCard(cardColor, textColor), // --- DIUBAH ---
           const SizedBox(height: 10),
           _infoCard(
             icon: Icons.help_outline,
@@ -256,7 +369,10 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
             value: "Lihat pertanyaan umum (FAQ)",
             cardColor: cardColor,
             textColor: textColor,
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HelpCenterPage())),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HelpCenterPage()),
+            ),
           ),
           const SizedBox(height: 10),
           _infoCard(
@@ -265,7 +381,10 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
             value: "Baca aturan penggunaan aplikasi",
             cardColor: cardColor,
             textColor: textColor,
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const TermsPage())),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const TermsPage()),
+            ),
           ),
           const SizedBox(height: 10),
           _infoCard(
@@ -274,7 +393,10 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
             value: "Latar belakang pembuat aplikasi",
             cardColor: cardColor,
             textColor: textColor,
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutMePage())),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AboutMePage()),
+            ),
           ),
           const SizedBox(height: 10),
           _infoCard(
@@ -288,7 +410,11 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
           const SizedBox(height: 25),
           Text(
             "Informasi Perangkat:",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
           ),
           const SizedBox(height: 10),
           _buildDeviceInfoCard(cardColor, textColor),
@@ -320,9 +446,12 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
               backgroundColor: Colors.red, // Konsisten dengan tombol delete
               foregroundColor: Colors.white, // Warna teks putih
               padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            onPressed: _showLogoutConfirmationDialog, // Fungsi logout sudah benar
+            onPressed:
+                _showLogoutConfirmationDialog, // Fungsi logout sudah benar
             icon: const Icon(Icons.logout),
             label: const Text("Log Out", style: TextStyle(fontSize: 16)),
           ),
@@ -331,6 +460,73 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
     );
   }
 
+  // --- BARU: Widget untuk Header Profil ---
+  Widget _buildProfileHeader(Color textColor) {
+  // Cek apakah ada URL gambar profil
+  final bool hasImage = widget.user.foto_profil_guru != null &&
+      widget.user.foto_profil_guru!.isNotEmpty;
+
+  return Column(
+    children: [
+      Stack(
+        children: [
+          CircleAvatar(
+            radius: 60,
+            backgroundColor: Colors.grey.shade300,
+            backgroundImage: hasImage 
+                ? NetworkImage(widget.user.foto_profil_guru!) // ← PERBAIKAN DI SINI
+                : null,
+            child: !hasImage
+                ? const Icon(Icons.person, size: 60, color: Colors.white)
+                : null,
+          ),
+          if (_isUploading)
+            const Positioned.fill(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: Container(
+              decoration: BoxDecoration(
+                color: mintHighlight,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 2),
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.edit, color: Colors.white, size: 20),
+                onPressed: _isUploading ? null : _showImageSourceDialog,
+              ),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 16),
+      Text(
+        widget.user.name,
+        style: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+          color: textColor,
+        ),
+      ),
+      const SizedBox(height: 4),
+      Text(
+        widget.user.email,
+        style: TextStyle(
+          fontSize: 16,
+          color: textColor.withAlpha(204),
+        ),
+      ),
+    ],
+  );
+}
+  // --- END BARU ---
+
+  // --- DIUBAH: Menghapus Nama & Email dari Card ---
   Widget _buildAccountInfoCard(Color cardColor, Color textColor) {
     return Card(
       color: cardColor,
@@ -341,36 +537,39 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
       ),
       clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
-        leading: const Icon(Icons.account_circle_outlined, color: mintHighlight, size: 28),
-        title: Text("Informasi Akun", style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
-        subtitle: Text("Lihat detail nama, email, & password", style: TextStyle(color: textColor.withAlpha(204))),
+        leading: const Icon(
+          Icons.account_circle_outlined,
+          color: mintHighlight,
+          size: 28,
+        ),
+        title: Text(
+          "Informasi Akun",
+          style: TextStyle(fontWeight: FontWeight.bold, color: textColor),
+        ),
+        subtitle: Text(
+          "Lihat detail username", // Subtitle diubah
+          style: TextStyle(color: textColor.withAlpha(204)),
+        ),
         iconColor: mintHighlight,
         collapsedIconColor: mintHighlight,
         childrenPadding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
         children: [
           const Divider(height: 1),
-          ListTile(
-            leading: Icon(Icons.badge_outlined, size: 22, color: textColor),
-            title: Text("Nama Lengkap", style: TextStyle(color: textColor)),
-            subtitle: Text(widget.user.name, style: TextStyle(color: textColor.withAlpha(204))),
-            dense: true,
-          ),
+          // ListTile Nama & Email dihapus karena sudah ada di header
           ListTile(
             leading: Icon(Icons.person_outline, size: 22, color: textColor),
             title: Text("Username", style: TextStyle(color: textColor)),
-            subtitle: Text(widget.user.username, style: TextStyle(color: textColor.withAlpha(204))),
-            dense: true,
-          ),
-          ListTile(
-            leading: Icon(Icons.email_outlined, size: 22, color: textColor),
-            title: Text("Email", style: TextStyle(color: textColor)),
-            subtitle: Text(widget.user.email, style: TextStyle(color: textColor.withAlpha(204))),
+            subtitle: Text(
+              widget.user.username,
+              style: TextStyle(color: textColor.withAlpha(204)),
+            ),
             dense: true,
           ),
         ],
       ),
     );
   }
+  // --- END DIUBAH ---
 
   Widget _buildDeviceInfoCard(Color cardColor, Color textColor) {
     return Card(
@@ -385,15 +584,30 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
         children: _deviceData.entries.map((entry) {
           return ListTile(
             leading: Icon(_getDeviceIcon(entry.key), color: mintHighlight),
-            title: Text(entry.key, style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
-            subtitle: Text("${entry.value}", style: TextStyle(color: textColor.withAlpha(204)), maxLines: 2, overflow: TextOverflow.ellipsis),
+            title: Text(
+              entry.key,
+              style: TextStyle(fontWeight: FontWeight.bold, color: textColor),
+            ),
+            subtitle: Text(
+              "${entry.value}",
+              style: TextStyle(color: textColor.withAlpha(204)),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
           );
         }).toList(),
       ),
     );
   }
 
-  Widget _infoCard({ required IconData icon, required String title, String? value, VoidCallback? onTap, required Color cardColor, required Color textColor }) {
+  Widget _infoCard({
+    required IconData icon,
+    required String title,
+    String? value,
+    VoidCallback? onTap,
+    required Color cardColor,
+    required Color textColor,
+  }) {
     return Card(
       color: cardColor,
       elevation: 1,
@@ -404,13 +618,21 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
       child: ListTile(
         onTap: onTap,
         leading: Icon(icon, color: mintHighlight),
-        title: Text(title, style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
-        subtitle: value != null ? Text(value, style: TextStyle(color: textColor.withAlpha(204))) : null,
-        trailing: onTap != null ? Icon(Icons.arrow_forward_ios, size: 16, color: textColor) : null,
+        title: Text(
+          title,
+          style: TextStyle(fontWeight: FontWeight.bold, color: textColor),
+        ),
+        subtitle: value != null
+            ? Text(value, style: TextStyle(color: textColor.withAlpha(204)))
+            : null,
+        trailing: onTap != null
+            ? Icon(Icons.arrow_forward_ios, size: 16, color: textColor)
+            : null,
       ),
     );
   }
-  
+
+  // ... [Sisa fungsi _showDeleteAccountDialog, _showPasswordVerificationDialog, _deleteAccount tetap sama] ...
   // Method untuk show dialog konfirmasi
   void _showDeleteAccountDialog() {
     showDialog(
@@ -506,73 +728,75 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
   // Method hapus akun
   // Ini adalah fungsi di dalam file UI Anda (profil_guru.dart)
 
-Future<void> _deleteAccount(String password) async {
-  // Tampilkan dialog loading
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        content: Row(
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(width: 20),
-            Text("Menghapus akun..."),
-          ],
-        ),
-      );
-    },
-  );
-
-  // Simpan context untuk digunakan setelah 'await'
-  final currentContext = context;
-
-  try {
-    final authService = AuthService();
-    final result = await authService.deleteAccount(
-      currentUser: widget.user, // 'widget.user' adalah UserModel yang Anda dapatkan saat login
-      password: password,       // 'password' adalah parameter dari fungsi _deleteAccount
+  Future<void> _deleteAccount(String password) async {
+    // Tampilkan dialog loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text("Menghapus akun..."),
+            ],
+          ),
+        );
+      },
     );
-  
-    if (currentContext.mounted) {
-      Navigator.pop(currentContext);
-    }
 
-    if (result['success'] == true) {
-      // Jika sukses, lempar ke halaman Login
-      if (currentContext.mounted) {
-        Navigator.of(currentContext).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-          (route) => false,
-        );
+    // Simpan context untuk digunakan setelah 'await'
+    final currentContext = context;
 
-        // Tampilkan notifikasi sukses
-        ScaffoldMessenger.of(currentContext).showSnackBar(
-          const SnackBar(
-            content: Text("Akun berhasil dihapus"),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } else {
-      // Jika gagal (misal: "Password salah")
-      if (currentContext.mounted) {
-        ScaffoldMessenger.of(currentContext).showSnackBar(
-          SnackBar(
-            content: Text(result['message'] ?? "Gagal menghapus akun"),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  } catch (e) {
-    // Jika terjadi error (misal: tidak ada koneksi)
-    if (currentContext.mounted) {
-      Navigator.pop(currentContext); // Tutup dialog loading
-      ScaffoldMessenger.of(currentContext).showSnackBar(
-        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+    try {
+      final authService = AuthService();
+      final result = await authService.deleteAccount(
+        currentUser: widget
+            .user, // 'widget.user' adalah UserModel yang Anda dapatkan saat login
+        password:
+            password, // 'password' adalah parameter dari fungsi _deleteAccount
       );
+
+      if (currentContext.mounted) {
+        Navigator.pop(currentContext);
+      }
+
+      if (result['success'] == true) {
+        // Jika sukses, lempar ke halaman Login
+        if (currentContext.mounted) {
+          Navigator.of(currentContext).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+            (route) => false,
+          );
+
+          // Tampilkan notifikasi sukses
+          ScaffoldMessenger.of(currentContext).showSnackBar(
+            const SnackBar(
+              content: Text("Akun berhasil dihapus"),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        // Jika gagal (misal: "Password salah")
+        if (currentContext.mounted) {
+          ScaffoldMessenger.of(currentContext).showSnackBar(
+            SnackBar(
+              content: Text(result['message'] ?? "Gagal menghapus akun"),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // Jika terjadi error (misal: tidak ada koneksi)
+      if (currentContext.mounted) {
+        Navigator.pop(currentContext); // Tutup dialog loading
+        ScaffoldMessenger.of(currentContext).showSnackBar(
+          SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+        );
+      }
     }
   }
-}
 }

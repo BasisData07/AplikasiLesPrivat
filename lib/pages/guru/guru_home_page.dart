@@ -90,7 +90,7 @@ class _GuruHomePageState extends State<GuruHomePage> {
                         ),
                       if (!isLoading && listMapelGuru.isNotEmpty)
                         DropdownButtonFormField<int>(
-                          value: selectedIdGuruMapel,
+                          initialValue: selectedIdGuruMapel,
                           hint: const Text("Pilih Mata Pelajaran"),
                           decoration: const InputDecoration(labelText: 'Mata Pelajaran'),
                           items: listMapelGuru.map((GuruMapelModel mapel) {
@@ -107,7 +107,7 @@ class _GuruHomePageState extends State<GuruHomePage> {
                         ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        value: selectedDay,
+                        initialValue: selectedDay,
                         decoration: const InputDecoration(labelText: 'Hari'),
                         items: days.map((String day) {
                           return DropdownMenuItem<String>(

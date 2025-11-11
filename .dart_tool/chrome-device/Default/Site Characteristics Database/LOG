@@ -1,17 +1,44 @@
-2025/11/08-21:21:49.074 1d1c Reusing MANIFEST C:\Users\User\AppData\Local\Temp\flutter_tools.a2fcdb4b\flutter_tools_chrome_device.f329d704\Default\Site Characteristics Database/MANIFEST-000001
-2025/11/08-21:21:49.088 1d1c Recovering log #30
-2025/11/08-21:21:49.089 1d1c Reusing old log C:\Users\User\AppData\Local\Temp\flutter_tools.a2fcdb4b\flutter_tools_chrome_device.f329d704\Default\Site Characteristics Database/000030.log 
-2025/11/08-21:21:49.090 1d1c Delete type=0 #3
-2025/11/08-21:21:49.090 1d1c Delete type=2 #4
-2025/11/08-21:21:49.090 1d1c Delete type=2 #6
-2025/11/08-21:21:49.091 1d1c Delete type=0 #6
-2025/11/08-21:21:49.091 1d1c Delete type=0 #10
-2025/11/08-21:21:49.091 1d1c Delete type=2 #11
-2025/11/08-21:21:49.091 1d1c Delete type=2 #13
-2025/11/08-21:21:49.092 1d1c Delete type=2 #14
-2025/11/08-21:21:49.092 1d1c Delete type=0 #19
-2025/11/08-21:21:49.092 1d1c Delete type=2 #20
-2025/11/08-21:21:49.092 1d1c Delete type=2 #22
-2025/11/08-21:21:49.092 1d1c Delete type=2 #23
-2025/11/08-21:21:49.092 1d1c Delete type=2 #24
-2025/11/08-21:21:49.092 1d1c Delete type=2 #31
+2025/11/10-20:48:02.580 ff4 Reusing MANIFEST C:\Users\halim\AppData\Local\Temp\flutter_tools.c74a20ec\flutter_tools_chrome_device.8361c1a3\Default\Site Characteristics Database/MANIFEST-000001
+2025/11/10-20:48:02.586 ff4 Recovering log #3
+2025/11/10-20:48:02.587 ff4 Level-0 table #47: started
+2025/11/10-20:48:02.592 ff4 Level-0 table #47: 493 bytes OK
+2025/11/10-20:48:02.592 ff4 Recovering log #6
+2025/11/10-20:48:02.592 ff4 Level-0 table #48: started
+2025/11/10-20:48:02.595 ff4 Level-0 table #48: 527 bytes OK
+2025/11/10-20:48:02.596 ff4 Recovering log #10
+2025/11/10-20:48:02.596 ff4 Level-0 table #49: started
+2025/11/10-20:48:02.598 ff4 Level-0 table #49: 338 bytes OK
+2025/11/10-20:48:02.599 ff4 Recovering log #19
+2025/11/10-20:48:02.599 ff4 Level-0 table #50: started
+2025/11/10-20:48:02.602 ff4 Level-0 table #50: 632 bytes OK
+2025/11/10-20:48:02.602 ff4 Recovering log #30
+2025/11/10-20:48:02.603 ff4 Level-0 table #51: started
+2025/11/10-20:48:02.605 ff4 Level-0 table #51: 261 bytes OK
+2025/11/10-20:48:02.606 ff4 Recovering log #44
+2025/11/10-20:48:02.606 ff4 Reusing old log C:\Users\halim\AppData\Local\Temp\flutter_tools.c74a20ec\flutter_tools_chrome_device.8361c1a3\Default\Site Characteristics Database/000044.log 
+2025/11/10-20:48:02.608 ff4 Delete type=0 #3
+2025/11/10-20:48:02.608 ff4 Delete type=2 #4
+2025/11/10-20:48:02.609 ff4 Delete type=2 #6
+2025/11/10-20:48:02.609 ff4 Delete type=0 #6
+2025/11/10-20:48:02.609 ff4 Delete type=0 #10
+2025/11/10-20:48:02.609 ff4 Delete type=2 #11
+2025/11/10-20:48:02.609 ff4 Delete type=2 #13
+2025/11/10-20:48:02.609 ff4 Delete type=2 #14
+2025/11/10-20:48:02.609 ff4 Delete type=0 #19
+2025/11/10-20:48:02.609 ff4 Delete type=2 #20
+2025/11/10-20:48:02.609 ff4 Delete type=2 #22
+2025/11/10-20:48:02.609 ff4 Delete type=2 #23
+2025/11/10-20:48:02.609 ff4 Delete type=2 #24
+2025/11/10-20:48:02.609 ff4 Delete type=0 #30
+2025/11/10-20:48:02.609 ff4 Delete type=2 #31
+2025/11/10-20:48:02.609 ff4 Delete type=2 #37
+2025/11/10-20:48:02.615 ff4 Compacting 5@0 + 1@1 files
+2025/11/10-20:48:02.618 ff4 Generated table #52@0: 4 keys, 324 bytes
+2025/11/10-20:48:02.619 ff4 Compacted 5@0 + 1@1 files => 324 bytes
+2025/11/10-20:48:02.620 ff4 compacted to: files[ 0 1 0 0 0 0 0 ]
+2025/11/10-20:48:02.621 ff4 Delete type=2 #45
+2025/11/10-20:48:02.621 ff4 Delete type=2 #47
+2025/11/10-20:48:02.621 ff4 Delete type=2 #48
+2025/11/10-20:48:02.621 ff4 Delete type=2 #49
+2025/11/10-20:48:02.621 ff4 Delete type=2 #50
+2025/11/10-20:48:02.621 ff4 Delete type=2 #51

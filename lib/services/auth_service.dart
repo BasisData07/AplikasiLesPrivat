@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:PRIVATE_AJA/pages/model/user_model.dart';
 import 'package:flutter/foundation.dart';
@@ -188,7 +187,7 @@ Future<Map<String, dynamic>> deleteAccount({
     
     // --- DEBUG 3: SETELAH DAPAT RESPONSE ---
     print('✅ [DEBUG] Status Code: ${response.statusCode}');
-    print('📄 [DEBUG] Response Body (50 karakter pertama): ${response.body.length > 500 ? response.body.substring(0, 50) + "..." : response.body}');
+    print('📄 [DEBUG] Response Body (50 karakter pertama): ${response.body.length > 500 ? "${response.body.substring(0, 50)}..." : response.body}');
     
     // --- DEBUG 4: CEK APAKAH RESPONSE HTML ---
     if (response.body.trim().startsWith('<!DOCTYPE') || response.body.trim().startsWith('<html')) {

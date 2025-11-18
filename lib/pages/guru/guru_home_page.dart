@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:PRIVATE_AJA/pages/model/guru_mapel_model.dart';
 import 'package:PRIVATE_AJA/pages/model/jadwal_provider.dart';
 import 'package:PRIVATE_AJA/pages/model/user_model.dart';
-import 'package:PRIVATE_AJA/repositories/jadwal-repositoris.dart';
 
 // Halaman lain
 import 'beranda_guru.dart';
@@ -219,7 +218,7 @@ class _GuruHomePageState extends State<GuruHomePage> {
           : null,
       bottomNavigationBar: BottomNavigationBar(
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Jadwal Les'),
           BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'Chat Room'),
           BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profil'),
           BottomNavigationBarItem(icon: Icon(Icons.edit_outlined), label: 'Edit'),

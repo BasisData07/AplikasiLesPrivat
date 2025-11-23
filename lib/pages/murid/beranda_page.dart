@@ -7,8 +7,8 @@ import 'package:provider/provider.dart';
 // Import yang SUDAH ADA
 import '../model/guru_model.dart';
 import '../model/user_model.dart';
-import '../model/guru_provider.dart';
-import '../murid/detail_guru.dart';
+import '../cadangan/guru_provider.dart';
+import 'detail_guru_page.dart';
 
 // Import BARU (Ganti path-nya jika perlu)
 

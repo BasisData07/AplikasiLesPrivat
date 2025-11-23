@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../model/user_model.dart';
 import '../model/guru_model.dart';
-import '../murid/detail_guru.dart';
+import 'detail_guru_page.dart';
 
 class FavoritPage extends StatefulWidget {
   final UserModel user;

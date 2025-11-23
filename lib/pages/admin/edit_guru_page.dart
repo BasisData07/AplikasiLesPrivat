@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../model/guru_model.dart';
-import '../model/guru_provider.dart';
+import '../cadangan/guru_provider.dart';
 
 class EditGuruPage extends StatefulWidget {
   final Guru guru;

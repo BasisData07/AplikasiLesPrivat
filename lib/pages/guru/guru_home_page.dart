@@ -1,9 +1,9 @@
+import 'package:PRIVATE_AJA/pages/guru/pengaturan_guru.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:PRIVATE_AJA/pages/model/guru_mapel_model.dart';
 import 'package:PRIVATE_AJA/pages/model/jadwal_provider.dart';
 import 'package:PRIVATE_AJA/pages/model/user_model.dart';
-import 'package:PRIVATE_AJA/repositories/jadwal-repositoris.dart';
 
 // Halaman lain
 import 'beranda_guru.dart';
@@ -32,7 +32,8 @@ class _GuruHomePageState extends State<GuruHomePage> {
       GuruBerandaPage(user: widget.user),
       ChatRoomGuruPage(user: widget.user),
       GuruProfilPage(user: widget.user),
-      const EditProfilGuruPage(),
+      EditProfilGuruPage(user: widget.user, currentData: const {}),
+      GuruPengaturanPage(user: widget.user),
     ];
 
     // 🔧 Fetch mapel guru saat pertama kali halaman dibuka
@@ -90,7 +91,7 @@ class _GuruHomePageState extends State<GuruHomePage> {
                         ),
                       if (!isLoading && listMapelGuru.isNotEmpty)
                         DropdownButtonFormField<int>(
-                          value: selectedIdGuruMapel,
+                          initialValue: selectedIdGuruMapel,
                           hint: const Text("Pilih Mata Pelajaran"),
                           decoration: const InputDecoration(labelText: 'Mata Pelajaran'),
                           items: listMapelGuru.map((GuruMapelModel mapel) {
@@ -107,7 +108,7 @@ class _GuruHomePageState extends State<GuruHomePage> {
                         ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        value: selectedDay,
+                        initialValue: selectedDay,
                         decoration: const InputDecoration(labelText: 'Hari'),
                         items: days.map((String day) {
                           return DropdownMenuItem<String>(
@@ -219,10 +220,11 @@ class _GuruHomePageState extends State<GuruHomePage> {
           : null,
       bottomNavigationBar: BottomNavigationBar(
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Jadwal Les'),
           BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'Chat Room'),
           BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profil'),
           BottomNavigationBarItem(icon: Icon(Icons.edit_outlined), label: 'Edit'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings_outlined), label: 'Pengaturan'),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: mintHighlight,

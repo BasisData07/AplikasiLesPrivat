@@ -41,7 +41,9 @@ abstract class Guru extends Equatable {
   }
 
   @override
-  List<Object?> get props => [name, email, noTelepon, mapel]; // <-- TAMBAHKAN email KE props
+  List<Object?> get props => [name, email, noTelepon, mapel];
+
+  get id => null; // <-- TAMBAHKAN email KE props
 }
 
 class GuruSD extends Guru {

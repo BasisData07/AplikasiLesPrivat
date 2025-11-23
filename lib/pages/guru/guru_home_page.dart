@@ -1,3 +1,4 @@
+import 'package:PRIVATE_AJA/pages/guru/pengaturan_guru.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:PRIVATE_AJA/pages/model/guru_mapel_model.dart';
@@ -31,7 +32,8 @@ class _GuruHomePageState extends State<GuruHomePage> {
       GuruBerandaPage(user: widget.user),
       ChatRoomGuruPage(user: widget.user),
       GuruProfilPage(user: widget.user),
-      const EditProfilGuruPage(),
+      EditProfilGuruPage(user: widget.user, currentData: const {}),
+      GuruPengaturanPage(user: widget.user),
     ];
 
     // 🔧 Fetch mapel guru saat pertama kali halaman dibuka
@@ -222,6 +224,7 @@ class _GuruHomePageState extends State<GuruHomePage> {
           BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'Chat Room'),
           BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profil'),
           BottomNavigationBarItem(icon: Icon(Icons.edit_outlined), label: 'Edit'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings_outlined), label: 'Pengaturan'),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: mintHighlight,

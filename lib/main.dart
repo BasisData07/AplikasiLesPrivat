@@ -4,8 +4,8 @@ import 'package:PRIVATE_AJA/utils/connection_test.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'package:webview_flutter_web/webview_flutter_web.dart';
+//import 'package:webview_flutter/webview_flutter.dart';
+//import 'package:webview_flutter_web/webview_flutter_web.dart';
 import 'package:flutter/foundation.dart';
 
 // --- PERBAIKAN UTAMA ADA DI BAGIAN IMPORT INI ---
@@ -16,7 +16,7 @@ import 'login_page.dart';
 import 'SignUpPage.dart';
 import 'pages/murid/home_page.dart';
 import 'pages/model/user_model.dart';
-import 'pages/model/guru_provider.dart';
+import 'pages/cadangan/guru_provider.dart';
 import 'pages/model/ulasan_provider.dart';
 import 'pages/model/jadwal_provider.dart'; // <-- Pastikan path ini benar
 
@@ -27,10 +27,10 @@ void main() async {
   // Test koneksi saat app start
   await ConnectionTest.testAllConnections();
 
-  // Konfigurasi WebView untuk platform web
+  /* Konfigurasi WebView untuk platform web
   if (kIsWeb) {
     WebViewPlatform.instance = WebWebViewPlatform();
-  }
+  }*/
 
   // Inisialisasi format tanggal untuk bahasa Indonesia
   await initializeDateFormatting('id_ID', null);
@@ -58,7 +58,10 @@ class MyApp extends StatelessWidget {
       title: 'PRIVATE AJA',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: mintSeedColor),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.orange, // Mengganti warna utama menjadi orange
+          primary: Colors.orange,
+        ),
         useMaterial3: true,
       ),
       home: const SplashWrapper(), // Halaman awal adalah Splash

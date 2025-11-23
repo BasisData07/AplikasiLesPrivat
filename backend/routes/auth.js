@@ -19,7 +19,7 @@ import { execute } from '../config/database.js';
 console.log('✅ routes/auth.js loaded (Custom ID & No-Token Logic)');
 
 // ========================
-// REGISTER (Bersih tanpa lokasi_id)
+// REGISTER (Bersih tanpa id_domisili)
 // ========================
 router.post('/register', async (req, res) => {
   try {

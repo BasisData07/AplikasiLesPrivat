@@ -1,9 +1,8 @@
 # Flutter build output
 build/
 .dart_tool/
-.packages
 
-# Generated file
+# Generated files
 pubspec.lock
 flutter_export_environment.sh
 
@@ -37,16 +36,16 @@ linux/flutter/ephemeral/
 # Web
 lib/generated_plugin_registrant.dart
 
-# Backend (jika NodeJS)
+# Backend (NodeJS)
 backend/node_modules/
 backend/.env
 backend/build/
 backend/dist/
 
-# Env file
+# Env files
 .env
 *.env
 
-# Log & Temp
+# Log & Temp files
 *.log
 *.tmp

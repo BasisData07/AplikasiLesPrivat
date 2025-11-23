@@ -367,87 +367,89 @@ class _ProfilPageState extends State<ProfilPage> {
   // Method hapus akun
   // Ini adalah fungsi di dalam file UI Anda
 
-Future<void> _deleteAccount(String password) async {
-  // Tampilkan dialog loading
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        content: Row(
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(width: 20),
-            Text("Menghapus akun..."),
-          ],
-        ),
-      );
-    },
-  );
-
-  // Simpan context untuk digunakan setelah 'await'
-  final currentContext = context;
-
-  try {
-    //
-    // =========================================================
-    // ⬇️⬇️ INI ADALAH BARIS YANG DIPERBAIKI ⬇️⬇️
-    //
-    // Kita memanggil 'AuthService' dengan parameter 'currentUser' (yang berisi ID dan ROLE)
-    // dan 'password' (yang diinput oleh pengguna).
-    //
-    final authService = AuthService();
-    final result = await authService.deleteAccount(
-      currentUser: widget.user, // 'widget.user' adalah UserModel yang Anda dapatkan saat login
-      password: password,       // 'password' adalah parameter dari fungsi _deleteAccount
+  Future<void> _deleteAccount(String password) async {
+    // Tampilkan dialog loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text("Menghapus akun..."),
+            ],
+          ),
+        );
+      },
     );
-    //
-    // ⬆️⬆️ BARIS YANG DIPERBAIKI SELESAI ⬆️⬆️
-    // =========================================================
-    //
 
-    // Tutup dialog loading
-    if (currentContext.mounted) {
-      Navigator.pop(currentContext);
-    }
+    // Simpan context untuk digunakan setelah 'await'
+    final currentContext = context;
 
-    if (result['success'] == true) {
-      // Jika sukses, lempar ke halaman Login
-      if (currentContext.mounted) {
-        Navigator.of(currentContext).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-          (route) => false,
-        );
-
-        // Tampilkan notifikasi sukses
-        ScaffoldMessenger.of(currentContext).showSnackBar(
-          const SnackBar(
-            content: Text("Akun berhasil dihapus"),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } else {
-      // Jika gagal (misal: "Password salah")
-      if (currentContext.mounted) {
-        ScaffoldMessenger.of(currentContext).showSnackBar(
-          SnackBar(
-            content: Text(result['message'] ?? "Gagal menghapus akun"),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  } catch (e) {
-    // Jika terjadi error (misal: tidak ada koneksi)
-    if (currentContext.mounted) {
-      Navigator.pop(currentContext); // Tutup dialog loading
-      ScaffoldMessenger.of(currentContext).showSnackBar(
-        SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+    try {
+      //
+      // =========================================================
+      // ⬇️⬇️ INI ADALAH BARIS YANG DIPERBAIKI ⬇️⬇️
+      //
+      // Kita memanggil 'AuthService' dengan parameter 'currentUser' (yang berisi ID dan ROLE)
+      // dan 'password' (yang diinput oleh pengguna).
+      //
+      final authService = AuthService();
+      final result = await authService.deleteAccount(
+        currentUser: widget
+            .user, // 'widget.user' adalah UserModel yang Anda dapatkan saat login
+        password:
+            password, // 'password' adalah parameter dari fungsi _deleteAccount
       );
+      //
+      // ⬆️⬆️ BARIS YANG DIPERBAIKI SELESAI ⬆️⬆️
+      // =========================================================
+      //
+
+      // Tutup dialog loading
+      if (currentContext.mounted) {
+        Navigator.pop(currentContext);
+      }
+
+      if (result['success'] == true) {
+        // Jika sukses, lempar ke halaman Login
+        if (currentContext.mounted) {
+          Navigator.of(currentContext).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+            (route) => false,
+          );
+
+          // Tampilkan notifikasi sukses
+          ScaffoldMessenger.of(currentContext).showSnackBar(
+            const SnackBar(
+              content: Text("Akun berhasil dihapus"),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        // Jika gagal (misal: "Password salah")
+        if (currentContext.mounted) {
+          ScaffoldMessenger.of(currentContext).showSnackBar(
+            SnackBar(
+              content: Text(result['message'] ?? "Gagal menghapus akun"),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // Jika terjadi error (misal: tidak ada koneksi)
+      if (currentContext.mounted) {
+        Navigator.pop(currentContext); // Tutup dialog loading
+        ScaffoldMessenger.of(currentContext).showSnackBar(
+          SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+        );
+      }
     }
   }
-}
 
   @override
   Widget build(BuildContext context) {

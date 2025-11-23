@@ -164,3 +164,25 @@
 2025-11-06 08:25:27.651: [INFO][SyncAuthManager::SetLastAuthError] Current auth error: None
 2025-11-06 08:25:27.651: [INFO][SyncAuthManager::EdgeLogTokenErrorState] Token error with: None for account type: MSA
 2025-11-06 08:25:27.651: [INFO][Sync] Credentials changed for: EdgeSyncScopeNew
+2025-11-22 09:29:16.440: [INFO][Sync] SyncState after authenticated was: FeatureNotRequestedNotSetup
+2025-11-22 09:29:17.190: [INFO][Sync] Try to start sync engine
+2025-11-22 09:29:17.203: [INFO][SyncManagerImpl::NudgeForInitialDownload] Initial download nudge for Encryption Keys
+2025-11-22 09:29:17.203: [INFO][SyncEngineBackend::LoadAndConnectNigoriController] Load and connect Nigori controller
+2025-11-22 09:29:17.203: [INFO][SyncEngineBackend::DoInitialize] Control Types added: Encryption Keys
+2025-11-22 09:29:17.203: [INFO][SyncManagerImpl::ConfigureSyncer] Types to download: Encryption Keys with reason: 3
+2025-11-22 09:29:17.203: [INFO][SyncSchedulerImpl::DoConfigurationSyncCycleJob] Configure job was blocked
+2025-11-22 09:29:23.474: [INFO][SyncAuthManager::SetLastAuthError] Current auth error: None
+2025-11-22 09:29:23.475: [INFO][SyncAuthManager::EdgeLogTokenErrorState] Token error with: None for account type: MSA
+2025-11-22 09:29:23.475: [INFO][Sync] Credentials changed for: EdgeSyncScopeNew
+2025-11-23 01:36:57.010: [INFO][Sync] SyncState after authenticated was: FeatureNotRequestedNotSetup
+2025-11-23 01:36:57.680: [INFO][Sync] Try to start sync engine
+2025-11-23 01:36:57.683: [INFO][SyncManagerImpl::NudgeForInitialDownload] Initial download nudge for Encryption Keys
+2025-11-23 01:36:57.683: [INFO][SyncEngineBackend::LoadAndConnectNigoriController] Load and connect Nigori controller
+2025-11-23 01:36:57.683: [INFO][SyncEngineBackend::DoInitialize] Control Types added: Encryption Keys
+2025-11-23 01:36:57.683: [INFO][SyncManagerImpl::ConfigureSyncer] Types to download: Encryption Keys with reason: 3
+2025-11-23 01:36:57.684: [INFO][SyncSchedulerImpl::DoConfigurationSyncCycleJob] Configure job was blocked
+2025-11-23 01:36:58.049: [INFO][SyncAuthManager::SetLastAuthError] Current auth error: None
+2025-11-23 01:36:58.049: [INFO][SyncAuthManager::EdgeLogTokenErrorState] Token error with: None for account type: MSA
+2025-11-23 01:36:58.049: [INFO][Sync] Credentials changed for: EdgeSyncScopeNew
+2025-11-23 01:37:41.714: [INFO][Sync] Reset engine, reason: 0
+2025-11-23 01:37:41.714: [INFO][Sync] Reset engine with reason: 0

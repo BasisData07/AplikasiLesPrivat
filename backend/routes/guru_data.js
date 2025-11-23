@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { execute } from '../config/database.js';
+// Ganti import 'execute' lama menjadi 'db' (Pool Promise)
+import db from '../config/database.js';
 
 const router = Router();
 
@@ -7,7 +8,7 @@ const router = Router();
 // (READ) Mendapatkan daftar "Mapel yang Saya Ajar" untuk Guru
 // Dipanggil oleh: Flutter (JadwalProvider.fetchMapelGuru)
 // ==================================================================
-router.get('/mapel-saya/:guru_id', (req, res) => {
+router.get('/mapel-saya/:guru_id', async (req, res) => {
   const { guru_id } = req.params;
   console.log(`🔥 HIT: /api/guru-data/mapel-saya/${guru_id}`);
 
@@ -20,15 +21,22 @@ router.get('/mapel-saya/:guru_id', (req, res) => {
     WHERE gm.guru_id = ?
   `;
   
-  execute(query, [guru_id], (err, results) => {
-    if (err) {
-      console.error('❌ Error get mapel guru:', err);
-      return res.status(500).json({ success: false, message: 'Database error' });
-    }
+  try {
+    // Gunakan await db.execute
+    // [results] adalah array destructuring untuk mengambil baris data
+    const [results] = await db.execute(query, [guru_id]);
     
     console.log(`✅ Mengirim ${results.length} mapel untuk Guru ID ${guru_id}`);
     res.json({ success: true, data: results });
-  });
+
+  } catch (err) {
+    console.error('❌ Error get mapel guru:', err);
+    res.status(500).json({ 
+        success: false, 
+        message: 'Database error',
+        error: err.message 
+    });
+  }
 });
 
 export default router;

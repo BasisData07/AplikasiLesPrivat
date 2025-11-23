@@ -1,25 +1,27 @@
-// File: backend/routes/mapel.js
 import { Router } from 'express';
-import { execute } from '../config/database.js';
+// Ubah import menjadi 'db' (Pool Promise)
+import db from '../config/database.js';
 
 const router = Router();
 
 // --- [1] Ambil semua mapel ---
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   console.log('🔥 /api/mapel/ ENDPOINT HIT!');
   const query = 'SELECT mapel_id, nama_mapel FROM mapel ORDER BY nama_mapel ASC';
 
-  execute(query, [], (err, results) => {
-    if (err) {
-      console.error('❌ Error get all mapel:', err);
-      return res.status(500).json({ success: false, message: 'Database error' });
-    }
+  try {
+    // Gunakan await dan array destructuring
+    const [results] = await db.execute(query);
     res.json({ success: true, data: results });
-  });
+
+  } catch (err) {
+    console.error('❌ Error get all mapel:', err);
+    res.status(500).json({ success: false, message: 'Database error', error: err.message });
+  }
 });
 
 // --- [2] Ambil mapel milik guru tertentu ---
-router.get('/guru/:guruId', (req, res) => {
+router.get('/guru/:guruId', async (req, res) => {
   const { guruId } = req.params;
   console.log(`🔥 /api/mapel/guru/${guruId} HIT!`);
 
@@ -30,22 +32,23 @@ router.get('/guru/:guruId', (req, res) => {
     WHERE gm.guru_id = ?;
   `;
 
-  execute(query, [guruId], (err, results) => {
-    if (err) {
-      console.error('❌ Error get mapel guru:', err);
-      return res.status(500).json({ success: false, message: 'Database error' });
-    }
+  try {
+    const [results] = await db.execute(query, [guruId]);
 
     if (results.length === 0) {
       return res.json({
-        success: false,
+        success: false, // Atau true dengan data [], tergantung selera frontend
         message: 'Guru ini belum terdaftar mengajar mapel apapun.',
         data: [],
       });
     }
 
     res.json({ success: true, data: results });
-  });
+
+  } catch (err) {
+    console.error('❌ Error get mapel guru:', err);
+    res.status(500).json({ success: false, message: 'Database error', error: err.message });
+  }
 });
 
 export default router;

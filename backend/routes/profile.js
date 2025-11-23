@@ -5,7 +5,8 @@
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
-import { execute } from '../config/database.js';
+// PERUBAHAN 1: Gunakan db pool langsung
+import db from '../config/database.js';
 
 const router = express.Router();
 
@@ -34,10 +35,15 @@ router.post('/upload-profile-picture', upload.single('profile_picture'), async (
     const { user_id } = req.body;
     const file = req.file;
     if (!file || !user_id) return res.status(400).json({ success: false, message: 'Data tidak lengkap.' });
+    
     const fileUrl = file.filename; 
-    await execute(`UPDATE akun_guru SET foto_profil_guru = ? WHERE guru_id = ?`, [fileUrl, user_id]);
+    
+    // PERUBAHAN 2: Pakai db.execute
+    await db.execute(`UPDATE akun_guru SET foto_profil_guru = ? WHERE guru_id = ?`, [fileUrl, user_id]);
+    
     res.status(200).json({ success: true, message: 'Foto berhasil diupload!', url: fileUrl });
   } catch (error) {
+    console.error('Upload Error:', error);
     res.status(500).json({ success: false, message: 'Error server', error: error.message });
   }
 });
@@ -56,22 +62,22 @@ router.put('/update-info/:id', async (req, res) => {
         let finalLokasiId = null;
 
         if (domisili) {
-            // Cek apakah ada?
-            const cek = await execute('SELECT lokasi_id FROM lokasi WHERE nama_kota = ?', [domisili]);
+            // PERUBAHAN 3: Destructuring [cek]
+            const [cek] = await db.execute('SELECT lokasi_id FROM lokasi WHERE nama_kota = ?', [domisili]);
             
             if (cek.length > 0) {
                 finalLokasiId = cek[0].lokasi_id;
                 console.log(`-> Lokasi Lama ID: ${finalLokasiId}`);
             } else {
-                // Insert Baru (Sekarang pasti ditunggu sampai selesai)
-                const insert = await execute('INSERT INTO lokasi (nama_kota) VALUES (?)', [domisili]);
+                // PERUBAHAN 4: Destructuring [insert] untuk ambil insertId
+                const [insert] = await db.execute('INSERT INTO lokasi (nama_kota) VALUES (?)', [domisili]);
                 finalLokasiId = insert.insertId;
                 console.log(`-> Lokasi Baru ID: ${finalLokasiId}`);
             }
         }
 
         // --- LOGIKA PROFIL ---
-        const cekProfil = await execute('SELECT profile_id FROM profile_guru WHERE guru_id = ?', [idGuru]);
+        const [cekProfil] = await db.execute('SELECT profile_id FROM profile_guru WHERE guru_id = ?', [idGuru]);
 
         if (cekProfil.length > 0) {
             // UPDATE
@@ -85,11 +91,11 @@ router.put('/update-info/:id', async (req, res) => {
             sql += ` WHERE guru_id=?`;
             params.push(idGuru);
             
-            await execute(sql, params);
+            await db.execute(sql, params);
             console.log("-> Profil Updated");
         } else {
             // INSERT
-            await execute(
+            await db.execute(
                 `INSERT INTO profile_guru (guru_id, deskripsi, tahun_ajar, no_telpon, nama_instansi, posisi, lokasi_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
                 [idGuru, bio_deskripsi, pengalaman_tahun, no_telpon, nama_instansi, posisi, finalLokasiId]
             );
@@ -98,14 +104,14 @@ router.put('/update-info/:id', async (req, res) => {
 
         // --- LOGIKA HARGA ---
         if (harga_per_jam) {
-            await execute(`UPDATE guru_mapel SET harga = ? WHERE guru_id = ?`, [harga_per_jam, idGuru]);
+            await db.execute(`UPDATE guru_mapel SET harga = ? WHERE guru_id = ?`, [harga_per_jam, idGuru]);
             console.log("-> Harga Updated");
         }
 
         res.json({ success: true, message: 'Berhasil disimpan' });
 
     } catch (error) {
-        console.error("ERROR:", error);
+        console.error("ERROR Update Info:", error);
         res.status(500).json({ success: false, message: error.message });
     }
 });
@@ -140,7 +146,8 @@ router.get('/detail/:id', async (req, res) => {
             GROUP BY ag.guru_id
         `;
 
-        const result = await execute(query, [idGuru, idGuru]);
+        // PERUBAHAN 5: Destructuring [result]
+        const [result] = await db.execute(query, [idGuru, idGuru]);
 
         if (result.length > 0) {
             const d = result[0];
@@ -163,86 +170,9 @@ router.get('/detail/:id', async (req, res) => {
             res.status(200).json({ success: true, data: {} });
         }
     } catch (error) {
+        console.error("ERROR Get Detail:", error);
         res.status(500).json({ success: false, message: 'Gagal mengambil data', error: error.message });
     }
 });
-
-/*
-// ============================================================
-// 3. RUTE AMBIL DETAIL PROFIL LENGKAP (GET)
-// ============================================================
-router.get('/detail/:id', async (req, res) => {
-    const idGuru = req.params.id;
-    console.log(`Request Detail Guru ID: ${idGuru}`);
-
-    try {
-        // QUERY JOIN LENGKAP
-        const query = `
-            SELECT 
-                -- Profile Guru
-                pg.deskripsi AS bio_deskripsi,
-                pg.tahun_ajar AS pengalaman_tahun,
-                pg.no_telpon,
-                pg.nama_instansi,
-                pg.posisi,
-                pg.sertifikat AS file_sertifikat, -- Sekarang sudah varchar, tidak perlu CAST
-                
-                -- Lokasi
-                l.nama_kota AS domisili,
-
-                -- Akun Guru
-                ag.foto_profil_guru AS foto_profile_url,
-                ag.username,
-                -- Harga (Ambil dari GURU_MAPEL, sesuai permintaan)
-                (SELECT harga FROM guru_mapel WHERE guru_id = ? LIMIT 1) AS harga_per_jam,
-
-                -- List Mapel
-                GROUP_CONCAT(DISTINCT m.nama_mapel SEPARATOR ', ') AS list_mapel,
-
-                -- List Jenjang (SD/SMP)
-                -- Pastikan tabel guru_mapel punya kolom 'jenjang_id' atau 'kategori_id'
-                GROUP_CONCAT(DISTINCT kj.nama_jenjang SEPARATOR ', ') AS list_jenjang
-
-            FROM akun_guru ag
-            LEFT JOIN profile_guru pg ON ag.guru_id = pg.guru_id
-            LEFT JOIN lokasi l ON pg.lokasi_id = l.lokasi_id
-            LEFT JOIN guru_mapel gm ON ag.guru_id = gm.guru_id
-            LEFT JOIN mapel m ON gm.mapel_id = m.mapel_id
-            LEFT JOIN kategori_jenjang kj ON gm.kategori_id = kj.kategori_id 
-
-            WHERE ag.guru_id = ?
-            GROUP BY ag.guru_id
-        `;
-
-        const result = await execute(query, [idGuru, idGuru]);
-
-        if (result.length > 0) {
-            // Rapikan data (handle null)
-            const d = result[0];
-            const cleanData = {
-                nama_lengkap: d.nama_lengkap || "",
-                bio_deskripsi: d.bio_deskripsi || "",
-                pengalaman_tahun: d.pengalaman_tahun || "",
-                no_telpon: d.no_telpon || "",
-                nama_instansi: d.nama_instansi || "",
-                posisi: d.posisi || "",
-                domisili: d.domisili || "",
-                file_sertifikat: d.file_sertifikat || "",
-                foto_profile_url: d.foto_profile_url || "",
-                harga_per_jam: d.harga_per_jam || "", // Ini harga dari guru_mapel
-                list_mapel: d.list_mapel || "",
-                list_jenjang: d.list_jenjang || ""
-            };
-
-            res.status(200).json({ success: true, data: cleanData });
-        } else {
-            res.status(200).json({ success: true, data: {} });
-        }
-
-    } catch (error) {
-        console.error('Error get detail:', error);
-        res.status(500).json({ success: false, message: 'Gagal mengambil data', error: error.message });
-    }
-});*/
 
 export default router;

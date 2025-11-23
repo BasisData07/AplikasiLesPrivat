@@ -1,171 +1,165 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'dart:io'; // Untuk Platform
-import 'package:flutter/foundation.dart'; // Untuk kIsWeb
-import 'dart:async';
+// lib/services/api_service.dart
 
-// import 'package:http/http.dart' as client; // Import ini tidak terpakai
+import 'dart:convert';
+import 'dart:io'; // Untuk Platform
+import 'dart:async';
+import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart'; // Untuk kIsWeb
 
 class ApiService {
-  // === KONFIGURASI BASE URL OTOMATIS ===
-  static String getBaseUrl() {
+  
+  // =======================================================================
+  // 1. KONFIGURASI URL (DYNAMIC)
+  // =======================================================================
+  
+  // GANTI IP INI SESUAI LAPTOP ANDA SAAT INI
+  static const String _laptopIp = '192.168.1.8'; 
+  static const String _port = '5000';
+
+  // ✅ KITA GUNAKAN NAMA 'getBaseUrl' AGAR SESUAI DENGAN FILE LAIN
+  static String get getBaseUrl {
+    // 1. Jika Web, pakai localhost
     if (kIsWeb) {
-      return 'http://localhost:5000/api';
+      return 'http://localhost:$_port/api';
     }
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:5000/api';
+
+    // 2. Cek Platform Mobile (Dibungkus try-catch agar aman)
+    try {
+      if (Platform.isAndroid) {
+        return 'http://10.0.2.2:$_port/api'; // Emulator Android
+      }
+      if (Platform.isIOS) {
+        return 'http://127.0.0.1:$_port/api'; // Simulator iOS
+      }
+    } catch (e) {
+      print('Info: Bukan platform mobile native');
     }
-    if (Platform.isIOS) {
-      return 'http://127.0.0.1:5000/api';
-    }
-    // Ganti IP di bawah ini dengan IP laptop kamu
-    return 'http://192.168.1.8:5000/api'; // ⚠️ GANTI sesuai IP lokal laptop kamu
+
+    // 3. Fallback ke IP Laptop (Untuk HP Fisik di jaringan sama)
+    return 'http://$_laptopIp:$_port/api'; 
   }
 
-  // === METHOD POST ===
-  static Future<Map<String, dynamic>> post(String endpoint, Map<String, dynamic> data) async {
-    final String baseUrl = getBaseUrl();
-    final String fullUrl = '$baseUrl/$endpoint';
+  // Getter Gambar
+  static String get baseImgUrl {
+    // Mengubah '.../api' menjadi '.../uploads/'
+    return getBaseUrl.replaceAll('/api', '/uploads/');
+  }
 
-    print('🌍 Base URL: $baseUrl');
-    print('🚀 API CALL: POST $fullUrl');
+  // =======================================================================
+  // 2. METHOD GENERIC (POST, GET, PUT, DELETE)
+  // =======================================================================
+
+  // --- GET ---
+  static Future<Map<String, dynamic>> get(String endpoint) async {
+    final String fullUrl = '$getBaseUrl/$endpoint'; // Pakai getBaseUrl
+    print('🌍 GET: $fullUrl');
+
+    try {
+      final response = await http.get(
+        Uri.parse(fullUrl),
+        headers: {'Accept': 'application/json'},
+      ).timeout(const Duration(seconds: 20));
+
+      return _processResponse(response);
+    } catch (e) {
+      return _handleError(e);
+    }
+  }
+
+  // --- POST ---
+  static Future<Map<String, dynamic>> post(String endpoint, Map<String, dynamic> data) async {
+    final String fullUrl = '$getBaseUrl/$endpoint'; // Pakai getBaseUrl
+    print('🚀 POST: $fullUrl');
     print('📦 Data: ${jsonEncode(data)}');
 
     try {
-      final response = await http
-          .post(
-            Uri.parse(fullUrl),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: jsonEncode(data),
-          )
-          .timeout(const Duration(seconds: 15));
+      final response = await http.post(
+        Uri.parse(fullUrl),
+        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+        body: jsonEncode(data),
+      ).timeout(const Duration(seconds: 20));
 
-      print('✅ RESPONSE STATUS: ${response.statusCode}');
-      print('📄 RESPONSE BODY: ${response.body}');
-
-      Map<String, dynamic> responseBody = jsonDecode(response.body);
-
-      if (responseBody['success'] == true) {
-        return responseBody;
-      } else {
-        return {
-          'success': false,
-          'message': responseBody['message'] ?? 'Terjadi kesalahan pada server'
-        };
-      }
-    } on SocketException catch (_) {
-      print('❌ ERROR: Tidak bisa menjangkau server (SocketException)');
-      return {
-        'success': false,
-        'message':
-            'Tidak bisa terhubung ke server. Pastikan server Node.js berjalan dan perangkat satu jaringan.'
-      };
-    } on FormatException catch (_) {
-      print('❌ ERROR: Response bukan JSON valid');
-      return {
-        'success': false,
-        'message': 'Respon dari server tidak valid (bukan JSON).'
-      };
-    } on HttpException catch (_) {
-      print('❌ ERROR: HTTP Exception');
-      return {
-        'success': false,
-        'message': 'Terjadi kesalahan saat menghubungi server.'
-      };
-    } on TimeoutException catch (_) {
-      print('❌ ERROR: Request timeout');
-      return {
-        'success': false,
-        'message': 'Koneksi ke server terlalu lama (timeout).'
-      };
+      return _processResponse(response);
     } catch (e) {
-      print('💥 ERROR UMUM: $e');
-      return {
-        'success': false,
-        'message': 'Gagal terhubung ke server. Pastikan server berjalan.'
-      };
+      return _handleError(e);
     }
   }
 
-  // === METHOD GET ===
-  static Future<Map<String, dynamic>> get(String endpoint) async {
-    final String baseUrl = getBaseUrl();
-    final String fullUrl = '$baseUrl/$endpoint';
-
-    print('🌍 GET Request: $fullUrl');
-
+  // --- PUT (Untuk Edit Profil) ---
+  static Future<Map<String, dynamic>> put(String endpoint, Map<String, dynamic> data) async {
+    final String fullUrl = '$getBaseUrl/$endpoint'; // Pakai getBaseUrl
+    print('✏️ PUT: $fullUrl');
+    
     try {
-      final response = await http
-          .get(Uri.parse(fullUrl), headers: {
-            'Accept': 'application/json',
-          })
-          .timeout(const Duration(seconds: 15));
+      final response = await http.put(
+        Uri.parse(fullUrl),
+        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+        body: jsonEncode(data),
+      ).timeout(const Duration(seconds: 15));
 
-      print('✅ RESPONSE STATUS: ${response.statusCode}');
-      print('📄 RESPONSE BODY: ${response.body}');
-      
-      Map<String, dynamic> responseBody = jsonDecode(response.body);
-
-      // Tambahkan error handling sederhana untuk GET
-      if (responseBody['success'] == true) {
-        return responseBody;
-      } else {
-        return {
-          'success': false,
-          'message': responseBody['message'] ?? 'Terjadi kesalahan pada server'
-        };
-      }
-    } on SocketException catch (_) {
-      return {'success': false, 'message': 'Tidak bisa terhubung ke server.'};
-    } on TimeoutException catch (_) {
-      return {'success': false, 'message': 'Koneksi ke server timeout.'};
+      return _processResponse(response);
     } catch (e) {
-      print('💥 ERROR (GET): $e');
-      return {'success': false, 'message': 'Gagal menghubungi server'};
+      return _handleError(e);
     }
   }
 
- // === METHOD DELETE ===
- // Ini adalah method DELETE yang Anda berikan. 
- // Catatan: Untuk 'delete-account', kita akan menggunakan ApiService.post()
- // karena backend kita di-setting untuk method POST.
+  // --- DELETE ---
   static Future<Map<String, dynamic>> delete(String endpoint, {Map<String, dynamic>? data}) async {
+    final String fullUrl = '$getBaseUrl/$endpoint'; // Pakai getBaseUrl
+    print('🗑️ DELETE: $fullUrl');
+
     try {
-      print('🗑️ === API DELETE REQUEST ===');
-      final String baseUrl = getBaseUrl();
-      final String fullUrl = '$baseUrl/$endpoint';
-      print('📍 DELETE $fullUrl');
-      if (data != null) {
-        print('📦 Data: ${jsonEncode(data)}');
-      } else {
-        print('📦 No data provided');
-      }
-      
       final response = await http.delete(
         Uri.parse(fullUrl),
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
         body: data != null ? jsonEncode(data) : null,
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 15));
 
-      print('✅ === API DELETE RESPONSE ===');
-      print('📡 Status Code: ${response.statusCode}');
-      print('📄 Response Body: ${response.body}');
-      
-      final responseData = jsonDecode(response.body);
-      print('🔍 Parsed Data: $responseData');
-      print('🔚 === END ===');
-      
-      return responseData;
-      
+      return _processResponse(response);
     } catch (e) {
-      print('❌ === API DELETE ERROR ===');
-      print('💥 Error: $e');
-      print('🔚 === END ===');
-      // Error handling Anda di sini lebih baik menggunakan return seperti di method POST
-      return {'success': false, 'message': 'Error saat delete: $e'};
+      return _handleError(e);
+    }
+  }
+
+  // =======================================================================
+  // 4. HELPER
+  // =======================================================================
+
+  static Map<String, dynamic> _processResponse(http.Response response) {
+    print('✅ STATUS: ${response.statusCode}');
+    
+    try {
+      if (response.body.isEmpty) {
+         return {'success': false, 'message': 'Server tidak memberikan respon (Body Kosong)'};
+      }
+
+      final body = jsonDecode(response.body);
+      
+      if (body is Map<String, dynamic>) {
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          if (!body.containsKey('success')) body['success'] = true; 
+          return body;
+        } else {
+          return {
+            'success': false,
+            'message': body['message'] ?? 'Gagal. Kode: ${response.statusCode}'
+          };
+        }
+      }
+      return {'success': false, 'message': 'Format respon server salah.'};
+    } catch (e) {
+      return {'success': false, 'message': 'Gagal memproses respon server: $e'};
+    }
+  }
+
+  static Map<String, dynamic> _handleError(dynamic e) {
+    print('💥 ERROR KONEKSI: $e');
+    if (e is SocketException) {
+      return {'success': false, 'message': 'Tidak ada koneksi internet / Server mati.'};
+    } else if (e is TimeoutException) {
+      return {'success': false, 'message': 'Waktu habis (Timeout). Cek koneksi Anda.'};
+    } else {
+      return {'success': false, 'message': 'Terjadi kesalahan aplikasi: $e'};
     }
   }
 }

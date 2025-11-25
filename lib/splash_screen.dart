@@ -12,11 +12,11 @@ class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
-  // DIUBAH DI SINI: Nama aplikasi diganti
-  final String _fullText = "PRIVATE AJA";
-  String _displayedText = "";
-  int _charIndex = 0;
-  Timer? _typingTimer;
+  // DIHAPUS: Variabel untuk teks "PRIVATE AJA" dan animasi typing
+  // final String _fullText = "PRIVATE AJA";
+  // String _displayedText = "";
+  // int _charIndex = 0;
+  // Timer? _typingTimer;
 
   @override
   void initState() {
@@ -26,19 +26,12 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(seconds: 2),
     )..repeat();
 
-    _typingTimer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
-      if (_charIndex < _fullText.length) {
-        setState(() {
-          _displayedText += _fullText[_charIndex];
-          _charIndex++;
-        });
-      } else {
-        timer.cancel();
-      }
-    });
+    // DIHAPUS: Logika Timer.periodic (animasi typing)
 
+    // Timer untuk navigasi ke halaman login (tetap 4 detik)
     Timer(const Duration(seconds: 4), () {
       if (!mounted) return;
+      // Pastikan rute '/login' telah didefinisikan di MaterialApp Anda
       Navigator.pushReplacementNamed(context, '/login');
     });
   }
@@ -46,47 +39,64 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void dispose() {
     _controller.dispose();
-    _typingTimer?.cancel();
+    // DIHAPUS: Pembatalan _typingTimer
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // DIUBAH DI SINI: Warna latar belakang diubah menjadi hijau mint yang elegan
-      backgroundColor: Colors.orange,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            RotationTransition(
-              turns: _controller,
-              child: Image.asset('assets/panda.png', height: 150, width: 150),
+      body: Stack(
+        // Menggunakan Stack untuk menumpuk background dan konten
+        children: [
+          // 1. Background Image
+          Positioned.fill(
+            child: Image.asset(
+              'assets/private.png', // Background image
+              fit: BoxFit.cover,
             ),
-            const SizedBox(height: 20),
-            Text(
-              _displayedText,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                letterSpacing: 2,
-              ),
+          ),
+
+          // 3. Konten Utama (Ikon Panda dan Teks Credit)
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Ikon Panda dengan Rotasi
+                RotationTransition(
+                  turns: _controller,
+                  child: Image.asset(
+                    'assets/panda.png',
+                    height: 150,
+                    width: 150,
+                  ),
+                ),
+
+                // DIHAPUS: SizedBox(height: 20) dan Widget Text untuk "PRIVATE AJA"
+                const SizedBox(height: 40),
+
+                // Teks Credit
+                const Text(
+                  "Created by Kelompok 8",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white70,
+                    fontStyle: FontStyle.italic,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 3.0,
+                        color: Colors.black,
+                        offset: Offset(2.0, 2.0),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 40),
-            const Text(
-              "Created by Kelompok 8",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white70,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

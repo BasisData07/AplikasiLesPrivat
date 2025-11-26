@@ -12,7 +12,6 @@ import 'SignUpPage.dart';
 import 'pages/admin/admin_page.dart';
 import 'pages/guru/guru_home_page.dart';
 
-
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -25,7 +24,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final RegExp _emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-  
+
   bool _isLoading = false;
 
   @override
@@ -59,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
 
       try {
         final result = await AuthService.login(email, password);
-        
+
         setState(() {
           _isLoading = false;
         });
@@ -69,6 +68,11 @@ class _LoginPageState extends State<LoginPage> {
           final user = UserModel.fromJson(userData);
 
           if (context.mounted) {
+            // Jika Anda ingin menyimpan status login/data user setelah berhasil login:
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setBool('isLoggedIn', true);
+            await prefs.setString('userData', jsonEncode(user.toJson()));
+
             _navigateByUserRole(user);
           }
         } else {
@@ -112,7 +116,7 @@ class _LoginPageState extends State<LoginPage> {
       MaterialPageRoute(builder: (context) => const SignUpPage()),
     );
   }
-  
+
   void _LupaPasswordForm() {
     Navigator.push(
       context,
@@ -133,28 +137,36 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: Center(
         child: _isLoading
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
+            ? const Center(child: CircularProgressIndicator())
             : isSmallScreen
-                ? SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const _Logo(),
-                        _FormContent(
-                          formKey: _formKey,
-                          usernameController: _usernameController,
-                          passwordController: _passwordController,
-                          onLogin: _login,
-                          onSignUp: _goToSignUp,
-                          isLoading: _isLoading,
-                          onPassword: _LupaPasswordForm,
-                        ),
-                      ],
+            ? SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const _Logo(),
+                    _FormContent(
+                      formKey: _formKey,
+                      usernameController: _usernameController,
+                      passwordController: _passwordController,
+                      onLogin: _login,
+                      onSignUp: _goToSignUp,
+                      isLoading: _isLoading,
+                      onPassword: _LupaPasswordForm,
                     ),
-                  )
-                : Container(
+                  ],
+                ),
+              )
+            : Stack(
+                children: [
+                  Positioned.fill(
+                    child: Opacity(
+                      // Menggunakan Opacity untuk visibilitas konten yang lebih baik
+                      opacity: 0.2,
+                      child: Image.asset('assets/nu.png', fit: BoxFit.cover),
+                    ),
+                  ),
+                  // 2. Konten Utama
+                  Container(
                     padding: const EdgeInsets.all(32.0),
                     constraints: const BoxConstraints(maxWidth: 800),
                     child: Row(
@@ -176,6 +188,9 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                     ),
                   ),
+                ],
+              ),
+        // END: Perubahan untuk Latar Belakang di layar besar
       ),
     );
   }
@@ -199,15 +214,15 @@ class _Logo extends StatelessWidget {
             textAlign: TextAlign.center,
             style: isSmallScreen
                 ? Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.orange,
-                      fontSize: 20,
-                    )
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange,
+                    fontSize: 20,
+                  )
                 : Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.orange,
-                      fontSize: 24,
-                    ),
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange,
+                    fontSize: 24,
+                  ),
           ),
         ),
         Padding(
@@ -258,6 +273,24 @@ class __FormContentState extends State<_FormContent> {
   Widget build(BuildContext context) {
     return Container(
       constraints: const BoxConstraints(maxWidth: 300),
+      // START: Menambahkan sedikit background di layar besar agar form tetap menonjol
+      decoration: MediaQuery.of(context).size.width >= 600
+          ? BoxDecoration(
+              color: Colors.white.withOpacity(0.95), // Warna background form
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            )
+          : null,
+      padding: MediaQuery.of(context).size.width >= 600
+          ? const EdgeInsets.all(24.0) // Padding pada layar besar
+          : null,
+      // END: Menambahkan sedikit background di layar besar
       child: Form(
         key: widget.formKey,
         child: Column(
@@ -354,7 +387,9 @@ class __FormContentState extends State<_FormContent> {
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -372,7 +407,10 @@ class __FormContentState extends State<_FormContent> {
                         padding: EdgeInsets.all(10.0),
                         child: Text(
                           'Sign in',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),

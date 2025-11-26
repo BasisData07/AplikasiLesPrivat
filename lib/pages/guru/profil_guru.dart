@@ -8,7 +8,7 @@ import 'package:PRIVATE_AJA/services/auth_service.dart';
 // Import halaman terkait
 import '../model/user_model.dart';
 import 'edit_profil_guru.dart';
-import 'pengaturan_guru.dart'; // <--- Kita akan buat file ini di bawah
+import 'pengaturan_guru.dart';
 
 class GuruProfilPage extends StatefulWidget {
   final UserModel user;
@@ -19,11 +19,9 @@ class GuruProfilPage extends StatefulWidget {
 }
 
 class _GuruProfilPageState extends State<GuruProfilPage> {
-  // --- STATE UNTUK PROFIL ---
-  Map<String, dynamic>? _guruDetailData; // Data dari database
+  Map<String, dynamic>? _guruDetailData;
   bool _isLoadingDetail = true;
 
-  // --- STATE UNTUK UPLOAD FOTO ---
   final ImagePicker _picker = ImagePicker();
   bool _isUploading = false;
 
@@ -36,13 +34,13 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
     _fetchGuruDetail();
   }
 
-  // 1. AMBIL DATA DETAIL
+  // 1. AMBIL DATA DETAIL & REFRESH
   Future<void> _fetchGuruDetail() async {
+    if (!mounted) return;
+    setState(() => _isLoadingDetail = true);
     try {
       final response = await http.get(
-        Uri.parse(
-          '${ApiService.getBaseUrl}/api/profile/detail/${widget.user.id}',
-        ),
+        Uri.parse('${ApiService.getBaseUrl}/profile/detail/${widget.user.id}'),
       );
 
       if (response.statusCode == 200) {
@@ -50,19 +48,46 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
         if (mounted) {
           setState(() {
             _guruDetailData = jsonResponse['data'];
-            _isLoadingDetail = false;
           });
         }
-      } else {
-        if (mounted) setState(() => _isLoadingDetail = false);
       }
     } catch (e) {
-      print("Error fetch: $e");
+      if (mounted) print("Error fetch: $e");
+    } finally {
       if (mounted) setState(() => _isLoadingDetail = false);
     }
   }
 
-  // 2. FUNGSI UPLOAD FOTO
+  // 2. NAVIGASI KE EDIT PROFILE (Mendukung Refresh Otomatis)
+  Future<void> _goToEditProfile() async {
+    final initialData = _guruDetailData ?? {};
+
+    // Menunggu hasil dari halaman edit
+    final bool? shouldRefresh = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            EditProfilGuruPage(user: widget.user, currentData: initialData),
+      ),
+    );
+
+    // Cek apakah sinyal refresh diterima (true)
+    if (shouldRefresh == true) {
+      if (mounted) {
+        // Langsung panggil refresh data
+        await _fetchGuruDetail();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Profil berhasil diperbarui."),
+            duration: Duration(seconds: 1),
+            backgroundColor: mintHighlight,
+          ),
+        );
+      }
+    }
+  }
+
+  // 3. FUNGSI UPLOAD FOTO (Tidak Berubah)
   void _showImageSourceDialog() {
     showModalBottomSheet(
       context: context,
@@ -109,9 +134,8 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
       );
 
       if (result['success'] == true) {
-        setState(() {
-          widget.user.foto_profil_guru = result['url'];
-        });
+        // Update state lokal dan panggil fetch data lagi
+        await _fetchGuruDetail();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Foto berhasil diupdate!"),
@@ -131,7 +155,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
         SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
       );
     } finally {
-      setState(() => _isUploading = false);
+      if (mounted) setState(() => _isUploading = false);
     }
   }
 
@@ -141,19 +165,26 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
     final bgColor = isDarkMode ? Colors.grey[900] : lightMintBackground;
     final cardColor = isDarkMode ? Colors.grey[800]! : Colors.white;
     final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final subTextColor = isDarkMode ? Colors.white70 : Colors.grey[600];
+
+    // --- Data yang ditampilkan ---
+    final data = _guruDetailData;
+    final String displayInstansi = data?['nama_instansi'] ?? "Belum diatur";
+    final String displayPosisi = data?['posisi'] ?? "Belum diatur";
+    final String displayJenjangString = data?['list_jenjang'] ?? "";
+    final String displayMapelString = data?['list_mapel'] ?? "";
 
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
+        title: Text("Profil Saya", style: TextStyle(color: textColor)),
         backgroundColor: bgColor,
         elevation: 0,
         actions: [
-          // --- TOMBOL MENU PENGATURAN (GERIGI) ---
           IconButton(
             icon: Icon(Icons.settings, color: textColor),
             tooltip: "Pengaturan Akun",
             onPressed: () {
-              // Navigasi ke Halaman Pengaturan
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -167,37 +198,176 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
       ),
       body: RefreshIndicator(
         onRefresh: _fetchGuruDetail,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            // 1. Header Profil (Foto & Nama)
-            _buildProfileHeader(textColor),
-
-            const SizedBox(height: 20),
-
-            // 2. Statistik (Pengalaman & Harga)
-            if (_isLoadingDetail)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(20),
-                  child: CircularProgressIndicator(),
-                ),
+        child: _isLoadingDetail
+            ? const Center(
+                child: CircularProgressIndicator(color: mintHighlight),
               )
-            else if (_guruDetailData != null) ...[
-              _buildStatsRow(cardColor, textColor),
-              const SizedBox(height: 20),
-              _buildBioSection(cardColor, textColor),
-            ] else
-              const Center(child: Text("Gagal memuat data profil.")),
+            : ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  // 1. Header Profil (Foto & Nama)
+                  _buildProfileHeader(textColor),
 
-            const SizedBox(height: 30),
-          ],
-        ),
+                  const SizedBox(height: 20),
+
+                  // 2. Statistik (Pengalaman & Harga)
+                  if (_guruDetailData != null) ...[
+                    _buildStatsRow(cardColor, textColor),
+                    const SizedBox(height: 20),
+                    // --- DETAIL TAMBAHAN (Instansi & Posisi) ---
+                    _buildSectionTitle("Latar Belakang", textColor),
+                    const SizedBox(height: 8),
+                    _buildDetailCard(
+                      cardColor,
+                      textColor,
+                      subTextColor!,
+                      displayInstansi,
+                      displayPosisi,
+                    ),
+                    const SizedBox(height: 20),
+
+                    // --- BIO ---
+                    _buildSectionTitle("Tentang Saya", textColor),
+                    const SizedBox(height: 8),
+                    _buildBioText(cardColor, textColor),
+                    const SizedBox(height: 20),
+
+                    // --- JENJANG ---
+                    _buildSectionTitle("Jenjang yang Diajar", textColor),
+                    const SizedBox(height: 8),
+                    _buildChips(
+                      displayJenjangString,
+                      mintHighlight.withOpacity(0.1),
+                      textColor,
+                    ),
+                    const SizedBox(height: 20),
+
+                    // --- MAPEL ---
+                    _buildSectionTitle("Mata Pelajaran", textColor),
+                    const SizedBox(height: 8),
+                    _buildChips(
+                      displayMapelString,
+                      mintHighlight,
+                      Colors.white,
+                    ),
+                    const SizedBox(height: 30),
+                  ] else
+                    const Center(child: Text("Gagal memuat data profil.")),
+                ],
+              ),
       ),
     );
   }
 
   // --- WIDGETS ---
+
+  Widget _buildSectionTitle(String title, Color textColor) {
+    return Text(
+      title,
+      style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: textColor,
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(
+    IconData icon,
+    String title,
+    String value,
+    Color? subTextColor,
+    Color textColor,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Icon(icon, color: subTextColor, size: 20),
+          const SizedBox(width: 16),
+          Text(title, style: TextStyle(fontSize: 15, color: subTextColor)),
+          const Spacer(),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget baru untuk menampilkan Instansi & Posisi
+  Widget _buildDetailCard(
+    Color cardColor,
+    Color textColor,
+    Color subTextColor,
+    String instansi,
+    String posisi,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          _buildInfoRow(
+            Icons.school_outlined,
+            "Instansi",
+            instansi,
+            subTextColor,
+            textColor,
+          ),
+          const Divider(height: 1),
+          _buildInfoRow(
+            Icons.work_outline,
+            "Posisi/Jurusan",
+            posisi,
+            subTextColor,
+            textColor,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget baru untuk menampilkan Bio
+  Widget _buildBioText(Color cardColor, Color textColor) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        _guruDetailData?['bio_deskripsi'] ?? "Belum ada deskripsi.",
+        style: TextStyle(color: textColor.withAlpha(200), height: 1.5),
+      ),
+    );
+  }
+
+  // Widget untuk Chip (Jenjang/Mapel)
+  Widget _buildChips(String listString, Color bgColor, Color labelColor) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: listString.split(', ').map<Widget>((item) {
+        if (item.trim().isEmpty) return const SizedBox();
+        return Chip(
+          label: Text(item, style: TextStyle(fontSize: 12, color: labelColor)),
+          backgroundColor: bgColor,
+        );
+      }).toList(),
+    );
+  }
 
   Widget _buildProfileHeader(Color textColor) {
     final bool hasImage =
@@ -224,7 +394,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
             ),
             if (_isUploading)
               const Positioned.fill(
-                child: CircularProgressIndicator(color: Colors.white),
+                child: CircularProgressIndicator(color: mintHighlight),
               ),
             Positioned(
               bottom: 0,
@@ -257,24 +427,11 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
                 color: textColor,
               ),
             ),
+            // Tombol Edit Info Profil
             IconButton(
               icon: const Icon(Icons.edit_note, color: Colors.blue),
-              onPressed: () async {
-                if (_guruDetailData == null) return;
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EditProfilGuruPage(
-                      user: widget.user,
-                      currentData: _guruDetailData!,
-                    ),
-                  ),
-                );
-                if (result == true) {
-                  setState(() => _isLoadingDetail = true);
-                  _fetchGuruDetail();
-                }
-              },
+              onPressed:
+                  _goToEditProfile, // Memanggil fungsi navigasi yang mendukung refresh
             ),
           ],
         ),
@@ -287,6 +444,11 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
   }
 
   Widget _buildStatsRow(Color cardColor, Color textColor) {
+    // Pastikan data tidak null sebelum ditampilkan
+    final String pengalaman =
+        "${_guruDetailData?['pengalaman_tahun'] ?? 0} Thn";
+    final String harga = "Rp ${_guruDetailData?['harga_per_jam'] ?? 0}";
+
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
@@ -299,17 +461,9 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _statItem(
-            "Pengalaman",
-            "${_guruDetailData?['pengalaman_tahun'] ?? 0} Thn",
-            textColor,
-          ),
+          _statItem("Pengalaman", pengalaman, textColor),
           Container(height: 40, width: 1, color: Colors.grey.shade300),
-          _statItem(
-            "Tarif/Jam",
-            "Rp ${_guruDetailData?['harga_per_jam'] ?? 0}",
-            textColor,
-          ),
+          _statItem("Tarif/Jam", harga, textColor),
         ],
       ),
     );
@@ -331,63 +485,6 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
           style: TextStyle(fontSize: 12, color: textColor.withAlpha(150)),
         ),
       ],
-    );
-  }
-
-  Widget _buildBioSection(Color cardColor, Color textColor) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Tentang Saya",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: textColor,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _guruDetailData?['bio_deskripsi'] ?? "Belum ada deskripsi.",
-            style: TextStyle(color: textColor.withAlpha(200), height: 1.5),
-          ),
-
-          const SizedBox(height: 20),
-          const Divider(),
-          const SizedBox(height: 10),
-
-          Text(
-            "Mata Pelajaran",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: textColor,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            children: (_guruDetailData?['list_mapel'] ?? "")
-                .toString()
-                .split(', ')
-                .map<Widget>((mapel) {
-                  if (mapel.trim().isEmpty) return const SizedBox();
-                  return Chip(
-                    label: Text(mapel, style: const TextStyle(fontSize: 12)),
-                    backgroundColor: mintHighlight.withOpacity(0.1),
-                  );
-                })
-                .toList(),
-          ),
-        ],
-      ),
     );
   }
 }

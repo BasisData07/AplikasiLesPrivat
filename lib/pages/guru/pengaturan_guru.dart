@@ -313,50 +313,72 @@ class _GuruPengaturanPageState extends State<GuruPengaturanPage> {
     );
   }
 
+  // Di dalam file pengaturan_guru.dart
+
   Future<void> _deleteAccount(String password) async {
-    // Loading Dialog
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) => const Center(child: CircularProgressIndicator()),
-    );
+      // Simpan konteks halaman Pengaturan
+      final pageContext = context; 
+      
+      // Konteks Khusus untuk Loading Dialog
+      late BuildContext loadingDialogContext; 
 
-    final currentContext = context;
-
-    try {
-      final authService = AuthService();
-      final result = await authService.deleteAccount(
-        currentUser: widget.user,
-        password: password,
+      // --- 1. TAMPILKAN LOADING DIALOG ---
+      showDialog(
+        context: pageContext,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          loadingDialogContext = context; // Simpan konteks dialog
+          return const Center(child: CircularProgressIndicator());
+        },
       );
 
-      if (currentContext.mounted) Navigator.pop(currentContext); // Tutup Loading
-
-      if (result['success'] == true) {
-        if (currentContext.mounted) {
-          Navigator.of(currentContext).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const LoginPage()),
-            (route) => false,
-          );
-          ScaffoldMessenger.of(currentContext).showSnackBar(
-            const SnackBar(content: Text("Akun berhasil dihapus"), backgroundColor: Colors.green),
-          );
-        }
-      } else {
-        if (currentContext.mounted) {
-          ScaffoldMessenger.of(currentContext).showSnackBar(
-            SnackBar(content: Text(result['message'] ?? "Gagal menghapus akun"), backgroundColor: Colors.red),
-          );
-        }
-      }
-    } catch (e) {
-      if (currentContext.mounted) {
-        Navigator.pop(currentContext);
-        ScaffoldMessenger.of(currentContext).showSnackBar(
-          SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+      try {
+        final authService = AuthService();
+        final result = await authService.deleteAccount(
+          currentUser: widget.user,
+          password: password,
         );
+
+        // --- 2. TUTUP LOADING DIALOG HANYA SEKALI ---
+        if (loadingDialogContext.mounted) Navigator.pop(loadingDialogContext); 
+
+        // Di dalam _deleteAccount:
+
+        if (result['success'] == true) {
+            if (pageContext.mounted) {
+                
+                // 1. Tampilkan notifikasi terlebih dahulu
+                ScaffoldMessenger.of(pageContext).showSnackBar(
+                    const SnackBar(content: Text("Akun berhasil dihapus"), backgroundColor: Colors.green),
+                );
+                
+                // 2. Tunda Navigasi sebentar untuk membiarkan SnackBar ditampilkan
+                await Future.delayed(const Duration(milliseconds: 500)); 
+
+                // 3. LAKUKAN NAVIGASI AMAN KE LOGIN PAGE
+                Navigator.of(pageContext).pushAndRemoveUntil(
+                    // Menggunakan MaterialPageRoute untuk memastikan route ditutup
+                    MaterialPageRoute(builder: (context) => const LoginPage()), 
+                    (route) => false,
+                );
+            }
+        } else {
+          // Tampilkan error jika gagal
+          if (pageContext.mounted) {
+              ScaffoldMessenger.of(pageContext).showSnackBar(
+                  SnackBar(content: Text(result['message'] ?? "Gagal menghapus akun"), backgroundColor: Colors.red),
+              );
+          }
+        }
+      } catch (e) {
+        if (loadingDialogContext.mounted) Navigator.pop(loadingDialogContext); // Tutup loading jika error
+        
+        if (pageContext.mounted) {
+          ScaffoldMessenger.of(pageContext).showSnackBar(
+            SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
+          );
+        }
       }
-    }
   }
 
   // ==========================================

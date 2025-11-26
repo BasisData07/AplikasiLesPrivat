@@ -123,62 +123,6 @@ class _EditProfilGuruPageState extends State<EditProfilGuruPage> {
     }
   }
 
-  /* --- FUNGSI SIMPAN & KEMBALI KE BERANDA ---
-  Future<void> _saveData() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    // 1. Tampilkan Loading
-    setState(() => _isLoading = true);
-
-    // 2. Siapkan Data
-    final Map<String, dynamic> dataToSend = {
-      "bio_deskripsi": _bioController.text,
-      "pengalaman_tahun": _pengalamanController.text,
-      "harga_per_jam": _hargaController.text,
-      "domisili": _domisiliController.text,
-      "no_telpon": _telponController.text,
-      "nama_instansi": _instansiController.text,
-      "posisi": _posisiController.text,
-      "jenjang": _selectedJenjang.join(", "),
-    };
-
-    // 3. Kirim ke Backend
-    final result = await ApiService.updateProfil(
-      widget.user.id.toString(),
-      dataToSend,
-    );
-
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-
-    // 4. Cek Hasil
-    if (result['success'] == true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Profil berhasil diperbarui!"),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      // === OPSI 1: KEMBALI KE PROFIL (Sesuai Standard) ===
-      // Navigator.pop(context, true);
-
-      // === OPSI 2: PAKSA KEMBALI KE BERANDA (Sesuai Permintaan Anda) ===
-      // Kita butuh import halaman beranda dulu di atas:
-      // import 'guru_beranda_page.dart'; (Sesuaikan nama file beranda Anda)
-
-      // Jika ingin aman (kembali ke halaman sebelumnya dan refresh):
-      Navigator.pop(context, true);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message'] ?? "Gagal menyimpan"),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }*/
-
   @override
   Widget build(BuildContext context) {
     // ... (KODE UI BUILD SAMA PERSIS SEPERTI SEBELUMNYA) ...

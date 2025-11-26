@@ -21,30 +21,7 @@ class ChatRoomPage extends StatelessWidget {
     // --- DATA DUMMY GURU (sesuai model Guru Anda) ---
     // Di aplikasi nyata, daftar ini didapat dari Provider atau API
     final List<Guru> availableGurus = [
-      GuruSD(
-          name: 'Budi Santoso',
-          email: 'budi.santoso@guru.com', // Gunakan email sebagai ID unik
-          gelar: 'S.Pd.',
-          price: 50,
-          rating: 4.8,
-          photo: 'url_foto_budi',
-          kota: 'Jakarta',
-          mapel: 'Matematika',
-          noTelepon: '0812345678',
-          pengalaman: '5 tahun',
-          deskripsi: 'Pengajar sabar dan berpengalaman.'),
-      GuruSMP(
-          name: 'Siti Aminah',
-          email: 'siti.aminah@guru.com', // Gunakan email sebagai ID unik
-          gelar: 'M.Pd.',
-          price: 75,
-          rating: 4.9,
-          photo: 'url_foto_siti',
-          kota: 'Surabaya',
-          mapel: 'Fisika',
-          noTelepon: '0812345679',
-          pengalaman: '8 tahun',
-          deskripsi: 'Fokus pada pemahaman konsep.'),
+      
     ];
 
     final textColor = isDarkMode ? Colors.white70 : Colors.black87;

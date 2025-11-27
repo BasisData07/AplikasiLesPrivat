@@ -389,13 +389,7 @@ class _ProfilPageState extends State<ProfilPage> {
     final currentContext = context;
 
     try {
-      //
-      // =========================================================
-      // ⬇️⬇️ INI ADALAH BARIS YANG DIPERBAIKI ⬇️⬇️
-      //
-      // Kita memanggil 'AuthService' dengan parameter 'currentUser' (yang berisi ID dan ROLE)
-      // dan 'password' (yang diinput oleh pengguna).
-      //
+
       final authService = AuthService();
       final result = await authService.deleteAccount(
         currentUser: widget
@@ -403,12 +397,7 @@ class _ProfilPageState extends State<ProfilPage> {
         password:
             password, // 'password' adalah parameter dari fungsi _deleteAccount
       );
-      //
-      // ⬆️⬆️ BARIS YANG DIPERBAIKI SELESAI ⬆️⬆️
-      // =========================================================
-      //
 
-      // Tutup dialog loading
       if (currentContext.mounted) {
         Navigator.pop(currentContext);
       }

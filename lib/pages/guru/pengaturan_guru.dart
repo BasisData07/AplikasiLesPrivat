@@ -392,12 +392,10 @@ class _GuruPengaturanPageState extends State<GuruPengaturanPage> {
     final textColor = isDarkMode ? Colors.white : Colors.black87;
 
     return Scaffold(
-      backgroundColor: bgColor,
       appBar: AppBar(
-        title: Text("Pengaturan", style: TextStyle(color: textColor)),
-        backgroundColor: bgColor,
-        elevation: 0,
-        iconTheme: IconThemeData(color: textColor),
+        title: Text("Pengaturan"),
+        backgroundColor: Colors.orange,
+        foregroundColor: Colors.white,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),

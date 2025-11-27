@@ -9,7 +9,6 @@ import 'package:PRIVATE_AJA/pages/model/user_model.dart';
 import 'beranda_guru.dart';
 import 'profil_guru.dart';
 import 'chat_room_guru.dart';
-import 'edit_profil_guru.dart';
 
 class GuruHomePage extends StatefulWidget {
   final UserModel user;
@@ -32,7 +31,6 @@ class _GuruHomePageState extends State<GuruHomePage> {
       GuruBerandaPage(user: widget.user),
       ChatRoomGuruPage(user: widget.user),
       GuruProfilPage(user: widget.user),
-      EditProfilGuruPage(user: widget.user, currentData: const {}),
       GuruPengaturanPage(user: widget.user),
     ];
 
@@ -203,12 +201,6 @@ class _GuruHomePageState extends State<GuruHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Guru Dashboard'),
-        backgroundColor: Colors.orange,
-        foregroundColor: Colors.white,
-        automaticallyImplyLeading: false,
-      ),
       body: _guruPages.elementAt(_selectedIndex),
       floatingActionButton: _selectedIndex == 0
           ? FloatingActionButton(
@@ -223,7 +215,6 @@ class _GuruHomePageState extends State<GuruHomePage> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Jadwal Les'),
           BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'Chat Room'),
           BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profil'),
-          BottomNavigationBarItem(icon: Icon(Icons.edit_outlined), label: 'Edit'),
           BottomNavigationBarItem(icon: Icon(Icons.settings_outlined), label: 'Pengaturan'),
         ],
         currentIndex: _selectedIndex,

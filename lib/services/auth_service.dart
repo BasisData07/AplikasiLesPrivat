@@ -10,31 +10,37 @@ import 'api_service.dart';
 class AuthService {
   get _getBaseUrl => null;
 
-  static Future<Map<String, dynamic>> login(String email, String password) async {
+  static Future<Map<String, dynamic>> login(
+    String email,
+    String password,
+  ) async {
     final response = await ApiService.post('auth/login', {
       'email': email,
       'password': password,
     });
 
     if (response['success'] == true) {
-      // Save user data to shared preferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isLoggedIn', true);
       await prefs.setString('userData', jsonEncode(response['data']));
-      
+
       return {'success': true, 'data': response['data']};
     } else {
       return {'success': false, 'message': response['message']};
     }
   }
 
-  
   static Future<Map<String, dynamic>> register(
-    String name, String username, String email, String password, String role, String? subject) async {
-    
+    String name,
+    String username,
+    String email,
+    String password,
+    String role,
+    String? subject,
+  ) async {
     try {
       print('📝 Attempting registration for: $email');
-      
+
       final response = await ApiService.post('auth/register', {
         'name': name,
         'username': username,
@@ -45,7 +51,7 @@ class AuthService {
       });
 
       print('📡 Registration response: ${response['success']}');
-      
+
       if (response['success'] == true) {
         print('✅ Registration successful');
         return {'success': true, 'data': response['data']};
@@ -68,21 +74,24 @@ class AuthService {
   static Future<Map<String, dynamic>> getCurrentUser() async {
     final prefs = await SharedPreferences.getInstance();
     final userDataString = prefs.getString('userData');
-    
+
     if (userDataString != null) {
       return jsonDecode(userDataString);
     }
     return {};
   }
-  
- 
-  static Future<Map<String, dynamic>> updatePasswordTanpaVerifikasi(String email, String password) async {
+
+  static Future<Map<String, dynamic>> updatePasswordTanpaVerifikasi(
+    String email,
+    String password,
+  ) async {
     try {
       print('🔒 (INSECURE) Attempting password update for: $email');
-      
+
       final response = await ApiService.post('auth/update-password-direct', {
         'email': email,
-        'new_password': password, // Mengirim 'new_password' sesuai harapan file PHP
+        'new_password':
+            password, // Mengirim 'new_password' sesuai harapan file PHP
       });
 
       print('📡 Update password response: ${response['success']}');
@@ -97,39 +106,34 @@ class AuthService {
       return {'success': false, 'message': 'Gagal terhubung ke server'};
     }
   }
-  // --- END FUNGSI BARU ---
-  // Di dalam file: auth_service.dart
 
-Future<Map<String, dynamic>> deleteAccount({
-  required UserModel currentUser, // Berisi ID dan ROLE
-  required String password,
-}) async {
-  try {
-    print('🗑️ Requesting account deletion for user: ${currentUser.id}');
-    
-    // Siapkan data yang BENAR untuk backend
-    final data = {
-      'userId': currentUser.id,
-      'role': currentUser.role,     // Mengirim 'role' (BUKAN 'email')
-      'password': password,
-    };
+  Future<Map<String, dynamic>> deleteAccount({
+    required UserModel currentUser,
+    required String password,
+  }) async {
+    try {
+      print('🗑️ Requesting account deletion for user: ${currentUser.id}');
 
-    // Panggil ApiService.post
-    final response = await ApiService.post('auth/delete-account', data);
+      final data = {
+        'userId': currentUser.id,
+        'role': currentUser.role,
+        'password': password,
+      };
 
-    print('📡 Delete account response: ${response['success']}');
-    
-    if (response['success'] == true) {
-      // ... (logika logout) ...
-      return {'success': true, 'message': response['message']};
-    } else {
-      return {'success': false, 'message': response['message']};
+      final response = await ApiService.post('auth/delete-account', data);
+
+      print('📡 Delete account response: ${response['success']}');
+
+      if (response['success'] == true) {
+        return {'success': true, 'message': response['message']};
+      } else {
+        return {'success': false, 'message': response['message']};
+      }
+    } catch (e) {
+      print('💥 Delete account error: $e');
+      return {'success': false, 'message': 'Gagal terhubung ke server'};
     }
-  } catch (e) {
-    print('💥 Delete account error: $e');
-    return {'success': false, 'message': 'Gagal terhubung ke server'};
   }
-}
 
   static Future<Map<String, dynamic>> getAllUsers() async {
     try {
@@ -146,17 +150,22 @@ Future<Map<String, dynamic>> deleteAccount({
       return {'success': false, 'message': 'Gagal mengambil data pengguna'};
     }
   }
-  
-    Future<Map<String, dynamic>> uploadProfilePicture(
-    XFile imageFile, String userId) async {
-  
-    // --- DEBUG 1: CEK URL & PARAMETER ---
-    print('🔗 [DEBUG] Mengirim request ke: http://localhost:5000/api/profile/upload-profile-picture');
+
+  Future<Map<String, dynamic>> uploadProfilePicture(
+    XFile imageFile,
+    String userId,
+  ) async {
+    //
+    print(
+      '🔗 [DEBUG] Mengirim request ke: ${ApiService.getBaseUrl}/profile/upload-profile-picture',
+    );
     print('📤 [DEBUG] User ID: $userId');
     print('📁 [DEBUG] File: ${imageFile.name}');
-    
-    final uri = Uri.parse('http://localhost:5000/api/profile/upload-profile-picture');
-        
+
+    final uri = Uri.parse(
+      '${ApiService.getBaseUrl}/profile/upload-profile-picture',
+    );
+
     try {
       var request = http.MultipartRequest('POST', uri);
       request.fields['user_id'] = userId.toString();
@@ -179,32 +188,32 @@ Future<Map<String, dynamic>> deleteAccount({
 
       request.files.add(multipartFile);
 
-      // --- DEBUG 2: SEBELUM KIRIM REQUEST ---
-    print('🚀 [DEBUG] Mengirim request...');
-    
-    var streamedResponse = await request.send();
-    var response = await http.Response.fromStream(streamedResponse);
-    
-    // --- DEBUG 3: SETELAH DAPAT RESPONSE ---
+      print('🚀 [DEBUG] Mengirim request...');
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      // --- DEBUG 3: SETELAH DAPAT RESPONSE ---
       print('✅ [DEBUG] Status Code: ${response.statusCode}');
-      print('📄 [DEBUG] Response Body (50 karakter pertama): ${response.body.length > 500 ? "${response.body.substring(0, 50)}..." : response.body}');
-      
+      print(
+        '📄 [DEBUG] Response Body (50 karakter pertama): ${response.body.length > 500 ? "${response.body.substring(0, 50)}..." : response.body}',
+      );
+
       // --- DEBUG 4: CEK APAKAH RESPONSE HTML ---
-      if (response.body.trim().startsWith('<!DOCTYPE') || response.body.trim().startsWith('<html')) {
+      if (response.body.trim().startsWith('<!DOCTYPE') ||
+          response.body.trim().startsWith('<html')) {
         print('❌ [DEBUG] SERVER MENGEMBALIKAN HTML, BUKAN JSON!');
         print('📄 [DEBUG] Full response: ${response.body}');
         return {
           'success': false,
-          'message': 'Server error: Mengembalikan HTML bukan JSON. Endpoint mungkin salah.',
+          'message':
+              'Server error: Mengembalikan HTML bukan JSON. Endpoint mungkin salah.',
         };
       }
 
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
-        return {
-          'success': true,
-          'url': responseData['url'], 
-        };
+        return {'success': true, 'url': responseData['url']};
       } else {
         var responseData = json.decode(response.body);
         return {
@@ -215,11 +224,7 @@ Future<Map<String, dynamic>> deleteAccount({
     } catch (e) {
       // --- DEBUG 5: JIKA ADA ERROR ---
       print('💥 [DEBUG] Error catch: $e');
-      return {
-        'success': false,
-        'message': 'Terjadi error: $e',
-      };
+      return {'success': false, 'message': 'Terjadi error: $e'};
     }
   }
-
 }

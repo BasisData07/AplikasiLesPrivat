@@ -125,9 +125,9 @@ class _DetailGuruPageState extends State<DetailGuruPage> {
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        title: Text("Profil Guru", style: TextStyle(color: textColor)),
-        backgroundColor: bgColor,
-        elevation: 0,
+        title: Text("Profil Guru"),
+        backgroundColor: Colors.orange,
+        foregroundColor: Colors.white,
         iconTheme: IconThemeData(color: textColor),
       ),
       body: _isLoading 

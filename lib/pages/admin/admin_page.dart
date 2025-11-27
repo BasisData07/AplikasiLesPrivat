@@ -30,7 +30,7 @@ class AdminPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Admin Panel - Manajemen Guru"),
-        backgroundColor: const Color.fromARGB(255, 24, 24, 194),
+        backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [

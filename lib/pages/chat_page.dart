@@ -109,7 +109,7 @@ class _ChatPageState extends State<ChatPage> {
       appBar: AppBar(
         title: Text(widget.peerName),
         // PERBAIKAN: Menyelaraskan warna dengan tema aplikasi
-        backgroundColor: const Color(0xFF3CB371),
+        backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
       ),
       body: Column(

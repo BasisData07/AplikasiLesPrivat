@@ -8,7 +8,6 @@ import 'package:PRIVATE_AJA/services/auth_service.dart';
 // Import halaman terkait
 import '../model/user_model.dart';
 import 'edit_profil_guru.dart';
-import 'pengaturan_guru.dart';
 
 class GuruProfilPage extends StatefulWidget {
   final UserModel user;
@@ -40,7 +39,9 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
     setState(() => _isLoadingDetail = true);
     try {
       final response = await http.get(
-        Uri.parse('${ApiService.getBaseUrl}/profile/detail/${widget.user.id}'),
+        Uri.parse(
+        '${ApiService.getBaseUrl}/profile/detail/${widget.user.id}'
+        ),
       );
 
       if (response.statusCode == 200) {
@@ -66,10 +67,12 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
     final bool? shouldRefresh = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            EditProfilGuruPage(user: widget.user, currentData: initialData),
-      ),
-    );
+        builder: (context) => EditProfilGuruPage(
+            user: widget.user, 
+            currentData: initialData,
+          ),
+        ),
+      );
 
     // Cek apakah sinyal refresh diterima (true)
     if (shouldRefresh == true) {
@@ -159,6 +162,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -177,24 +181,9 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        title: Text("Profil Saya", style: TextStyle(color: textColor)),
-        backgroundColor: bgColor,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.settings, color: textColor),
-            tooltip: "Pengaturan Akun",
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => GuruPengaturanPage(user: widget.user),
-                ),
-              );
-            },
-          ),
-          const SizedBox(width: 10),
-        ],
+        title: Text("Profil Saya"),
+        backgroundColor: Colors.orange,
+        foregroundColor: Colors.white,
       ),
       body: RefreshIndicator(
         onRefresh: _fetchGuruDetail,
@@ -385,7 +374,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
                   ? NetworkImage(
                       widget.user.foto_profil_guru!.startsWith('http')
                           ? widget.user.foto_profil_guru!
-                          : "${ApiService.baseImgUrl}${widget.user.foto_profil_guru!}",
+                          : "${ApiService.baseImgUrl}/uploads/${widget.user.foto_profil_guru!}",
                     )
                   : null,
               child: !hasImage

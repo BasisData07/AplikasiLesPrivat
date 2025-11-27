@@ -81,8 +81,14 @@ class _GuruBerandaPageState extends State<GuruBerandaPage> {
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Beranda Guru"),
+        backgroundColor: Colors.orange,
+        foregroundColor: Colors.white,
+      ),
     // 4. Hubungkan dengan JadwalProvider
-    return Consumer<JadwalProvider>(
+    body: Consumer<JadwalProvider>(
       builder: (context, jadwalProvider, child) {
         
         // Tampilkan loading
@@ -137,6 +143,7 @@ class _GuruBerandaPageState extends State<GuruBerandaPage> {
           },
         );
       },
+    )
     );
   }
 }

@@ -131,8 +131,8 @@ class _EditProfilGuruPageState extends State<EditProfilGuruPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Edit Profil"),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: Colors.orange,
+        foregroundColor: Colors.white,
         elevation: 0.5,
       ),
       backgroundColor: Colors.white,

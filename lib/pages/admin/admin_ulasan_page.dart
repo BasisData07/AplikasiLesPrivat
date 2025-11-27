@@ -14,8 +14,8 @@ class AdminUlasanPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Daftar Ulasan Pengguna"),
-        backgroundColor: const Color.fromARGB(255, 24, 24, 194),
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.orange,
+        foregroundColor: Colors.white, 
       ),
       body: ulasanList.isEmpty
           ? const Center(

@@ -6,6 +6,9 @@
 import express from 'express';
 import cors from 'cors';
 import { config } from 'dotenv';
+import path from 'path';
+//import fs from 'fs';        // <-- TAMBAH INI
+import { fileURLToPath } from 'url'; //
 //import { execute } from '../config/database.js'; 
 import db from './config/database.js'; // Pastikan path import benar
 
@@ -20,6 +23,8 @@ import profileRoutes from './routes/profile.js';
 // --- 3. INISIALISASI APLIKASI ---
 config(); // Muat variabel dari .env
 const app = express(); // Buat instance express
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 
 // --- 4. MIDDLEWARE ---
@@ -27,6 +32,8 @@ app.use(cors());         // Izinkan akses antar domain (frontend ↔ backend)
 app.use(express.json()); // Agar body JSON bisa dibaca
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('public/uploads')); // Untuk mengakses file gambar secara publik
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 app.use((req, res, next) => {
   console.log(`🔥 [${new Date().toLocaleTimeString()}] Request Masuk: ${req.method} ${req.url}`);
   next();

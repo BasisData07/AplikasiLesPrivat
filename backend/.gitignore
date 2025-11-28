@@ -1,0 +1,51 @@
+# Flutter build output
+build/
+.dart_tool/
+
+# Generated files
+pubspec.lock
+flutter_export_environment.sh
+
+# VS Code
+.vscode/
+
+# IntelliJ / Android Studio
+.idea/
+*.iml
+
+# Android
+android/app/debug.keystore
+android/.gradle/
+android/app/build/
+android/build/
+
+# iOS
+ios/Pods/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Runner.xcworkspace/
+ios/.symlinks/
+
+# macOS
+macos/Pods/
+macos/Flutter/ephemeral/
+
+# Linux
+linux/flutter/ephemeral/
+
+# Web
+lib/generated_plugin_registrant.dart
+
+# Backend (NodeJS)
+Backend/node_modules
+Backend/.env
+Backend/build
+Backend/dist
+
+# Env files
+.env
+*.env
+
+# Log & Temp files
+*.log
+*.tmp

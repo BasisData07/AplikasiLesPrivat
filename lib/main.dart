@@ -24,7 +24,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Test koneksi saat app start
-  await ConnectionTest.testAllConnections();
+  //await ConnectionTest.testAllConnections();
 
   /* Konfigurasi WebView untuk platform web
   if (kIsWeb) {

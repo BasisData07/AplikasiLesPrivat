@@ -7,12 +7,23 @@ import mysql from 'mysql2/promise';
 import 'dotenv/config';
 
 // 2. Gunakan createPool (Lebih stabil daripada createConnection untuk API)
-const db = mysql.createPool({
+/*const db = mysql.createPool({
   // GANTI 'localhost' JADI '127.0.0.1'
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});*/
+
+const db = mysql.createPool({
+  // GANTI 'localhost' JADI '127.0.0.1'
+  host: process.env.DB_HOST || '127.0.0.1',
+  user: process.env.DB_USER || 'root', 
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'aplikasi_les_mania',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0

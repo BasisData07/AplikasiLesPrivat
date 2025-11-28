@@ -6,10 +6,8 @@
 import express from 'express';
 import cors from 'cors';
 import { config } from 'dotenv';
-import path from 'path';
-//import fs from 'fs';        // <-- TAMBAH INI
+import path from 'path';     // <-- TAMBAH INI
 import { fileURLToPath } from 'url'; //
-//import { execute } from '../config/database.js'; 
 import db from './config/database.js'; // Pastikan path import benar
 
 // --- 2. IMPORT ROUTES ---

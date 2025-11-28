@@ -40,7 +40,7 @@ router.post('/create', async (req, res) => {
    (READ) Murid melihat semua jadwal (Beranda Murid)
    ========================================================= */
 router.get('/all', async (req, res) => {
-  console.log('🔥 [GET] /api/jadwal/all HIT!');
+  console.log('🔥 [GET] /jadwal/all HIT!');
 
   try {
     const query =
@@ -67,7 +67,7 @@ router.get('/all', async (req, res) => {
    ========================================================= */
 router.get('/guru/:guru_id', async (req, res) => {
   const { guru_id } = req.params;
-  console.log(`🔥 [GET] /api/jadwal/guru/${guru_id} HIT!`);
+  console.log(`🔥 [GET] /jadwal/guru/${guru_id} HIT!`);
 
   try {
     const query =
@@ -95,7 +95,7 @@ router.post('/update/:jadwal_id', async (req, res) => {
   const { jadwal_id } = req.params;
   const { hari, jam_mulai, jam_selesai, guru_id_pemilik } = req.body;
 
-  console.log(`🔥 [POST] /api/jadwal/update/${jadwal_id} HIT!`);
+  console.log(`🔥 [POST] /jadwal/update/${jadwal_id} HIT!`);
 
   try {
     if (!hari || !jam_mulai || !jam_selesai || !guru_id_pemilik) {
@@ -132,7 +132,7 @@ router.post('/delete/:jadwal_id', async (req, res) => {
   const { jadwal_id } = req.params;
   const { guru_id_pemilik } = req.body;
 
-  console.log(`🔥 [POST] /api/jadwal/delete/${jadwal_id} HIT!`);
+  console.log(`🔥 [POST] /jadwal/delete/${jadwal_id} HIT!`);
 
   try {
     if (!guru_id_pemilik) {

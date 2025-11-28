@@ -16,7 +16,7 @@ class JadwalRepository {
   Future<List<JadwalLesModel>> getJadwalUntukBerandaMurid() async {
     try {
       
-      final response = await ApiService.get('jadwal/all');
+      final response = await ApiService.get('/api/jadwal/all');
       if (response['success'] == true) {
         List<JadwalLesModel> jadwalList = (response['data'] as List)
             .map((item) => JadwalLesModel.fromJson(item))
@@ -33,7 +33,7 @@ class JadwalRepository {
   // [DIBENAHI] Ini adalah fungsi untuk Dropdown "Pilih Mapel"
   Future<List<GuruMapelModel>> getMapelMilikGuru(String guruId) async {
     try {
-      final response = await ApiService.get('guru-data/mapel-saya/$guruId');
+      final response = await ApiService.get('/api/guru-data/mapel-saya/$guruId');
       if (response['success'] == true) {
         List<GuruMapelModel> mapelList = (response['data'] as List)
             .map((item) => GuruMapelModel.fromJson(item))
@@ -50,7 +50,7 @@ class JadwalRepository {
   // [DITAMBAHKAN] Ini adalah fungsi untuk "Jadwal Saya" di Beranda Guru
   Future<List<Map<String, dynamic>>> getJadwalMilikGuru(String guruId) async {
     try {
-      final response = await ApiService.get('jadwal/guru/$guruId');
+      final response = await ApiService.get('/api/jadwal/guru/$guruId');
       if (response['success'] == true) {
         List<Map<String, dynamic>> jadwalList = 
             List<Map<String, dynamic>>.from(response['data']);
@@ -76,7 +76,7 @@ class JadwalRepository {
       'jam_mulai': jamMulai, 
       'jam_selesai': jamSelesai,
     };
-    final response = await ApiService.post('jadwal/create', data);
+    final response = await ApiService.post('/api/jadwal/create', data);
     return response; 
   }
 
@@ -86,7 +86,7 @@ class JadwalRepository {
     required String guruIdPemilik, 
   }) async {
     final data = {'guru_id_pemilik': guruIdPemilik};
-    final response = await ApiService.post('jadwal/delete/$jadwalId', data);
+    final response = await ApiService.post('/api/jadwal/delete/$jadwalId', data);
     return response;
   }
   
@@ -104,7 +104,7 @@ class JadwalRepository {
       'jam_mulai': jamMulai,
       'jam_selesai': jamSelesai,
     };
-    final response = await ApiService.post('jadwal/update/$jadwalId', data);
+    final response = await ApiService.post('/api/jadwal/update/$jadwalId', data);
     return response;
   }
 

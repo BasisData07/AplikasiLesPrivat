@@ -129,7 +129,8 @@ router.put('/update-info/:id', async (req, res) => {
             if (selectedKategoriIds.length > 0) {
                 // 2. Ambil mapel_id & harga lama
                 const [mapelResults] = await db.execute(
-                    `SELECT mapel_id, harga FROM guru_mapel WHERE guru_id = ? GROUP BY mapel_id`,
+                    //`SELECT mapel_id, harga FROM guru_mapel WHERE guru_id = ? GROUP BY mapel_id`
+                    'SELECT mapel_id, ANY_VALUE(harga) as harga FROM guru_mapel WHERE guru_id = ? GROUP BY mapel_id'
                     [idGuru]
                 );
                 

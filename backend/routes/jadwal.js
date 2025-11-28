@@ -40,18 +40,48 @@ router.post('/create', async (req, res) => {
    (READ) Murid melihat semua jadwal (Beranda Murid)
    ========================================================= */
 router.get('/all', async (req, res) => {
-  console.log('🔥 [GET] /jadwal/all HIT!');
+  console.log('🔥 [GET] /jadwal/all HIT! (Complex Join)');
 
   try {
-    const query =
-      'SELECT j.jadwal_id, j.hari, j.jam_mulai, j.jam_selesai, g.name AS nama_guru, m.nama_mapel ' +
-      'FROM jadwal_les j ' +
-      'JOIN guru_mapel gm ON j.id_gurumapel = gm.id_gurumapel ' +
-      'JOIN akun_guru g ON gm.guru_id = g.guru_id ' +
-      'JOIN mapel m ON gm.mapel_id = m.mapel_id ' +
-      'ORDER BY j.jadwal_id DESC';
+    // KITA LAKUKAN JOIN KE BANYAK TABEL
+    // Pastikan nama kolom foreign key (fk) di database Anda sesuai (misal: lokasi_id, kategori_id)
+    const query = `
+      SELECT 
+        j.jadwal_id, 
+        j.hari, 
+        j.jam_mulai, 
+        j.jam_selesai, 
+        ag.name AS nama_guru, 
+        m.nama_mapel,
+        
+        -- Ambil Nama Kota dari tabel lokasi
+        COALESCE(l.nama_kota, 'Indonesia') AS kota, 
+        
+        -- Ambil Nama Jenjang dari tabel kategori_jenjang
+        COALESCE(kj.nama_jenjang, 'Umum') AS level
 
-    // Perubahan: Tanpa parameter, cukup array kosong di argumen query (opsional di mysql2, tapi aman pakai)
+      FROM jadwal_les j
+      -- 1. Hubungkan Jadwal ke Guru Mapel
+      JOIN guru_mapel gm ON j.id_gurumapel = gm.id_gurumapel
+      
+      -- 2. Hubungkan ke Akun Guru (untuk dapat nama)
+      JOIN akun_guru ag ON gm.guru_id = ag.guru_id
+      
+      -- 3. Hubungkan ke Mapel (untuk dapat nama mapel)
+      JOIN mapel m ON gm.mapel_id = m.mapel_id
+      
+      -- 4. Hubungkan ke Jenjang (Lewat guru_mapel)
+      -- ASUMSI: tabel guru_mapel punya kolom 'kategori_id'
+      LEFT JOIN kategori_jenjang kj ON gm.kategori_id = kj.kategori_id
+      
+      -- 5. Hubungkan ke Lokasi (Lewat profile_guru)
+      -- ASUMSI: Ada tabel profile_guru yg punya 'guru_id' dan 'lokasi_id'
+      LEFT JOIN profile_guru pg ON ag.guru_id = pg.guru_id
+      LEFT JOIN lokasi l ON pg.lokasi_id = l.lokasi_id
+      
+      ORDER BY j.jadwal_id DESC
+    `;
+
     const [results] = await db.execute(query);
 
     res.json({ success: true, data: results });

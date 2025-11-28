@@ -55,9 +55,16 @@ class _EditProfilGuruPageState extends State<EditProfilGuruPage> {
     _domisiliController = TextEditingController(
       text: widget.currentData['domisili'] ?? '',
     );
-    _telponController = TextEditingController(
-      text: widget.currentData['no_telpon']?.toString() ?? '',
-    );
+
+    // --- PERBAIKAN 1: Logic Load No Telpon ---
+    String rawPhone = widget.currentData['no_telpon']?.toString() ?? '';
+    // Jika dari database ada '62' di depan, kita hapus agar di UI tidak dobel
+    if (rawPhone.startsWith('62')) {
+      rawPhone = rawPhone.substring(2); 
+    }
+    _telponController = TextEditingController(text: rawPhone);
+    // -----------------------------------------
+
     _instansiController = TextEditingController(
       text: widget.currentData['nama_instansi'] ?? '',
     );
@@ -88,9 +95,22 @@ class _EditProfilGuruPageState extends State<EditProfilGuruPage> {
   }
 
    //--- FUNGSI SIMPAN (JADI SANGAT RINGKAS) ---
+  //--- FUNGSI SIMPAN (JADI SANGAT RINGKAS) ---
   Future<void> _saveData() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
+
+    // --- PERBAIKAN 2: Logic Simpan No Telpon ---
+    String nomorHpFinal = _telponController.text.trim(); // Tambah trim utk spasi
+    
+    // Cek apakah user mengetik angka 0 di depan (misal 0812...)
+    if (nomorHpFinal.startsWith('0')) {
+      nomorHpFinal = nomorHpFinal.substring(1); // Hapus angka 0 di depan
+    }
+    
+    // Gabungkan dengan 62
+    String noTelponKirimKeDb = "62$nomorHpFinal"; 
+    // -------------------------------------------
 
     // 1. Siapkan Data
     final dataToSend = {
@@ -98,7 +118,7 @@ class _EditProfilGuruPageState extends State<EditProfilGuruPage> {
       "pengalaman_tahun": _pengalamanController.text,
       "harga_per_jam": _hargaController.text,
       "domisili": _domisiliController.text,
-      "no_telpon": _telponController.text,
+      "no_telpon": noTelponKirimKeDb, // <--- GUNAKAN VARIABEL YG SUDAH DIOLAH
       "nama_instansi": _instansiController.text,
       "posisi": _posisiController.text,
       "jenjang": _selectedJenjang.join(", "),
@@ -156,6 +176,7 @@ class _EditProfilGuruPageState extends State<EditProfilGuruPage> {
                 controller: _telponController,
                 icon: Icons.phone,
                 inputType: TextInputType.phone,
+                prefix: "+62 ",
               ),
 
               const SizedBox(height: 25),
@@ -307,6 +328,7 @@ class _EditProfilGuruPageState extends State<EditProfilGuruPage> {
     IconData? icon,
     TextInputType inputType = TextInputType.text,
     String? hint,
+    String? prefix,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
@@ -319,6 +341,8 @@ class _EditProfilGuruPageState extends State<EditProfilGuruPage> {
           prefixIcon: icon != null
               ? Icon(icon, size: 20, color: Colors.grey)
               : null,
+          prefixText: prefix, 
+          prefixStyle: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           filled: true,
           fillColor: Colors.grey[50],

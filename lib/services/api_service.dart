@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart'; // Untuk kIsWeb
 
 class ApiService {
   static const String _laptopIp = '192.168.1.8';
-  static const String _port = '3306';
+  static const String _port = '5000';
 
   static String get getBaseUrl {
     if (kIsWeb) {

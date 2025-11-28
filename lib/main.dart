@@ -15,7 +15,6 @@ import 'login_page.dart';
 import 'SignUpPage.dart';
 import 'pages/murid/home_page.dart';
 import 'pages/model/user_model.dart';
-import 'pages/cadangan/guru_provider.dart';
 import 'pages/model/ulasan_provider.dart';
 import 'pages/model/jadwal_provider.dart'; // <-- Pastikan path ini benar
 
@@ -37,7 +36,6 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => GuruProvider()),
         ChangeNotifierProvider(create: (_) => UlasanProvider()),
         ChangeNotifierProvider(create: (_) => JadwalProvider()), // <-- Jika ini masih error, masalahnya ada di path import di atas
       ],

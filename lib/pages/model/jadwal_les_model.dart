@@ -7,6 +7,8 @@ class JadwalLesModel {
   final String jamSelesai;
   final String namaGuru;
   final String namaMapel;
+  final String kota;
+  final String level;
 
   JadwalLesModel({
     required this.jadwalId,
@@ -15,6 +17,8 @@ class JadwalLesModel {
     required this.jamSelesai,
     required this.namaGuru,
     required this.namaMapel,
+    required this.kota,
+    required this.level,
   });
 
   factory JadwalLesModel.fromJson(Map<String, dynamic> json) {
@@ -25,6 +29,8 @@ class JadwalLesModel {
       jamSelesai: json['jam_selesai'],
       namaGuru: json['nama_guru'],
       namaMapel: json['nama_mapel'],
+      kota: json['kota'] ?? '', 
+      level: json['level'] ?? 'Semua',
     );
   }
 }

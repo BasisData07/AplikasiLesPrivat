@@ -1,7 +1,7 @@
+/*import 'package:PRIVATE_AJA/pages/model/jadwal_les_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../model/guru_model.dart';
-import '../cadangan/guru_provider.dart';
 import '../../login_page.dart';
 import '../admin/edit_guru_page.dart';
 import '../admin/admin_ulasan_page.dart';
@@ -125,7 +125,7 @@ class AdminPage extends StatelessWidget {
                   : TextButton(
                       child: const Text("Setujui"),
                       onPressed: () {
-                        context.read<GuruProvider>().approveGuru(guru);
+                        context.read<JadwalLesModel>().approveGuru(guru);
                       },
                     ),
             ),
@@ -159,3 +159,4 @@ class AdminPage extends StatelessWidget {
     );
   }
 }
+*/

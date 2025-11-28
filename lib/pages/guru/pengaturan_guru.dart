@@ -301,7 +301,6 @@ class _GuruPengaturanPageState extends State<GuruPengaturanPage> {
                       return;
                     }
                     await _deleteAccount(password);
-                    if (context.mounted) Navigator.pop(context);
                   },
                   child: const Text("Hapus Akun", style: TextStyle(color: Colors.white)),
                 ),
@@ -313,16 +312,9 @@ class _GuruPengaturanPageState extends State<GuruPengaturanPage> {
     );
   }
 
-  // Di dalam file pengaturan_guru.dart
-
   Future<void> _deleteAccount(String password) async {
-      // Simpan konteks halaman Pengaturan
       final pageContext = context; 
-      
-      // Konteks Khusus untuk Loading Dialog
       late BuildContext loadingDialogContext; 
-
-      // --- 1. TAMPILKAN LOADING DIALOG ---
       showDialog(
         context: pageContext,
         barrierDismissible: false,
@@ -344,36 +336,49 @@ class _GuruPengaturanPageState extends State<GuruPengaturanPage> {
 
         // Di dalam _deleteAccount:
 
-        if (result['success'] == true) {
-            if (pageContext.mounted) {
-                
-                // 1. Tampilkan notifikasi terlebih dahulu
-                ScaffoldMessenger.of(pageContext).showSnackBar(
-                    const SnackBar(content: Text("Akun berhasil dihapus"), backgroundColor: Colors.green),
-                );
-                
-                // 2. Tunda Navigasi sebentar untuk membiarkan SnackBar ditampilkan
-                await Future.delayed(const Duration(milliseconds: 500)); 
+        // Di dalam fungsi _deleteAccount
 
-                // 3. LAKUKAN NAVIGASI AMAN KE LOGIN PAGE
-                Navigator.of(pageContext).pushAndRemoveUntil(
-                    // Menggunakan MaterialPageRoute untuk memastikan route ditutup
-                    MaterialPageRoute(builder: (context) => const LoginPage()), 
-                    (route) => false,
-                );
-            }
+        if (result['success'] == true) {
+          if (context.mounted) {
+            // 1. Tampilkan Notifikasi
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Akun berhasil dihapus"), backgroundColor: Colors.green),
+            );
+
+            // 2. Tunggu sebentar
+            await Future.delayed(const Duration(milliseconds: 500));
+
+            // ========================================================
+            // 3. (WAJIB) HAPUS DATA LOGIN DARI MEMORI HP
+            // ========================================================
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.clear(); // <--- INI KUNCINYA! Hapus semua data tersimpan
+            
+            // Jika pakai Provider, bersihkan juga (Opsional tapi bagus)
+            // context.read<UserProvider>().logout(); 
+            // ========================================================
+
+            if (!context.mounted) return;
+
+            // 4. Barulah Pindah ke Login
+            Navigator.pushNamedAndRemoveUntil(
+              context, 
+              '/login', 
+              (route) => false
+            );
+          }
         } else {
           // Tampilkan error jika gagal
-          if (pageContext.mounted) {
-              ScaffoldMessenger.of(pageContext).showSnackBar(
+          if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text(result['message'] ?? "Gagal menghapus akun"), backgroundColor: Colors.red),
               );
           }
         }
       } catch (e) {
-        if (loadingDialogContext.mounted) Navigator.pop(loadingDialogContext); // Tutup loading jika error
+        //if (loadingDialogContext.mounted) Navigator.pop(loadingDialogContext); // Tutup loading jika error
         
-        if (pageContext.mounted) {
+        if (context.mounted) {
           ScaffoldMessenger.of(pageContext).showSnackBar(
             SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
           );

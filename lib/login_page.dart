@@ -100,7 +100,8 @@ class _LoginPageState extends State<LoginPage> {
     } else if (user.role == 'admin') {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const AdminPage()),
+        //MaterialPageRoute(builder: (context) => const AdminPage()),
+        MaterialPageRoute(builder: (context) => const LoginPage()),
       );
     } else {
       Navigator.pushReplacement(

@@ -8,7 +8,9 @@ class UserModel {
   final String? password;
   final String? role;
   final String? subject;
-  String? foto_profil_guru;
+  
+  // Hapus final agar bisa di-update langsung saat upload foto (sesuai kodingan profilmu)
+  String? foto_profil_guru; 
 
   UserModel({
     required this.id,
@@ -23,13 +25,18 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
+      // 1. LOGIKA ID PINTAR: Cek segala kemungkinan nama ID dari backend
+      id: json['id'] ?? json['user_id'] ?? json['guru_id'] ?? json['murid_id'] ?? 0,
+      
+      name: json['name'] ?? json['nama_lengkap'] ?? json['username'] ?? '',
       username: json['username'] ?? '',
       email: json['email'] ?? '',
       role: json['role'],
       subject: json['subject'],
-      foto_profil_guru: json['foto_profil_guru'],
+      
+      // 2. LOGIKA FOTO PINTAR: Cek 'foto_profil_guru' ATAU 'foto_profile_url'
+      // Karena endpoint detail profil mengembalikan 'foto_profile_url', sedangkan login 'foto_profil_guru'
+      foto_profil_guru: json['foto_profil_guru'] ?? json['foto_profile_url'],
     );
   }
 

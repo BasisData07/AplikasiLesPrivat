@@ -29,9 +29,9 @@ const __dirname = path.dirname(__filename);
 app.use(cors());         // Izinkan akses antar domain (frontend ↔ backend)
 app.use(express.json()); // Agar body JSON bisa dibaca
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static('public/uploads')); // Untuk mengakses file gambar secara publik
+//app.use('/uploads', express.static('public/uploads')); // Untuk mengakses file gambar secara publik
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
-app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
+//app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 app.use((req, res, next) => {
   console.log(`🔥 [${new Date().toLocaleTimeString()}] Request Masuk: ${req.method} ${req.url}`);
   next();

@@ -137,6 +137,9 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
       );
 
       if (result['success'] == true) {
+        setState(() {
+          widget.user.foto_profil_guru = result['url'];
+        });
         // Update state lokal dan panggil fetch data lagi
         await _fetchGuruDetail();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -177,6 +180,9 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
     final String displayPosisi = data?['posisi'] ?? "Belum diatur";
     final String displayJenjangString = data?['list_jenjang'] ?? "";
     final String displayMapelString = data?['list_mapel'] ?? "";
+    //final int displayNoTelpon = data?['no_telpon'] ?? "";
+    // Paksa ubah ke String dulu, lalu coba parsing ke Int. Jika gagal, pakai 0.
+    final int displayNoTelpon = int.tryParse(data?['no_telpon']?.toString() ?? '0') ?? 0;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -212,6 +218,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
                       subTextColor!,
                       displayInstansi,
                       displayPosisi,
+                      displayNoTelpon,
                     ),
                     const SizedBox(height: 20),
 
@@ -299,6 +306,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
     Color subTextColor,
     String instansi,
     String posisi,
+    int no_telpon,
   ) {
     return Container(
       decoration: BoxDecoration(
@@ -319,6 +327,14 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
             Icons.work_outline,
             "Posisi/Jurusan",
             posisi,
+            subTextColor,
+            textColor,
+          ),
+          const Divider(height: 1),
+          _buildInfoRow(
+            Icons.phone_outlined,
+            "No. Telpon ",
+            "+$no_telpon",
             subTextColor,
             textColor,
           ),
@@ -374,7 +390,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
                   ? NetworkImage(
                       widget.user.foto_profil_guru!.startsWith('http')
                           ? widget.user.foto_profil_guru!
-                          : "${ApiService.baseImgUrl}/uploads/${widget.user.foto_profil_guru!}",
+                          : "${ApiService.baseImgUrl}${widget.user.foto_profil_guru!}",
                     )
                   : null,
               child: !hasImage
@@ -418,7 +434,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
             ),
             // Tombol Edit Info Profil
             IconButton(
-              icon: const Icon(Icons.edit_note, color: Colors.blue),
+              icon: const Icon(Icons.edit_note, color: Colors.black),
               onPressed:
                   _goToEditProfile, // Memanggil fungsi navigasi yang mendukung refresh
             ),

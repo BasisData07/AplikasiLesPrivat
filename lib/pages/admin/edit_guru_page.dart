@@ -1,9 +1,6 @@
-// lib/pages/edit_guru_page.dart
-
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../model/guru_model.dart';
-import '../cadangan/guru_provider.dart';
 
 class EditGuruPage extends StatefulWidget {
   final Guru guru;
@@ -278,4 +275,4 @@ class _EditGuruPageState extends State<EditGuruPage> {
 
     Navigator.of(context).pop();
   }
-}
+}*/

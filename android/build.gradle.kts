@@ -1,10 +1,19 @@
+import org.gradle.api.tasks.Delete
+
 buildscript {
-    ext.kotlin_version = '1.7.10' // Sesuaikan versi Kotlin
-    dependencies {
-        // 🔥 PASTIKAN BARIS INI ADA DI buildscript > dependencies
-        classpath 'com.google.gms:google-services:4.4.0' // Versi terbaru, periksa Firebase docs jika ada versi baru
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    repositories {
+        google()
+        mavenCentral()
     }
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.1.0")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0")
+        classpath("com.google.gms:google-services:4.4.1")
+    }
+}
+
+tasks.register("clean", Delete::class) {
+    delete(rootProject.buildDir)
 }
 
 allprojects {

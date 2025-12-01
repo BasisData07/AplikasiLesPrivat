@@ -35,7 +35,7 @@ class _ProfilPageState extends State<ProfilPage> {
   final TextEditingController _feedbackController = TextEditingController();
 
   // Palet warna tema hijau mint
-  static const Color mintHighlight = Color(0xFF3CB371);
+  static const Color mintHighlight = Colors.orange;
   static const Color lightMintBackground = Color(0xFFF5FFFA);
 
   @override

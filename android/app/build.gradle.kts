@@ -5,6 +5,7 @@ import java.io.FileInputStream
 plugins {
     id("com.android.application")
     id("kotlin-android")
+    id("com.google.gms.google-services")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -72,11 +73,9 @@ flutter {
 
 dependencies {
     implementation("com.google.android.material:material:1.13.0")
-    implementation(platform('com.google.firebase:firebase-bom:32.7.0'))
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     // Tambahkan library yang Anda pakai
-    implementation 'com.google.firebase:firebase-analytics-ktx'
-    implementation 'com.google.firebase:firebase-firestore-ktx' // Untuk Fires
+    implementation ("com.google.firebase:firebase-analytics-ktx")
+    implementation ("com.google.firebase:firebase-firestore-ktx") // Untuk Fires
     // Tambahkan dependensi lain jika perlu
 }
-
-apply plugin: 'com.google.gms.google-services'

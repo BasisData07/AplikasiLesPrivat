@@ -158,13 +158,6 @@ class _LoginPageState extends State<LoginPage> {
               )
             : Stack(
                 children: [
-                  Positioned.fill(
-                    child: Opacity(
-                      // Menggunakan Opacity untuk visibilitas konten yang lebih baik
-                      opacity: 0.2,
-                      child: Image.asset('assets/nu.png', fit: BoxFit.cover),
-                    ),
-                  ),
                   // 2. Konten Utama
                   Container(
                     padding: const EdgeInsets.all(32.0),
@@ -278,6 +271,14 @@ class __FormContentState extends State<_FormContent> {
           ? BoxDecoration(
               color: Colors.white.withOpacity(0.95), // Warna background form
               borderRadius: BorderRadius.circular(8),
+              image: DecorationImage(
+                image: const AssetImage('assets/nu.png'),
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  Colors.white.withOpacity(0.5),
+                  BlendMode.dstATop,
+                ),
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.1),

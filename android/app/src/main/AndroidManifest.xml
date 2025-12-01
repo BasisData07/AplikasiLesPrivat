@@ -3,7 +3,7 @@
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="aplikasi_private_aja"
+        android:label="Private Aja"
         android:name="${applicationName}"
         android:icon="@mipmap/panda"
         android:usesCleartextTraffic="true">

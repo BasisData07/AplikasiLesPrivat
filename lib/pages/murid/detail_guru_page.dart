@@ -32,7 +32,7 @@ class DetailGuruPage extends StatefulWidget {
 }
 
 class _DetailGuruPageState extends State<DetailGuruPage> {
-    static const Color mintHighlight = Color(0xFF3CB371);
+    static const Color mintHighlight = Colors.orange;
     static const Color lightMintBackground = Color(0xFFF5FFFA);
 
     bool _isLoading = true;
@@ -270,7 +270,7 @@ class _DetailGuruPageState extends State<DetailGuruPage> {
                 iconTheme: IconThemeData(color: widget.isDarkMode ? Colors.white : Colors.black87),
             ),
             body: _isLoading
-                ? const Center(child: CircularProgressIndicator(color: mintHighlight))
+                ? const Center(child: CircularProgressIndicator(color: Colors.orange))
                 : SingleChildScrollView(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Column(

@@ -22,7 +22,7 @@ class _ChatListPageState extends State<ChatListPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Pesan Masuk"),
-        backgroundColor: const Color(0xFF3CB371), // Warna mint
+        backgroundColor: Colors.orange, // Warna mint
         foregroundColor: Colors.white,
         automaticallyImplyLeading: false, 
       ),

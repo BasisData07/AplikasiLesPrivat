@@ -24,7 +24,7 @@ class GuruBerandaPage extends StatefulWidget {
 }
 
 class _GuruBerandaPageState extends State<GuruBerandaPage> {
-    static const Color mintHighlight = Color(0xFF3CB371);
+    static const Color mintHighlight = Colors.orange;
     
     // 🔥 STATE BARU UNTUK ULASAN
     List<UlasanModel> _ulasanList = []; 
@@ -296,7 +296,7 @@ class _GuruBerandaPageState extends State<GuruBerandaPage> {
                             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                             elevation: 1,
                             child: ListTile(
-                                leading: const Icon(Icons.comment, color: mintHighlight),
+                                leading: const Icon(Icons.comment, color: Colors.orange),
                                 title: Text(ulasan.komentarMurid, maxLines: 1, overflow: TextOverflow.ellipsis),
                                 subtitle: Text("Dari ${ulasan.namaMurid} (${ulasan.rating}⭐)"),
                                 trailing: ElevatedButton(
@@ -318,7 +318,7 @@ class _GuruBerandaPageState extends State<GuruBerandaPage> {
         return Scaffold(
             appBar: AppBar(
                 title: const Text("Jadwal Mengajar Anda"),
-                backgroundColor: mintHighlight,
+                backgroundColor: Colors.orange,
                 foregroundColor: Colors.white,
             ),
             body: SingleChildScrollView(
@@ -420,7 +420,7 @@ class _GuruBerandaPageState extends State<GuruBerandaPage> {
                                                         IconButton(
                                                             icon: Icon(
                                                                 isBooked ? Icons.check_box : Icons.check_box_outline_blank,
-                                                                color: isBooked ? mintHighlight : Colors.grey[600],
+                                                                color: isBooked ? Colors.orange : Colors.grey[600],
                                                             ),
                                                             onPressed: () => _toggleStatus(jadwalId, isBooked),
                                                             tooltip: isBooked ? 'Batalkan Pesanan' : 'Tandai Dipesan',
@@ -524,3 +524,4 @@ Widget _buildChatInbox(BuildContext context, GuruBerandaPage widget) { // Ubah '
         ],
     );
 }
+

@@ -33,7 +33,7 @@ class _GuruPengaturanPageState extends State<GuruPengaturanPage> {
   final TextEditingController _feedbackController = TextEditingController();
 
   // Warna Tema
-  static const Color mintHighlight = Color(0xFF3CB371);
+  static const Color mintHighlight = Colors.orange;
 
   @override
   void initState() {
@@ -413,14 +413,14 @@ class _GuruPengaturanPageState extends State<GuruPengaturanPage> {
              child: Column(
                children: [
                  ListTile(
-                   leading: const Icon(Icons.person, color: mintHighlight),
+                   leading: const Icon(Icons.person, color: Colors.orange),
                    title: const Text("Username"),
                    subtitle: Text(widget.user.username),
                    dense: true,
                  ),
                  const Divider(height: 1),
                  ListTile(
-                   leading: const Icon(Icons.email, color: mintHighlight),
+                   leading: const Icon(Icons.email, color: Colors.orange),
                    title: const Text("Email"),
                    subtitle: Text(widget.user.email),
                    dense: true,
@@ -460,7 +460,7 @@ class _GuruPengaturanPageState extends State<GuruPengaturanPage> {
              child: Column(
                children: _deviceData.entries.map((entry) {
                  return ListTile(
-                   leading: Icon(_getDeviceIcon(entry.key), color: mintHighlight),
+                   leading: Icon(_getDeviceIcon(entry.key), color: Colors.orange),
                    title: Text(entry.key, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                    subtitle: Text("${entry.value}", style: const TextStyle(fontSize: 12)),
                    dense: true,
@@ -501,7 +501,7 @@ class _GuruPengaturanPageState extends State<GuruPengaturanPage> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         onTap: onTap,
-        leading: Icon(icon, color: mintHighlight),
+        leading: Icon(icon, color: Colors.orange),
         title: Text(title, style: TextStyle(color: text)),
         trailing: Icon(Icons.chevron_right, color: text.withOpacity(0.5)),
       ),

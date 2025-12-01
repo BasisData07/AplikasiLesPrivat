@@ -17,21 +17,39 @@ const SERVICE_ACCOUNT_FILE = path.join(__dirname, 'aplikasiprivateaja-16651-fire
 // INISIALISASI FIREBASE ADMIN SDK (SAFE MODE)
 // -------------------------------------------------------------
 async function initializeFirebaseAdmin() {
-    // Cek apakah sudah terinisialisasi sebelumnya (Mencegah error saat restart)
     if (admin.apps.length > 0) {
-        console.log('✅ Firebase Admin SDK already initialized.');
-        return;
+        return; // Sudah init, skip.
     }
 
     try {
-        const serviceAccountJson = JSON.parse(fs.readFileSync(SERVICE_ACCOUNT_FILE, 'utf-8'));
+        let serviceAccount;
+
+        // CEK 1: Apakah kita sedang di Railway (Production)?
+        if (process.env.FIREBASE_CREDENTIALS_BASE64) {
+            console.log('🌍 Mendeteksi Environment Railway (Base64 Mode)...');
+            // Decode Base64 kembali menjadi JSON String
+            const buffer = Buffer.from(process.env.FIREBASE_CREDENTIALS_BASE64, 'base64');
+            const jsonString = buffer.toString('utf-8');
+            serviceAccount = JSON.parse(jsonString);
+        } 
+        // CEK 2: Jika tidak, berarti di Laptop (Local)
+        else {
+            console.log('💻 Mendeteksi Environment Lokal (File Mode)...');
+            if (fs.existsSync(SERVICE_ACCOUNT_FILE)) {
+                serviceAccount = JSON.parse(fs.readFileSync(SERVICE_ACCOUNT_FILE, 'utf-8'));
+            } else {
+                throw new Error("File JSON tidak ditemukan & Variable Base64 kosong.");
+            }
+        }
         
+        // Inisialisasi
         admin.initializeApp({
-            credential: admin.credential.cert(serviceAccountJson),
+            credential: admin.credential.cert(serviceAccount),
         });
         console.log('✅ Firebase Admin SDK Initialized Successfully.');
+
     } catch (error) {
-        console.error('❌ FATAL: Failed to initialize Firebase Admin SDK.', error);
+        console.error('❌ FATAL: Gagal init Firebase.', error.message);
         process.exit(1); 
     }
 }

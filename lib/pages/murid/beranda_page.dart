@@ -31,6 +31,8 @@ class _BerandaPageState extends State<BerandaPage> {
   static const Color mintHighlight = Colors.orange;
   static const Color lightMintBackground = Color(0xFFF5FFFA);
   static const Color lightMintAccent = Colors.orangeAccent;
+  
+  bool get _isDarkMode => false;
 
   @override
   void initState() {
@@ -366,16 +368,27 @@ class _BerandaPageState extends State<BerandaPage> {
     final searchResults = getSearchResults(filteredGurus);
 
     final textColor = widget.isDarkMode ? Colors.white : Colors.black;
+    const mintGreen = Colors.orangeAccent;
+    const darkerMintGreen = Colors.orange;
+    final gradientColors = _isDarkMode
+        ? [Colors.grey[800]!, Colors.black]
+        : [mintGreen, darkerMintGreen];
 
     return Scaffold(
       backgroundColor: widget.isDarkMode
           ? Colors.grey[900]
           : lightMintBackground,
+          
+      appBar: AppBar(
+          title: const Text("Dashboard Murid"),
+          backgroundColor: Colors.orange,
+          foregroundColor: Colors.white,
+      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             // SEARCH BAR
             TextField(
               style: TextStyle(color: textColor),

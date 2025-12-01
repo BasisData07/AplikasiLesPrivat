@@ -24,7 +24,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
   final ImagePicker _picker = ImagePicker();
   bool _isUploading = false;
 
-  static const Color mintHighlight = Color(0xFF3CB371);
+  static const Color mintHighlight = Colors.orange;
   static const Color lightMintBackground = Color(0xFFF5FFFA);
 
   @override
@@ -83,7 +83,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
           const SnackBar(
             content: Text("Profil berhasil diperbarui."),
             duration: Duration(seconds: 1),
-            backgroundColor: mintHighlight,
+            backgroundColor: Colors.orange,
           ),
         );
       }
@@ -195,7 +195,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
         onRefresh: _fetchGuruDetail,
         child: _isLoadingDetail
             ? const Center(
-                child: CircularProgressIndicator(color: mintHighlight),
+                child: CircularProgressIndicator(color: Colors.orange),
               )
             : ListView(
                 padding: const EdgeInsets.all(16),
@@ -233,7 +233,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
                     const SizedBox(height: 8),
                     _buildChips(
                       displayJenjangString,
-                      mintHighlight.withOpacity(0.1),
+                      Colors.orange.withOpacity(0.1),
                       textColor,
                     ),
                     const SizedBox(height: 20),
@@ -243,7 +243,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
                     const SizedBox(height: 8),
                     _buildChips(
                       displayMapelString,
-                      mintHighlight,
+                      Colors.orange,
                       Colors.white,
                     ),
                     const SizedBox(height: 30),
@@ -399,14 +399,14 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
             ),
             if (_isUploading)
               const Positioned.fill(
-                child: CircularProgressIndicator(color: mintHighlight),
+                child: CircularProgressIndicator(color: Colors.orange),
               ),
             Positioned(
               bottom: 0,
               right: 0,
               child: Container(
                 decoration: BoxDecoration(
-                  color: mintHighlight,
+                  color: Colors.orange,
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 2),
                 ),
@@ -482,7 +482,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: mintHighlight,
+            color: Colors.orange,
           ),
         ),
         Text(

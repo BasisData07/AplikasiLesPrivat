@@ -115,7 +115,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     final alignment = isCurrentUser ? Alignment.centerRight : Alignment.centerLeft;
     
     // Warna tema aplikasi (mintHighlight)
-    const sentColor = Color(0xFF3CB371);
+    const sentColor = Colors.orange;
     final receivedColor = Colors.grey.shade300;
     final textColor = isCurrentUser ? Colors.white : Colors.black87;
 
@@ -260,7 +260,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.peerName),
-        backgroundColor: const Color(0xFF3CB371),
+        backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
       ),
       body: Stack(

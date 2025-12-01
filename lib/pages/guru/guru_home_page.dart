@@ -21,7 +21,7 @@ class GuruHomePage extends StatefulWidget {
 
 class _GuruHomePageState extends State<GuruHomePage> {
   int _selectedIndex = 0;
-  static const Color mintHighlight = Color(0xFF3CB371);
+  static const Color mintHighlight = Colors.orange;
 
   late final List<Widget> _guruPages;
 
@@ -553,7 +553,7 @@ class _GuruHomePageState extends State<GuruHomePage> {
       floatingActionButton: _selectedIndex == 0
           ? FloatingActionButton(
               onPressed: () => _showTambahJadwalDialog(context),
-              backgroundColor: mintHighlight,
+              backgroundColor: Colors.orange,
               tooltip: 'Tambah Jadwal',
               child: const Icon(Icons.add, color: Colors.white),
             )
@@ -575,7 +575,7 @@ class _GuruHomePageState extends State<GuruHomePage> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: mintHighlight,
+        selectedItemColor: Colors.orange,
         unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed,

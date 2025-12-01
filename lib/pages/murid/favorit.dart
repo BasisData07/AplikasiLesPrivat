@@ -21,7 +21,7 @@ class FavoritPage extends StatefulWidget {
 
 class _FavoritPageState extends State<FavoritPage> {
   // Palet warna tema hijau mint
-  static const Color mintHighlight = Color(0xFF3CB371);
+  static const Color mintHighlight = Colors.orange;
   static const Color lightMintBackground = Color(0xFFF5FFFA);
 
   ImageProvider getImage(String path) {
@@ -39,12 +39,12 @@ class _FavoritPageState extends State<FavoritPage> {
     // WARNA DIUBAH DI SINI
     final bgColor = widget.isDarkMode ? Colors.grey[900] : lightMintBackground;
     final cardColor = widget.isDarkMode ? Colors.grey[850] : Colors.white;
-    final borderColor = widget.isDarkMode ? mintHighlight : Colors.transparent;
+    final borderColor = widget.isDarkMode ? Colors.orange : Colors.transparent;
     final textColor = widget.isDarkMode ? Colors.white : Colors.black87;
     final subTextColor = widget.isDarkMode ? Colors.white70 : Colors.grey[700];
 
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: borderColor,
       appBar: AppBar(
         title: Text("Guru Favorit", style: TextStyle(color: textColor)),
         backgroundColor: bgColor,

@@ -1,3 +1,4 @@
+import 'package:PRIVATE_AJA/pages/murid/hubungi_guru.dart';
 import 'package:flutter/material.dart';
 import '../model/user_model.dart';
 import '../model/guru_model.dart';
@@ -61,11 +62,16 @@ class _MyHomePageState extends State<MyHomePage> {
           favoriteTeachers: _favoriteTeachers,
         ),
         //Tab 2: Chat Room
-        ChatRoomPage(
+        /*ChatRoomPage(
           currentUserId: widget.user.id.toString(),
           peerId: '0', // ID default, nanti dipilih di ChatListPage
           peerName: 'Chat Room',
+        ),*/
+        
+        const ChatPage(
+        
         ),
+        
         // Tab 3: Profil
         ProfilPage(
           user: widget.user, 
@@ -127,7 +133,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Column(
         children: [
           // Header sambutan di bawah AppBar
-          Container(
+          /*Container(
             width: double.infinity,
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
@@ -147,7 +153,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
           ),
-          // Body utama yang akan berganti sesuai tab yang dipilih
+          // Body utama yang akan berganti sesuai tab yang dipilih*/
           Expanded(child: _pages[_selectedIndex]),
         ],
       ),
@@ -173,7 +179,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.rate_review),
-            label: "testimoni"
+            label: "Room"
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person), 

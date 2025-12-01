@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 // Untuk kIsWeb
 
 class ApiService {
-  static const String _laptopIp = '192.168.1.8';
+  /*static const String _laptopIp = '192.168.1.8';
   static const String _port = '5000';
 
   static String get getBaseUrl {
@@ -25,14 +25,14 @@ class ApiService {
       print('Info: Bukan platform mobile native');
     }
     return 'http://$_laptopIp:$_port/api';
-  }
+  }*/
   
-  /*static const String _railwayUrl = 'https://aplikasi-private-aja.up.railway.app'; 
+  static const String _railwayUrl = 'https://aplikasi-private-aja.up.railway.app'; 
 
   static String get getBaseUrl {
     // Hasilnya akan menjadi: https://...app/api
     return '$_railwayUrl/api';
-  }*/
+  }
 
   static String get baseImgUrl {
     return getBaseUrl.replaceAll('/api', '/uploads/');

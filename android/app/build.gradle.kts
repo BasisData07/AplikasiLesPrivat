@@ -1,3 +1,7 @@
+import java.util.Properties
+import java.io.FileInputStream
+
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -5,6 +9,7 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Memuat keystore.properties
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
@@ -12,7 +17,8 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.example.flutter_application_2"
+    // Pastikan namespace ini sesuai dengan package name di AndroidManifest.xml
+    namespace = "com.belajar.privateaja"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -22,14 +28,13 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = "11"
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.flutter_application_2"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        // GANTI applicationId ini dengan ID aplikasi Anda yang sebenarnya
+        applicationId = "com.belajar.privateaja"
+        
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -38,25 +43,40 @@ android {
 
     signingConfigs {
         create("release") {
-            keyAlias = keystoreProperties["keyAlias"] as String
-            keyPassword = keystoreProperties["keyPassword"] as String
+            // Menggunakan safe cast (as String?) untuk menghindari crash jika key.properties kosong
+            keyAlias = keystoreProperties["keyAlias"] as String?
+            keyPassword = keystoreProperties["keyPassword"] as String?
             storeFile = keystoreProperties["storeFile"]?.let { file(it) }
-            storePassword = keystoreProperties["storePassword"] as String
+            storePassword = keystoreProperties["storePassword"] as String?
         }
     }
+
     buildTypes {
-        release {
-            signingConfig = signingConfigs.getByName("debug")
+        getByName("release") {
+            // Gunakan konfigurasi release, bukan debug
             signingConfig = signingConfigs.getByName("release")
+            
+            // Opsional: Aktifkan ini untuk mengecilkan ukuran APK (Proguard/R8)
+            isMinifyEnabled = true 
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
         }
+    }
 }
 
 flutter {
     source = "../.."
 }
 
+//apply plugin: 'com.google.gms.google-services'
+
 dependencies {
-    // ...
     implementation("com.google.android.material:material:1.13.0")
-    // ...
+    implementation(platform('com.google.firebase:firebase-bom:32.7.0'))
+    // Tambahkan library yang Anda pakai
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-firestore-ktx' // Untuk Fires
+    // Tambahkan dependensi lain jika perlu
 }
+
+apply plugin: 'com.google.gms.google-services'

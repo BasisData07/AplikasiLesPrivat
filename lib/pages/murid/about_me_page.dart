@@ -19,7 +19,7 @@ class AboutMePage extends StatelessWidget {
   Widget build(BuildContext context) {
     // --- PALET WARNA HIJAU MINT ---
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final highlightColor = const Color.fromARGB(255, 255, 152, 0); // Hijau mint tua sebagai aksen utama
+    const highlightColor = Color.fromARGB(255, 255, 152, 0); // Hijau mint tua sebagai aksen utama
     final bgColor = isDarkMode
         ? Colors.grey[900]!
         : const Color(

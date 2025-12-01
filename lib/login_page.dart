@@ -9,7 +9,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'pages/model/user_model.dart';
 import 'pages/murid/home_page.dart';
 import 'SignUpPage.dart';
-import 'pages/admin/admin_page.dart';
 import 'pages/guru/guru_home_page.dart';
 
 class LoginPage extends StatefulWidget {

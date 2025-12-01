@@ -210,14 +210,15 @@ class _ProfilPageState extends State<ProfilPage> {
                 Navigator.of(context).pop();
               },
             ),
-            TextButton(
+            /*TextButton(
               child: const Text("Kirim"),
               onPressed: () {
                 final ulasanBaru = UlasanModel(
-                  userName: widget.user.name,
+                  namaMurid: widget.user.name,
                   rating: _rating,
-                  feedback: _feedbackController.text,
-                  timestamp: DateTime.now(),
+                  komentarMurid: _feedbackController.text,
+                  createdAt: DateTime.now(), 
+                  ulasanId: null,
                 );
                 context.read<UlasanProvider>().tambahUlasan(ulasanBaru);
                 Navigator.of(context).pop();
@@ -232,7 +233,7 @@ class _ProfilPageState extends State<ProfilPage> {
                   _rating = 3.0;
                 });
               },
-            ),
+            ),*/
           ],
         );
       },
@@ -278,8 +279,8 @@ class _ProfilPageState extends State<ProfilPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Hapus Akun?"),
-          content: Text(
+          title: const Text("Hapus Akun?"),
+          content: const Text(
             "Tindakan ini akan menghapus akun dan semua data Anda secara permanen. "
             "Anda tidak dapat mengembalikan akun setelah dihapus. "
             "Apakah Anda yakin ingin melanjutkan?",
@@ -287,14 +288,14 @@ class _ProfilPageState extends State<ProfilPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text("Batal", style: TextStyle(color: Colors.grey)),
+              child: const Text("Batal", style: TextStyle(color: Colors.grey)),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
                 _showPasswordVerificationDialog();
               },
-              child: Text("Lanjutkan", style: TextStyle(color: Colors.red)),
+              child: const Text("Lanjutkan", style: TextStyle(color: Colors.red)),
             ),
           ],
         );
@@ -313,18 +314,18 @@ class _ProfilPageState extends State<ProfilPage> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text("Verifikasi Password"),
+              title: const Text("Verifikasi Password"),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
+                  const Text(
                     "Masukkan password Anda untuk konfirmasi penghapusan akun:",
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   TextFormField(
                     controller: passwordController,
                     obscureText: true,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Password',
                       border: OutlineInputBorder(),
                     ),
@@ -334,7 +335,7 @@ class _ProfilPageState extends State<ProfilPage> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text("Batal"),
+                  child: const Text("Batal"),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -342,13 +343,13 @@ class _ProfilPageState extends State<ProfilPage> {
                     final password = passwordController.text.trim();
                     if (password.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Password harus diisi")),
+                        const SnackBar(content: Text("Password harus diisi")),
                       );
                       return;
                     }
                     await _deleteAccount(password);
                   },
-                  child: Text(
+                  child: const Text(
                     "Hapus Akun",
                     style: TextStyle(color: Colors.white),
                   ),

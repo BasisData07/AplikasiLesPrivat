@@ -5,14 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // --- IMPORT MODEL & HALAMAN TERKAIT ---
 import 'package:PRIVATE_AJA/services/auth_service.dart';
 import '../model/user_model.dart';
-import '../model/ulasan_model.dart';
-import '../model/ulasan_provider.dart';
 import '../../login_page.dart';
 import '../murid/help_center_page.dart';
 import '../murid/terms_page.dart';
@@ -169,13 +166,13 @@ class _GuruPengaturanPageState extends State<GuruPengaturanPage> {
               child: const Text("Batal"),
               onPressed: () => Navigator.of(context).pop(),
             ),
-            TextButton(
+            /*TextButton(
               child: const Text("Kirim"),
               onPressed: () {
                 final ulasanBaru = UlasanModel(
                   userName: widget.user.name,
                   rating: _rating,
-                  feedback: _feedbackController.text,
+                  komentar: _feedbackController.text,
                   timestamp: DateTime.now(),
                 );
                 context.read<UlasanProvider>().tambahUlasan(ulasanBaru);
@@ -186,7 +183,7 @@ class _GuruPengaturanPageState extends State<GuruPengaturanPage> {
                 _feedbackController.clear();
                 setState(() => _rating = 3.0);
               },
-            ),
+            ),*/
           ],
         );
       },
@@ -398,7 +395,7 @@ class _GuruPengaturanPageState extends State<GuruPengaturanPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Pengaturan"),
+        title: const Text("Pengaturan"),
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
       ),

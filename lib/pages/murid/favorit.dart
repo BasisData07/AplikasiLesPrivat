@@ -98,10 +98,10 @@ class _FavoritPageState extends State<FavoritPage> {
                       leading: CircleAvatar(
                         radius: 28,
                         backgroundColor: Colors.grey[300],
-                        backgroundImage: getImage(guru.photo),
+                        backgroundImage: getImage(guru.foto),
                       ),
                       title: Text(
-                        "${guru.name} (${guru.level})",
+                        "${guru.nama} (${guru.kategori_jenjang})",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: textColor,

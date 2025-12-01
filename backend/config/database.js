@@ -16,6 +16,8 @@ import 'dotenv/config';
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0
 });*/
 
 const db = mysql.createPool({
@@ -26,7 +28,9 @@ const db = mysql.createPool({
   database: process.env.DB_NAME || 'aplikasi_les_mania',
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0
 });
 
 // Cek koneksi saat server nyala (Opsional, biar tenang)

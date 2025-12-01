@@ -60,10 +60,11 @@ class _MyHomePageState extends State<MyHomePage> {
           isDarkMode: _isDarkMode,
           favoriteTeachers: _favoriteTeachers,
         ),
-        // Tab 2: Chat Room
+        //Tab 2: Chat Room
         ChatRoomPage(
-          user: widget.user, // Memberikan info user ke halaman chat
-          isDarkMode: _isDarkMode,
+          currentUserId: widget.user.id.toString(),
+          peerId: '0', // ID default, nanti dipilih di ChatListPage
+          peerName: 'Chat Room',
         ),
         // Tab 3: Profil
         ProfilPage(
@@ -90,8 +91,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     // Definisi warna berdasarkan _isDarkMode
     final bgColor = _isDarkMode ? Colors.grey[900] : Colors.white;
-    final mintGreen = Colors.orangeAccent;
-    final darkerMintGreen = Colors.orange;
+    const mintGreen = Colors.orangeAccent;
+    const darkerMintGreen = Colors.orange;
     final gradientColors = _isDarkMode
         ? [Colors.grey[800]!, Colors.black]
         : [mintGreen, darkerMintGreen];
@@ -171,8 +172,8 @@ class _MyHomePageState extends State<MyHomePage> {
             label: "Favorit"
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline), 
-            label: "Chat Room"
+            icon: Icon(Icons.rate_review),
+            label: "testimoni"
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person), 

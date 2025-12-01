@@ -16,6 +16,8 @@ import jadwalRoutes from './routes/jadwal.js';
 import guruDataRoutes from './routes/guru_data.js';
 import mapelRoutes from './routes/mapel.js'; // ✅ route mapel aktif
 import profileRoutes from './routes/profile.js';
+import ulasanRouter from './routes/ulasan.js';
+import { startFirestoreListener } from './firebase_listener.js';
 
 
 // --- 3. INISIALISASI APLIKASI ---
@@ -29,7 +31,7 @@ const __dirname = path.dirname(__filename);
 app.use(cors());         // Izinkan akses antar domain (frontend ↔ backend)
 app.use(express.json()); // Agar body JSON bisa dibaca
 app.use(express.urlencoded({ extended: true }));
-//app.use('/uploads', express.static('public/uploads')); // Untuk mengakses file gambar secara publik
+app.use('/uploads', express.static('public/uploads')); // Untuk mengakses file gambar secara publik
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 //app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 app.use((req, res, next) => {
@@ -43,6 +45,7 @@ app.use('/api/jadwal', jadwalRoutes);
 app.use('/api/guru-data', guruDataRoutes);
 app.use('/api/mapel', mapelRoutes); // ✅ route mapel sudah aktif
 app.use('/api/profile', profileRoutes); // Daftarkan route profile.js
+app.use('/api/ulasan', ulasanRouter); // Daftarkan route ulasan.js
 
 // --- 6. ROUTE UTAMA (TES SERVER) ---
 /*app.get('/api', (req, res) => {
@@ -73,6 +76,8 @@ app.get('/cek-db', async (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, '0.0.0.0', () => {
+
+  startFirestoreListener();
   console.log(`🚀 Server terbuka untuk SEMUA IP di port ${PORT}`);
   console.log('✅ Rute API yang terdaftar:');
   console.log('   - /api');
@@ -82,5 +87,11 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log('   - /api/mapel/... (mapel.js)');
   console.log('   - /api/upload-profile-picture (profile.js)'); 
   console.log('   - /api/update-profile (profile.js)'); // <-- Rute baru aktif!
+  console.log('   - /api/ulasan/... (ulasan.js)');
+  
+
+
+
+  
 });
 

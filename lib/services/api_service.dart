@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'dart:io'; // Untuk Platform
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart'; // Untuk kIsWeb
+// Untuk kIsWeb
 
 class ApiService {
   static const String _laptopIp = '192.168.1.8';

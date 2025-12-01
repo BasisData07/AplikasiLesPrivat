@@ -41,6 +41,7 @@ backend/node_modules/
 backend/.env
 backend/build/
 backend/dist/
+backend/aplikasiprivateaja-16651-firebase-adminsdk-fbsvc-bc589f7a51.json
 
 # Env files
 .env
@@ -49,3 +50,4 @@ backend/dist/
 # Log & Temp files
 *.log
 *.tmp
+

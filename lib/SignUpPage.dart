@@ -84,12 +84,12 @@ class _SignUpPageState extends State<SignUpPage> {
           SnackBar(
             content: Text(result['message'] ?? "Akun berhasil dibuat!"),
             backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
+            duration: const Duration(seconds: 3),
           ),
         );
         
         // 🔥 TUNGGU SEBENTAR lalu kembali ke login
-        await Future.delayed(Duration(seconds: 2));
+        await Future.delayed(const Duration(seconds: 2));
         
         // Kembali ke login page
         Navigator.pop(context);
@@ -371,7 +371,7 @@ class __FormRegistrasiState extends State<_FormRegistrasi> {
           prefixIcon: Icon(Icons.person_outline),
           border: OutlineInputBorder(),
         ),
-        items: [
+        items: const [
           DropdownMenuItem(
             value: 'murid',
             child: Text('Murid'),
@@ -545,7 +545,7 @@ class __FormRegistrasiState extends State<_FormRegistrasi> {
                 prefixIcon: Icon(Icons.person_outline),
                 border: OutlineInputBorder(),
               ),
-              items: [
+              items: const [
                 DropdownMenuItem(
                   value: 'murid',
                   child: Text('Murid'),

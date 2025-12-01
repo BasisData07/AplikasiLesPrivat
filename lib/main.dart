@@ -1,9 +1,11 @@
 // main.dart
 
-import 'package:PRIVATE_AJA/utils/connection_test.dart';
+import 'package:PRIVATE_AJA/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:timeago/timeago.dart' as timeago;
 //import 'package:webview_flutter/webview_flutter.dart';
 //import 'package:webview_flutter_web/webview_flutter_web.dart';
 
@@ -16,11 +18,16 @@ import 'SignUpPage.dart';
 import 'pages/murid/home_page.dart';
 import 'pages/model/user_model.dart';
 import 'pages/model/ulasan_provider.dart';
-import 'pages/model/jadwal_provider.dart'; // <-- Pastikan path ini benar
+import 'pages/model/jadwal_provider.dart';
+import 'pages/model/guru_provider.dart'; // <-- Pastikan path ini benar
 
 void main() async {
   // Pastikan Flutter siap sebelum menjalankan kode async
   WidgetsFlutterBinding.ensureInitialized();
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+  timeago.setLocaleMessages('id', timeago.IdMessages());
   
   // Test koneksi saat app start
   //await ConnectionTest.testAllConnections();
@@ -37,7 +44,8 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UlasanProvider()),
-        ChangeNotifierProvider(create: (_) => JadwalProvider()), // <-- Jika ini masih error, masalahnya ada di path import di atas
+        ChangeNotifierProvider(create: (_) => JadwalProvider()),
+         ChangeNotifierProvider(create: (_) => GuruProvider()), // <-- Jika ini masih error, masalahnya ada di path import di atas
       ],
       child: const MyApp(),
     ),
@@ -49,7 +57,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Color mintSeedColor = Color(0xFF3CB371);
+    const Color(0xFF3CB371);
 
     return MaterialApp(
       title: 'PRIVATE AJA',

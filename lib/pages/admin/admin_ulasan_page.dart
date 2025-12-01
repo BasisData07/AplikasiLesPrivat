@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../model/ulasan_provider.dart';
@@ -84,14 +84,14 @@ class AdminUlasanPage extends StatelessWidget {
                         ),
                         const Divider(height: 20),
                         Text(
-                          ulasan.feedback.isNotEmpty
-                              ? ulasan.feedback
+                          ulasan.komentar.isNotEmpty
+                              ? ulasan.komentar
                               : "Tidak ada masukan tambahan.",
                           style: TextStyle(
-                            fontStyle: ulasan.feedback.isEmpty
+                            fontStyle: ulasan.komentar.isEmpty
                                 ? FontStyle.italic
                                 : FontStyle.normal,
-                            color: ulasan.feedback.isEmpty
+                            color: ulasan.komentar.isEmpty
                                 ? Colors.grey
                                 : Colors.black87,
                           ),
@@ -105,3 +105,4 @@ class AdminUlasanPage extends StatelessWidget {
     );
   }
 }
+*/

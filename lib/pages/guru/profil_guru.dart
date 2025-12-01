@@ -187,7 +187,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        title: Text("Profil Saya"),
+        title: const Text("Profil Saya"),
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
       ),
@@ -306,7 +306,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
     Color subTextColor,
     String instansi,
     String posisi,
-    int no_telpon,
+    int noTelpon,
   ) {
     return Container(
       decoration: BoxDecoration(
@@ -334,7 +334,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
           _buildInfoRow(
             Icons.phone_outlined,
             "No. Telpon ",
-            "+$no_telpon",
+            "+$noTelpon",
             subTextColor,
             textColor,
           ),
@@ -479,7 +479,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
       children: [
         Text(
           val,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: mintHighlight,

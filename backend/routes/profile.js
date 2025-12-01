@@ -191,7 +191,11 @@ router.get('/detail/:id', async (req, res) => {
         l.nama_kota AS domisili,
         ag.foto_profil_guru AS foto_profile_url,
         ag.username AS nama_lengkap, 
-        (SELECT harga FROM guru_mapel WHERE guru_id = ? LIMIT 1) AS harga_per_jam,
+        COALESCE(AVG(ug.rating), 0) AS rating,
+        COALESCE(
+            (SELECT harga FROM guru_mapel gm_price WHERE gm_price.guru_id = ? LIMIT 1),
+            0
+        ) AS harga_per_jam,
         GROUP_CONCAT(DISTINCT m.nama_mapel SEPARATOR ', ') AS list_mapel,
         GROUP_CONCAT(DISTINCT kj.nama_jenjang SEPARATOR ', ') AS list_jenjang
         FROM akun_guru ag
@@ -200,6 +204,7 @@ router.get('/detail/:id', async (req, res) => {
         LEFT JOIN guru_mapel gm ON ag.guru_id = gm.guru_id
         LEFT JOIN mapel m ON gm.mapel_id = m.mapel_id
         LEFT JOIN kategori_jenjang kj ON gm.kategori_id = kj.kategori_id 
+        LEFT JOIN ulasan_guru ug ON ag.guru_id = ug.guru_id
         WHERE ag.guru_id = ?
         GROUP BY ag.guru_id, pg.deskripsi, pg.tahun_ajar, pg.no_telpon, pg.nama_instansi, pg.posisi, pg.sertifikat, l.nama_kota, ag.foto_profil_guru, ag.username
         `; // Pastikan backtick (`) berada tepat di ujung baris terakhir
@@ -231,6 +236,53 @@ router.get('/detail/:id', async (req, res) => {
         res.status(500).json({ success: false, message: 'Gagal mengambil data', error: error.message });
     }
 });
+
+// ============================================================
+// 🔥 3.5. RUTE BARU: AMBIL SEMUA GURU (GET) - UNTUK BERANDA
+// ============================================================
+router.get('/detail', async (req, res) => {
+    console.log('\n--- GET ALL GURU (DETAIL LIST) ---');
+
+    try {
+        const query = `
+        SELECT 
+        ag.guru_id AS id, 
+        ag.email AS email, 
+        ag.username AS nama_lengkap, 
+        ag.foto_profil_guru, 
+        pg.deskripsi,
+        pg.tahun_ajar AS pengalaman_tahun,
+        pg.no_telpon,
+        l.nama_kota AS domisili,
+        COALESCE(AVG(ug.rating), 0) AS rating, 
+        COALESCE(
+            (SELECT harga FROM guru_mapel gm_price WHERE gm_price.guru_id = ag.guru_id LIMIT 1),
+            0
+        ) AS harga_per_jam,
+        GROUP_CONCAT(DISTINCT m.nama_mapel SEPARATOR ', ') AS list_mapel,
+        GROUP_CONCAT(DISTINCT kj.nama_jenjang SEPARATOR ', ') AS list_jenjang
+        FROM akun_guru ag
+        LEFT JOIN profile_guru pg ON ag.guru_id = pg.guru_id
+        LEFT JOIN lokasi l ON pg.lokasi_id = l.lokasi_id
+        LEFT JOIN guru_mapel gm ON ag.guru_id = gm.guru_id
+        LEFT JOIN mapel m ON gm.mapel_id = m.mapel_id
+        LEFT JOIN kategori_jenjang kj ON gm.kategori_id = kj.kategori_id
+        LEFT JOIN ulasan_guru ug ON ag.guru_id = ug.guru_id
+        
+        GROUP BY ag.guru_id, ag.email, ag.username, ag.foto_profil_guru, pg.deskripsi, pg.tahun_ajar, pg.no_telpon, l.nama_kota
+        ORDER BY ag.guru_id DESC; 
+        `;
+
+        const [results] = await db.execute(query); 
+        
+        res.status(200).json({ success: true, data: results });
+        
+    } catch (error) {
+        console.error("❌ ERROR Get All Guru:", error);
+        res.status(500).json({ success: false, message: 'Kesalahan Server Internal: Gagal mengambil data guru', error: error.message });
+    }
+});
+
 
 // ============================================================
 // 4. RUTE HAPUS PROFIL GURU (DELETE) - TERMASUK HAPUS FILE FISIK

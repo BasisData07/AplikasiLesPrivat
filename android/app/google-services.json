@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "777126559500",
+    "project_id": "aplikasiprivateaja-16651",
+    "storage_bucket": "aplikasiprivateaja-16651.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:777126559500:android:9e755c3eafb52ef998d329",
+        "android_client_info": {
+          "package_name": "com.belajar.privateaja"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQj-4Oev6DgPR5MXSp1vblQ-MXOEOGSiM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

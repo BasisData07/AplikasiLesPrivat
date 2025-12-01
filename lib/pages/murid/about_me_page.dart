@@ -1,309 +1,215 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutMePage extends StatelessWidget {
   const AboutMePage({super.key});
 
-  Future<void> _launchUrl(String url) async {
+  final List<Map<String, String>> _members = const [
+    {
+      'name': 'Qolbun Halim H',
+      'nim': '24111814065',
+      'photo': 'assets/qolbun.jpg', 
+      'github': 'https://github.com/byeone001',
+    },
+    {
+      'name': 'Prima MIftakhul R',
+      'nim': '24111814005',
+      'photo': 'assets/rahma.jpg',
+      'github': 'https://github.com/PrimaRahma',
+    },
+    {
+      'name': 'Pratama Dicky N',
+      'nim': '24111814143',
+      'photo': 'assets/dicky.jpg',
+      'github': 'https://github.com/pratamadky',
+    },
+    {
+      'name': 'Wafiq Ulil Abshor A',
+      'nim': '24111814064',
+      'photo': 'assets/wafiq.jpg',
+      'github': 'https://github.com/wafiqulil2603',
+    },
+    {
+      'name': 'Rayhan Wahyu Satrio W',
+      'nim': '24111814046',
+      'photo': 'assets/bowo.png',
+      'github': 'https://github.com/RayhanWahyu9',
+    },
+  ];
+
+  final String _groupGithub = 'https://github.com/BasisData07/AplikasiLesPrivat';
+  final String _groupLogo = 'assets/panda.png';
+
+  Future<void> _openUrl(BuildContext context, String url) async {
     final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      // webOnlyWindowName is used for web platform to open in a new tab
-      await launchUrl(uri, webOnlyWindowName: '_blank');
-    } else {
-      throw 'Could not launch $url';
+    try {
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gagal membuka tautan')),
+        );
+      }
+    } catch (_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Terjadi kesalahan saat membuka tautan')),
+      );
     }
+  }
+
+  Widget _initialsFallback(String name) {
+    final List<String> parts = name.split(' ');
+    String initials = '';
+    if (parts.isNotEmpty) {
+      initials = parts[0][0].toUpperCase();
+    }
+    if (parts.length > 1) {
+      initials += parts[1][0].toUpperCase();
+    }
+    return Container(
+      alignment: Alignment.center,
+      child: Text(
+        initials,
+        style: const TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: Colors.orange,
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // --- PALET WARNA HIJAU MINT ---
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    const highlightColor = Color.fromARGB(255, 255, 152, 0); // Hijau mint tua sebagai aksen utama
-    final bgColor = isDarkMode
-        ? Colors.grey[900]!
-        : const Color(
-            0xFFF5FFFA,
-          ); // Latar belakang MintCream yang sangat terang
-    final cardColor = isDarkMode
-        ? Colors.grey[850]!
-        : Colors.white; // Kartu putih bersih untuk kontras
-    final textColor = isDarkMode ? Colors.white : Colors.black87;
-    final secondaryTextColor = textColor.withAlpha(178);
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color bg = isDark ? Colors.grey[900]! : const Color(0xFFF5FFFA);
+    final Color card = isDark ? Colors.grey[800]! : Colors.white;
+    final Color accent = Colors.orange;
 
     return Scaffold(
-      backgroundColor: bgColor,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            title: const Text("Tentang Pencipta"),
-            pinned: true,
-            backgroundColor: highlightColor, // Warna AppBar diubah
-            foregroundColor: Colors.white,
-            elevation: 2,
-          ),
-          SliverList(
-            delegate: SliverChildListDelegate([
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+      backgroundColor: bg,
+      appBar: AppBar(
+        title: const Text('Tentang Pencipta'),
+        backgroundColor: accent,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        children: [
+          Center(
+            child: Column(
+              children: [
+                Container(
+                  width: 110,
+                  height: 110,
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade100,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 20, offset: const Offset(0, 8)),
+                    ],
+                  ),
+                  child: ClipOval(
+                    child: Image.asset(
+                      _groupLogo,
+                      width: 110,
+                      height: 110,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Center(child: Icon(Icons.pets, size: 56, color: Colors.orange));
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Kelompok 8',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    const SizedBox(height: 24),
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: highlightColor,
-                          width: 5,
-                        ), // Border diubah
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withAlpha(102),
-                            blurRadius: 15,
-                            spreadRadius: 5,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
+                    const Icon(Icons.link, size: 16, color: Colors.blueGrey),
+                    const SizedBox(width: 6),
+                    TextButton(
+                      onPressed: () => _openUrl(context, _groupGithub),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                      child: const CircleAvatar(
-                        radius: 75,
-                        backgroundImage: AssetImage('assets/rahma.jpg'),
+                      child: Text(
+                        _groupGithub,
+                        style: const TextStyle(
+                          color: Colors.blue,
+                          decoration: TextDecoration.underline,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 24),
-                    Text(
-                      "PRIMA MIFTAKHUL RAHMA",
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        color: textColor,
-                        letterSpacing: 1.5,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Mahasiswi S1 Informatika, Universitas Negeri Surabaya",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: secondaryTextColor,
-                        fontStyle: FontStyle.italic,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 32),
-
-                    _buildInfoCard(
-                      context,
-                      cardColor,
-                      textColor,
-                      highlightColor,
-                      title: "Latar Belakang & Aspirasi",
-                      content:
-                          "Saya adalah mahasiswi S1 Informatika yang bersemangat dalam dunia teknologi dan pengembangan aplikasi. Menempuh pendidikan di Universitas Negeri Surabaya telah membekali saya dengan fundamental yang kuat dalam ilmu komputer. Saya percaya bahwa teknologi memiliki potensi besar untuk membawa perubahan positif, dan saya berdedikasi untuk menciptakan solusi yang inovatif dan relevan.",
-                    ),
-                    const SizedBox(height: 24),
-                    // --- NAMA APLIKASI DIUBAH DI SINI ---
-                    _buildInfoCard(
-                      context,
-                      cardColor,
-                      textColor,
-                      highlightColor,
-                      title: "Tentang Aplikasi PRIVATE AJA",
-                      content:
-                          "Aplikasi PRIVATE AJA lahir dari sebuah visi untuk mempermudah akses pendidikan berkualitas di Indonesia. Tujuan utamanya adalah menjembatani orang tua yang mencari guru privat terbaik untuk anak-anak mereka, dengan guru-guru kompeten yang siap berbagi ilmu. PRIVATE AJA menyediakan platform yang intuitif dan terpercaya, memungkinkan orang tua menemukan guru dengan spesialisasi yang sesuai, melihat profil lengkap, dan mengelola jadwal les dengan mudah. Harapan kami, aplikasi ini dapat berkontribusi dalam meningkatkan kualitas pendidikan dan memberikan pengalaman belajar yang lebih personal serta efektif bagi setiap siswa.",
-                    ),
-                    const SizedBox(height: 24),
-                    _buildInfoCard(
-                      context,
-                      cardColor,
-                      textColor,
-                      highlightColor,
-                      title: "Keahlian & Minat",
-                      content: Wrap(
-                        spacing: 8.0,
-                        runSpacing: 4.0,
-                        alignment: WrapAlignment.center,
-                        children: [
-                          _buildSkillChip("Flutter & Dart", highlightColor),
-                          _buildSkillChip(
-                            "Mobile UI/UX Design",
-                            highlightColor,
-                          ),
-                          _buildSkillChip("Problem Solving", highlightColor),
-                          _buildSkillChip(
-                            "Software Development",
-                            highlightColor,
-                          ),
-                          _buildSkillChip(
-                            "Database Management",
-                            highlightColor,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    _buildInfoCard(
-                      context,
-                      cardColor,
-                      textColor,
-                      highlightColor,
-                      title: "Hubungi Saya",
-                      content: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _buildSocialButton(
-                            icon: Icons.email,
-                            label: "Email",
-                            onTap: () =>
-                                _launchUrl('mailto:primamifta75@gmail.com'),
-                            color: highlightColor,
-                            textColor: textColor,
-                          ),
-                          _buildSocialButton(
-                            icon: FontAwesomeIcons.instagram,
-                            label: "Instagram",
-                            onTap: () => _launchUrl(
-                              'https://www.instagram.com/rhma.taa?igsh=MWU2eTkzb2VqdnRxZw==',
-                            ),
-                            color: highlightColor,
-                            textColor: textColor,
-                          ),
-                          _buildSocialButton(
-                            icon: FontAwesomeIcons.linkedinIn,
-                            label: "LinkedIn",
-                            onTap: () => _launchUrl(
-                              'https://www.linkedin.com/in/prima-rahma-745507318',
-                            ),
-                            color: highlightColor,
-                            textColor: textColor,
-                          ),
-                          _buildSocialButton(
-                            icon: FontAwesomeIcons.github,
-                            label: "GitHub",
-                            onTap: () =>
-                                _launchUrl('https://github.com/PrimaRahma'),
-                            color: highlightColor,
-                            textColor: textColor,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 40),
                   ],
                 ),
-              ),
-            ]),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoCard(
-    BuildContext context,
-    Color cardColor,
-    Color textColor,
-    Color highlightColor, {
-    required String title,
-    required dynamic content,
-  }) {
-    return Card(
-      color: cardColor,
-      elevation: 6,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: highlightColor.withAlpha(102), width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color:
-                    highlightColor, // Judul kartu menggunakan warna highlight
-              ),
-            ),
-            const SizedBox(height: 12),
-            if (content is String)
-              Text(
-                content,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyLarge?.copyWith(height: 1.6, color: textColor),
-                textAlign: TextAlign.justify,
-              )
-            else if (content is Widget)
-              content,
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSkillChip(String label, Color highlightColor) {
-    return Chip(
-      label: Text(
-        label,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      backgroundColor: highlightColor.withAlpha(
-        230,
-      ), // Chip menggunakan warna highlight
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      elevation: 3,
-      shadowColor: Colors.black.withAlpha(51),
-    );
-  }
-
-  Widget _buildSocialButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-    required Color color,
-    required Color textColor,
-  }) {
-    return Column(
-      children: [
-        InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(35),
-          child: Container(
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: color, // Tombol sosial menggunakan warna highlight
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(76),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
+                 const SizedBox(height: 6),
+                 const Text(
+                   'Tim pembuat aplikasi LES PRIVATE — 5 anggota',
+                   textAlign: TextAlign.center,
+                   style: TextStyle(color: Colors.black54),
+                 ),
               ],
             ),
-            child: Icon(icon, color: Colors.white, size: 32),
           ),
-        ),
-        const SizedBox(height: 10),
-        Text(
-          label,
-          style: TextStyle(
-            color: textColor,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
+          const SizedBox(height: 18),
+
+          ..._members.map((m) {
+            return Card(
+              color: card,
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: ListTile(
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                leading: CircleAvatar(
+                  radius: 28,
+                  backgroundColor: Colors.grey.shade200,
+                  child: ClipOval(
+                    child: (m['photo'] ?? '').toLowerCase().startsWith('http')
+                        ? Image.network(
+                            m['photo']!,
+                            width: 56,
+                            height: 56,
+                            fit: BoxFit.cover,
+                            errorBuilder: (c, e, s) => _initialsFallback(m['name']!),
+                          )
+                        : Image.asset(
+                            m['photo']!,
+                            width: 56,
+                            height: 56,
+                            fit: BoxFit.cover,
+                            errorBuilder: (c, e, s) => _initialsFallback(m['name']!),
+                          ),
+                  ),
+                ),
+                title: Text(
+                  m['name'] ?? '',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text('NIM: ${m['nim']}'),
+                trailing: IconButton(
+                  icon: const Icon(Icons.code),
+                  tooltip: 'Buka GitHub',
+                  onPressed: () => _openUrl(context, m['github']!),
+                ),
+              ),
+            );
+          }).toList(),
+
+          const SizedBox(height: 14),
+
+          const SizedBox(height: 30),
+        ],
+      ),
     );
   }
 }

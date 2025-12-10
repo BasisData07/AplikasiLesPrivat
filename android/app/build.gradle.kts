@@ -1,11 +1,11 @@
 import java.util.Properties
 import java.io.FileInputStream
 
-
+// 1. Definisikan semua plugin di blok plugins
 plugins {
     id("com.android.application")
-    id("kotlin-android")
-    id("com.google.gms.google-services")
+    id("org.jetbrains.kotlin.android") // Menggunakan ID Kotlin DSL yang benar
+    id("com.google.gms.google-services") // Menerapkan plugin Firebase di sini
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -14,8 +14,16 @@ plugins {
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+    // Menggunakan try-catch untuk memuat properties file
+    try {
+        keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+    } catch (e: Exception) {
+        println("Warning: Could not load key.properties file: ${e.message}")
+    }
+} else {
+    println("Warning: key.properties file not found.")
 }
+
 
 android {
     // Pastikan namespace ini sesuai dengan package name di AndroidManifest.xml
@@ -44,11 +52,12 @@ android {
 
     signingConfigs {
         create("release") {
-            // Menggunakan safe cast (as String?) untuk menghindari crash jika key.properties kosong
-            keyAlias = keystoreProperties["keyAlias"] as String?
-            keyPassword = keystoreProperties["keyPassword"] as String?
-            storeFile = keystoreProperties["storeFile"]?.let { file(it) }
-            storePassword = keystoreProperties["storePassword"] as String?
+            // KOREKSI ULANG GARIS MERAH: Menggunakan let dan cast yang lebih aman (sebagai String?)
+            keyAlias = keystoreProperties.getProperty("keyAlias")?.trim() // Trim untuk menghapus spasi tersembunyi
+            keyPassword = keystoreProperties.getProperty("keyPassword")?.trim() // Trim untuk menghapus spasi tersembunyi
+            // Menggunakan getProperty untuk mendapatkan path, lalu menggunakan let dan file()
+            storeFile = keystoreProperties.getProperty("storeFile")?.let { file(it) } 
+            storePassword = keystoreProperties.getProperty("storePassword")?.trim() // Trim untuk menghapus spasi tersembunyi
         }
     }
 
@@ -57,10 +66,10 @@ android {
             // Gunakan konfigurasi release, bukan debug
             signingConfig = signingConfigs.getByName("release")
             
-            // Opsional: Aktifkan ini untuk mengecilkan ukuran APK (Proguard/R8)
             isMinifyEnabled = true 
             isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+            // Menggunakan defaultProguardFile dengan .txt dihilangkan sesuai praktik terbaru
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro") 
         }
     }
 }
@@ -69,13 +78,17 @@ flutter {
     source = "../.."
 }
 
-//apply plugin: 'com.google.gms.google-services'
-
+// Semua 'apply plugin' Groovy Dihapus di bagian bawah.
+// Semua dependensi dikonversi ke sintaks Kotlin DSL (double quotes dan parenthesis).
 dependencies {
     implementation("com.google.android.material:material:1.13.0")
+    
+    // Firebase BOM (Menggunakan sintaks Kotlin DSL)
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
-    // Tambahkan library yang Anda pakai
-    implementation ("com.google.firebase:firebase-analytics-ktx")
-    implementation ("com.google.firebase:firebase-firestore-ktx") // Untuk Fires
-    // Tambahkan dependensi lain jika perlu
+    
+    // Tambahkan library Firebase (Menggunakan sintaks Kotlin DSL)
+    implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx") 
+    implementation("com.google.firebase:firebase-auth-ktx") // Ditambahkan: ini penting untuk auth
+    implementation("com.google.firebase:firebase-messaging-ktx")
 }

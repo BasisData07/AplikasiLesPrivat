@@ -18,6 +18,7 @@ import mapelRoutes from './routes/mapel.js'; // ✅ route mapel aktif
 import profileRoutes from './routes/profile.js';
 import ulasanRouter from './routes/ulasan.js';
 import { startFirestoreListener } from './firebase_listener.js';
+import userRouter from './routes/user_routes.js'; // <--- PASTIKAN INI DI-IMPORT
 
 
 // --- 3. INISIALISASI APLIKASI ---
@@ -46,6 +47,7 @@ app.use('/api/guru-data', guruDataRoutes);
 app.use('/api/mapel', mapelRoutes); // ✅ route mapel sudah aktif
 app.use('/api/profile', profileRoutes); // Daftarkan route profile.js
 app.use('/api/ulasan', ulasanRouter); // Daftarkan route ulasan.js
+app.use('/api/users', userRouter); // <--- Tambahkan ini
 
 // --- 6. ROUTE UTAMA (TES SERVER) ---
 /*app.get('/api', (req, res) => {
@@ -71,6 +73,8 @@ app.get('/cek-db', async (req, res) => {
     });
   }
 });
+
+
 
 // --- 7. MENJALANKAN SERVER ---
 const PORT = process.env.PORT || 5000;

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:PRIVATE_AJA/services/auth_service.dart';
+import 'package:intl/intl.dart';
 
 // Import halaman terkait
 import '../model/user_model.dart';
@@ -32,6 +33,21 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
     super.initState();
     _fetchGuruDetail();
   }
+  
+  // 🔥 FUNGSI BARU: Utility untuk format harga
+  String _formatCurrency(dynamic value) {
+    if (value == null) return "Rp 0";
+    
+    final num price = (value is num) ? value : double.tryParse(value.toString()) ?? 0;
+    
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID', 
+      symbol: 'Rp ',    
+      decimalDigits: 0 
+    );
+    
+    return formatter.format(price);
+  }
 
   // 1. AMBIL DATA DETAIL & REFRESH
   Future<void> _fetchGuruDetail() async {
@@ -39,9 +55,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
     setState(() => _isLoadingDetail = true);
     try {
       final response = await http.get(
-        Uri.parse(
-        '${ApiService.getBaseUrl}/profile/detail/${widget.user.id}'
-        ),
+        Uri.parse('${ApiService.getBaseUrl}/profile/detail/${widget.user.id}'),
       );
 
       if (response.statusCode == 200) {
@@ -67,12 +81,10 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
     final bool? shouldRefresh = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EditProfilGuruPage(
-            user: widget.user, 
-            currentData: initialData,
-          ),
-        ),
-      );
+        builder: (context) =>
+            EditProfilGuruPage(user: widget.user, currentData: initialData),
+      ),
+    );
 
     // Cek apakah sinyal refresh diterima (true)
     if (shouldRefresh == true) {
@@ -165,7 +177,6 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -182,7 +193,9 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
     final String displayMapelString = data?['list_mapel'] ?? "";
     //final int displayNoTelpon = data?['no_telpon'] ?? "";
     // Paksa ubah ke String dulu, lalu coba parsing ke Int. Jika gagal, pakai 0.
-    final int displayNoTelpon = int.tryParse(data?['no_telpon']?.toString() ?? '0') ?? 0;
+    final int displayNoTelpon =
+        int.tryParse(data?['no_telpon']?.toString() ?? '0') ?? 0;
+    final String displayHargaFormatted = _formatCurrency(data?['harga_per_jam']);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -206,9 +219,10 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
                   const SizedBox(height: 20),
 
                   // 2. Statistik (Pengalaman & Harga)
-                  if (_guruDetailData != null) ...[
-                    _buildStatsRow(cardColor, textColor),
-                    const SizedBox(height: 20),
+                 if (_guruDetailData != null) ...[
+                        // 🔥 Panggil _buildStatsRow dengan variabel yang baru dihitung
+                        _buildStatsRow(cardColor, textColor, displayHargaFormatted), 
+                        const SizedBox(height: 20),
                     // --- DETAIL TAMBAHAN (Instansi & Posisi) ---
                     _buildSectionTitle("Latar Belakang", textColor),
                     const SizedBox(height: 8),
@@ -375,8 +389,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
   }
 
   Widget _buildProfileHeader(Color textColor) {
-    final bool hasImage =
-        widget.user.foto_profil_guru != null &&
+    final bool hasImage = widget.user.foto_profil_guru != null &&
         widget.user.foto_profil_guru!.isNotEmpty;
 
     return Column(
@@ -448,11 +461,10 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
     );
   }
 
-  Widget _buildStatsRow(Color cardColor, Color textColor) {
+  Widget _buildStatsRow(Color cardColor, Color textColor, String displayHargaFormatted) {
     // Pastikan data tidak null sebelum ditampilkan
     final String pengalaman =
         "${_guruDetailData?['pengalaman_tahun'] ?? 0} Thn";
-    final String harga = "Rp ${_guruDetailData?['harga_per_jam'] ?? 0}";
 
     return Container(
       padding: const EdgeInsets.all(15),
@@ -468,7 +480,7 @@ class _GuruProfilPageState extends State<GuruProfilPage> {
         children: [
           _statItem("Pengalaman", pengalaman, textColor),
           Container(height: 40, width: 1, color: Colors.grey.shade300),
-          _statItem("Tarif/Jam", harga, textColor),
+          _statItem("Tarif/Jam", displayHargaFormatted, textColor),
         ],
       ),
     );

@@ -3,6 +3,7 @@ import 'package:PRIVATE_AJA/services/api_service.dart';
 import 'package:PRIVATE_AJA/services/guru_service.dart';
 import 'package:PRIVATE_AJA/services/ulasan_service.dart';    
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart'; 
@@ -56,6 +57,7 @@ class _DetailGuruPageState extends State<DetailGuruPage> {
         _ulasanController.dispose();
         super.dispose();
     }
+    
 
     Future<void> _fetchGuruDetail() async {
         final guruId = widget.guru.id;
@@ -205,7 +207,7 @@ class _DetailGuruPageState extends State<DetailGuruPage> {
         }
     }
 
-    Future<void> _launchCV(BuildContext context) async {
+    /*Future<void> _launchCV(BuildContext context) async {
         String? cvFile = _detailGuruData?['file_sertifikat'] ?? widget.guru.cvUrl;
 
         if (cvFile != null && cvFile.isNotEmpty) {
@@ -227,7 +229,35 @@ class _DetailGuruPageState extends State<DetailGuruPage> {
                 );
             }
         }
+    }*/
+    
+    // --- UTILITY BARU: Fungsi untuk memformat mata uang ---
+  String _formatCurrency(dynamic value) {
+    if (value == null) return "N/A";
+    
+    // Pastikan nilai adalah numerik (num)
+    final num price = (value is num) ? value : double.tryParse(value.toString()) ?? 0;
+    
+    // Gunakan NumberFormat untuk format mata uang IDR
+    final formatter = NumberFormat.currency(
+      locale: 'id_ID', // Lokasi Indonesia
+      symbol: 'Rp',    // Simbol Rupiah
+      decimalDigits: 0 // Tidak perlu desimal
+    );
+    
+    return formatter.format(price);
+  }
+  
+  Future<void> openWhatsApp(String number) async {
+    final String text = Uri.encodeComponent("Halo kak, saya ingin bertanya tentang les privat.");
+    final String url = "https://wa.me/$number?text=$text";
+
+    if (!await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication)) {
+      throw Exception("Tidak bisa membuka WhatsApp");
     }
+  }
+  
+
 
     @override
     Widget build(BuildContext context) {
@@ -242,14 +272,17 @@ class _DetailGuruPageState extends State<DetailGuruPage> {
         final String displayLevel = _detailGuruData?['list_jenjang'] ?? widget.guru.kategori_jenjang; 
         final String displayLokasi = _detailGuruData?['domisili'] ?? widget.guru.kota;
         final String displayTelpon = _detailGuruData?['no_telpon'] ?? widget.guru.noTelepon;
+        //final String isplayWatsApp = _detailGuruData?['no_whatsapp'] ?? widget.guru.noWhatsApp;
             
         final String displayPengalamanRaw = 
           _detailGuruData?['pengalaman_tahun']?.toString() ?? widget.guru.pengalaman.replaceAll(' Thn', '');
         final String displayPengalaman = displayPengalamanRaw.split(' ').first;
 
-        final String displayHarga = "Rp ${(_detailGuruData?['harga'] ?? widget.guru.harga)}K";
-        
+        final dynamic rawHarga = _detailGuruData?['harga_per_jam'] ?? widget.guru.harga;
+        final String displayHarga = _formatCurrency(rawHarga);
         final String displayMapelString = _detailGuruData?['list_mapel'] ?? widget.guru.mapel;
+        final String displayMapel = displayMapelString.replaceAll(',', ', ');
+        
         
         final double displayRating = (_detailGuruData?['rating'] is num) 
           ? (_detailGuruData!['rating'] as num).toDouble() 
@@ -298,6 +331,25 @@ class _DetailGuruPageState extends State<DetailGuruPage> {
                                       ),
                                   ],
                               ),
+                              /*SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: selectedGuru == null
+                                    ? null
+                                    : () => openWhatsApp(selectedGuru!.noTelepon),
+                                icon: const Icon(FontAwesomeIcons.whatsapp),
+                                label: const Text("Hubungi via WhatsApp"),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orange,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  textStyle: const TextStyle(fontSize: 16),
+                                ),
+                              ),
+                            )*/
                               const SizedBox(height: 24),
                               // Bagian Statistik
                               _buildStatsCard(cardColor, textColor, subTextColor, displayPengalaman, displayHarga, displayRating),
@@ -341,8 +393,8 @@ class _DetailGuruPageState extends State<DetailGuruPage> {
                                           _buildInfoRow(Icons.location_city_outlined, "Domisili", displayLokasi, subTextColor, textColor),
                                           const Divider(height: 1),
                                           _buildInfoRow(Icons.phone_outlined, "No. Telepon", displayTelpon, subTextColor, textColor),
-                                          const Divider(height: 1),
-                                          _buildTappableInfoRow(Icons.description_outlined, "Lihat CV / Sertifikat", subTextColor, () => _launchCV(context)),
+                                          //const Divider(height: 1),
+                                         // _buildTappableInfoRow(Icons.description_outlined, "Lihat CV / Sertifikat", subTextColor, () => _launchCV(context)),
                                       ],
                                   ),
                               ),

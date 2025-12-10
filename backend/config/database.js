@@ -1,12 +1,6 @@
-// ================================
-// File: backend/config/database.js (VERSI PROMISE / MODERN)
-// ================================
-
-// 1. PENTING: Tambahkan '/promise' di belakang mysql2
 import mysql from 'mysql2/promise'; 
 import 'dotenv/config';
 
-// 2. Gunakan createPool (Lebih stabil daripada createConnection untuk API)
 /*const db = mysql.createPool({
   // GANTI 'localhost' JADI '127.0.0.1'
   host: process.env.DB_HOST,
@@ -21,7 +15,6 @@ import 'dotenv/config';
 });*/
 
 const db = mysql.createPool({
-  // GANTI 'localhost' JADI '127.0.0.1'
   host: process.env.DB_HOST || '127.0.0.1',
   user: process.env.DB_USER || 'root', 
   password: process.env.DB_PASSWORD || '',
@@ -33,7 +26,6 @@ const db = mysql.createPool({
   keepAliveInitialDelay: 0
 });
 
-// Cek koneksi saat server nyala (Opsional, biar tenang)
 db.getConnection()
   .then(conn => {
     console.log('✅ Database connected successfully (Mode Promise)');
@@ -43,11 +35,6 @@ db.getConnection()
     console.error('❌ Database connection failed:', err);
   });
 
-// =======================================================
-// 💡 BAGIAN PENTING: WRAPPER EXECUTE
-// =======================================================
-
-// Kita buat fungsi pembungkus (wrapper) agar bisa dipakai dengan 'await'
 export const execute = async (query, params) => {
   try {
     // mysql2/promise mengembalikan array: [hasil_data, info_field]

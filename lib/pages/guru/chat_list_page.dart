@@ -27,7 +27,6 @@ class _ChatListPageState extends State<ChatListPage> {
         automaticallyImplyLeading: false, 
       ),
       body: StreamBuilder<List<String>>(
-        // 🔥 PERBAIKAN DI SINI: Gunakan widget.currentUserId
         stream: _chatService.getPeers(widget.currentUserId), 
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -61,33 +60,52 @@ class _ChatListPageState extends State<ChatListPage> {
             itemBuilder: (context, index) {
               final peerId = peerIds[index];
               
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                child: ListTile(
-                  leading: const CircleAvatar(
-                    backgroundColor: Color(0xFF3CB371),
-                    child: Icon(Icons.person, color: Colors.white),
-                  ),
-                  title: Text(
-                    "Murid ID: $peerId", 
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: const Text("Ketuk untuk membalas pesan"),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
-                    // Buka Chat Room
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ChatRoomPage(
-                          currentUserId: widget.currentUserId,
-                          peerId: peerId,
-                          peerName: "Murid $peerId", 
-                        ),
+              // Gunakan FutureBuilder untuk mengambil nama Murid
+              return FutureBuilder<String>(
+                future: _chatService.getUserName(peerId), 
+                builder: (context, nameSnapshot) {
+                  // Tentukan nama yang akan ditampilkan
+                  String displayedName = "Memuat nama...";
+                  String finalPeerName = "Murid ID: $peerId"; 
+
+                  if (nameSnapshot.hasData) {
+                    displayedName = nameSnapshot.data!;
+                    finalPeerName = nameSnapshot.data!;
+                  } else if (nameSnapshot.hasError) {
+                    displayedName = "Nama Gagal Dimuat ($peerId)";
+                  } else if (nameSnapshot.connectionState == ConnectionState.done && !nameSnapshot.hasData) {
+                    displayedName = "Murid ID: $peerId (Unknown)";
+                  }
+                  
+                  return Card(
+                    margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    child: ListTile(
+                      leading: const CircleAvatar(
+                        backgroundColor: Color(0xFF3CB371),
+                        child: Icon(Icons.person, color: Colors.white),
                       ),
-                    );
-                  },
-                ),
+                      title: Text(
+                        displayedName, // Menampilkan nama yang sudah dimuat
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: const Text("Ketuk untuk membalas pesan"),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      onTap: () {
+                        // Buka Chat Room, kirim finalPeerName
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ChatRoomPage(
+                              currentUserId: widget.currentUserId,
+                              peerId: peerId,
+                              peerName: finalPeerName, // Menggunakan nama yang sudah dimuat
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
               );
             },
           );

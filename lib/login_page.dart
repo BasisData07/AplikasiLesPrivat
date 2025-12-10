@@ -183,7 +183,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ],
               ),
-        // END: Perubahan untuk Latar Belakang di layar besar
+
       ),
     );
   }
@@ -266,10 +266,10 @@ class __FormContentState extends State<_FormContent> {
   Widget build(BuildContext context) {
     return Container(
       constraints: const BoxConstraints(maxWidth: 300),
-      // START: Menambahkan sedikit background di layar besar agar form tetap menonjol
+      
       decoration: MediaQuery.of(context).size.width >= 600
           ? BoxDecoration(
-              color: Colors.white.withOpacity(0.95), // Warna background form
+              color: Colors.white.withOpacity(0.95), 
               borderRadius: BorderRadius.circular(8),
               image: DecorationImage(
                 image: const AssetImage('assets/nu.png'),
@@ -289,9 +289,9 @@ class __FormContentState extends State<_FormContent> {
             )
           : null,
       padding: MediaQuery.of(context).size.width >= 600
-          ? const EdgeInsets.all(24.0) // Padding pada layar besar
+          ? const EdgeInsets.all(24.0) 
           : null,
-      // END: Menambahkan sedikit background di layar besar
+      
       child: Form(
         key: widget.formKey,
         child: Column(

@@ -29,7 +29,7 @@ class _GuruPengaturanPageState extends State<GuruPengaturanPage> {
   Map<String, dynamic> _deviceData = <String, dynamic>{};
 
   // --- STATE UNTUK RATING ---
-  double _rating = 3.0;
+  final double _rating = 3.0;
   final TextEditingController _feedbackController = TextEditingController();
 
   // Warna Tema
@@ -121,73 +121,6 @@ class _GuruPengaturanPageState extends State<GuruPengaturanPage> {
       case 'computer name': return Icons.laptop_windows;
       default: return Icons.device_hub;
     }
-  }
-
-  // ==========================================
-  // 2. LOGIC RATING
-  // ==========================================
-  void _showRatingDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Beri Rating Aplikasi"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text("Seberapa puas Anda dengan aplikasi ini?"),
-              const SizedBox(height: 20),
-              RatingBar.builder(
-                initialRating: _rating,
-                minRating: 1,
-                direction: Axis.horizontal,
-                allowHalfRating: true,
-                itemCount: 5,
-                itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-                itemBuilder: (context, _) => const Icon(Icons.star, color: Colors.amber),
-                onRatingUpdate: (rating) {
-                  _rating = rating;
-                },
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _feedbackController,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  hintText: "Tulis masukan Anda (opsional)...",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              child: const Text("Batal"),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            /*TextButton(
-              child: const Text("Kirim"),
-              onPressed: () {
-                final ulasanBaru = UlasanModel(
-                  userName: widget.user.name,
-                  rating: _rating,
-                  komentar: _feedbackController.text,
-                  timestamp: DateTime.now(),
-                );
-                context.read<UlasanProvider>().tambahUlasan(ulasanBaru);
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Terima kasih atas penilaian Anda!"), backgroundColor: Colors.green),
-                );
-                _feedbackController.clear();
-                setState(() => _rating = 3.0);
-              },
-            ),*/
-          ],
-        );
-      },
-    );
   }
 
   // ==========================================
@@ -350,10 +283,6 @@ class _GuruPengaturanPageState extends State<GuruPengaturanPage> {
             // ========================================================
             final prefs = await SharedPreferences.getInstance();
             await prefs.clear(); // <--- INI KUNCINYA! Hapus semua data tersimpan
-            
-            // Jika pakai Provider, bersihkan juga (Opsional tapi bagus)
-            // context.read<UserProvider>().logout(); 
-            // ========================================================
 
             if (!context.mounted) return;
 
@@ -445,7 +374,6 @@ class _GuruPengaturanPageState extends State<GuruPengaturanPage> {
            _buildMenuCard("Tentang Aplikasi", Icons.info_outline, cardColor, textColor, () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutMePage()));
            }),
-           _buildMenuCard("Beri Rating", Icons.star_outline, cardColor, textColor, _showRatingDialog),
 
            const SizedBox(height: 20),
 

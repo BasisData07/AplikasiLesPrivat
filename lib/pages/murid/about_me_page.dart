@@ -82,7 +82,7 @@ class AboutMePage extends StatelessWidget {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final Color bg = isDark ? Colors.grey[900]! : const Color(0xFFF5FFFA);
     final Color card = isDark ? Colors.grey[800]! : Colors.white;
-    final Color accent = Colors.orange;
+    const Color accent = Colors.orange;
 
     return Scaffold(
       backgroundColor: bg,
@@ -203,7 +203,7 @@ class AboutMePage extends StatelessWidget {
                 ),
               ),
             );
-          }).toList(),
+          }),
 
           const SizedBox(height: 14),
 

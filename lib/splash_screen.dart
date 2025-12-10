@@ -12,11 +12,7 @@ class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
-  // DIHAPUS: Variabel untuk teks "PRIVATE AJA" dan animasi typing
-  // final String _fullText = "PRIVATE AJA";
-  // String _displayedText = "";
-  // int _charIndex = 0;
-  // Timer? _typingTimer;
+  
 
   @override
   void initState() {
@@ -26,12 +22,10 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(seconds: 2),
     )..repeat();
 
-    // DIHAPUS: Logika Timer.periodic (animasi typing)
-
-    // Timer untuk navigasi ke halaman login (tetap 4 detik)
+    
     Timer(const Duration(seconds: 4), () {
       if (!mounted) return;
-      // Pastikan rute '/login' telah didefinisikan di MaterialApp Anda
+      
       Navigator.pushReplacementNamed(context, '/login');
     });
   }
@@ -39,7 +33,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void dispose() {
     _controller.dispose();
-    // DIHAPUS: Pembatalan _typingTimer
+    
     super.dispose();
   }
 
@@ -47,23 +41,23 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
-        // Menggunakan Stack untuk menumpuk background dan konten
+        
         children: [
-          // 1. Background Image
+          
           Positioned.fill(
             child: Image.asset(
-              'assets/private.png', // Background image
+              'assets/private.png', 
               fit: BoxFit.cover,
             ),
           ),
 
-          // 3. Konten Utama (Ikon Panda dan Teks Credit)
+          
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Ikon Panda dengan Rotasi
+                
                 RotationTransition(
                   turns: _controller,
                   child: Image.asset(
@@ -73,10 +67,10 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
 
-                // DIHAPUS: SizedBox(height: 20) dan Widget Text untuk "PRIVATE AJA"
+                
                 const SizedBox(height: 40),
 
-                // Teks Credit
+                
                 const Text(
                   "Created by Kelompok 8",
                   textAlign: TextAlign.center,

@@ -1,6 +1,5 @@
 // lib/pages/murid/chat_room_page.dart
 
-import 'package:PRIVATE_AJA/services/api_service.dart';
 import 'package:PRIVATE_AJA/services/chat_service.dart';
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago; // Pastikan package ini sudah diinstall
@@ -56,8 +55,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     if (_messageController.text.trim().isEmpty) return;
 
     // 2. 🔥 FIX CRASH: Cek jika ID kosong atau "null"
-    if (widget.currentUserId == null || widget.peerId == null || 
-        widget.currentUserId == "null" || widget.peerId == "null" || 
+    if (widget.currentUserId == "null" || widget.peerId == "null" || 
         widget.currentUserId.isEmpty || widget.peerId.isEmpty) {
         
         ScaffoldMessenger.of(context).showSnackBar(

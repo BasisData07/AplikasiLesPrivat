@@ -4,7 +4,6 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
@@ -13,8 +12,6 @@ import '../../login_page.dart';
 import '../murid/help_center_page.dart';
 import '../murid/terms_page.dart';
 import '../murid/about_me_page.dart';
-import '../model/ulasan_model.dart';
-import '../model/ulasan_provider.dart';
 
 class ProfilPage extends StatefulWidget {
   final UserModel user;
@@ -31,7 +28,7 @@ class _ProfilPageState extends State<ProfilPage> {
   Map<String, dynamic> _deviceData = <String, dynamic>{};
   final bool _isPasswordVisible = false;
 
-  double _rating = 3.0;
+  final double _rating = 3.0;
   final TextEditingController _feedbackController = TextEditingController();
 
   // Palet warna tema hijau mint
@@ -165,79 +162,6 @@ class _ProfilPageState extends State<ProfilPage> {
       default:
         return Icons.device_hub;
     }
-  }
-
-  void _showRatingDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Beri Rating Aplikasi"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text("Seberapa puas Anda dengan aplikasi ini?"),
-              const SizedBox(height: 20),
-              RatingBar.builder(
-                initialRating: _rating,
-                minRating: 1,
-                direction: Axis.horizontal,
-                allowHalfRating: true,
-                itemCount: 5,
-                itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-                itemBuilder: (context, _) =>
-                    const Icon(Icons.star, color: Colors.amber),
-                onRatingUpdate: (rating) {
-                  _rating = rating;
-                },
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _feedbackController,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  hintText: "Tulis masukan Anda (opsional)...",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              child: const Text("Batal"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            /*TextButton(
-              child: const Text("Kirim"),
-              onPressed: () {
-                final ulasanBaru = UlasanModel(
-                  namaMurid: widget.user.name,
-                  rating: _rating,
-                  komentarMurid: _feedbackController.text,
-                  createdAt: DateTime.now(), 
-                  ulasanId: null,
-                );
-                context.read<UlasanProvider>().tambahUlasan(ulasanBaru);
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Terima kasih atas penilaian Anda!"),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-                _feedbackController.clear();
-                setState(() {
-                  _rating = 3.0;
-                });
-              },
-            ),*/
-          ],
-        );
-      },
-    );
   }
 
   void _showLogoutConfirmationDialog() {
@@ -561,15 +485,6 @@ class _ProfilPageState extends State<ProfilPage> {
             },
           ),
           const SizedBox(height: 10),
-          _infoCard(
-            icon: Icons.star_outline,
-            title: "Beri Rating",
-            value: "Bantu kami menjadi lebih baik",
-            cardColor: cardColor,
-            textColor: textColor,
-            onTap: _showRatingDialog,
-          ),
-          const SizedBox(height: 25),
           Text(
             "Device Information:",
             style: TextStyle(
@@ -619,28 +534,6 @@ class _ProfilPageState extends State<ProfilPage> {
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 // WARNA DIUBAH DI SINI
-                backgroundColor: Colors.red,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onPressed: () {
-                _showDeleteAccountDialog();
-              },
-              icon: const Icon(Icons.logout, color: Colors.white),
-              label: const Text(
-                "Delete Akun",
-                style: TextStyle(fontSize: 16, color: Colors.white),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                // WARNA DIUBAH DI SINI
                 backgroundColor: mintHighlight,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
@@ -657,6 +550,29 @@ class _ProfilPageState extends State<ProfilPage> {
               ),
             ),
           ),
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                // WARNA DIUBAH DI SINI
+                backgroundColor: Colors.red,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: () {
+                _showDeleteAccountDialog();
+              },
+              icon: const Icon(Icons.logout, color: Colors.white),
+              label: const Text(
+                "Delete Akun",
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+            ),
+          ),
+          
         ],
       ),
     );

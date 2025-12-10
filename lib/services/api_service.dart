@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io'; // Untuk Platform
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 // Untuk kIsWeb
 

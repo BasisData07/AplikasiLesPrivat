@@ -5,6 +5,7 @@ import 'package:PRIVATE_AJA/pages/murid/chat_room_page.dart';
 import 'package:PRIVATE_AJA/services/chat_service.dart';
 import 'package:PRIVATE_AJA/services/ulasan_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart'; // Import ini
 import 'package:provider/provider.dart';
 
 // Asumsi: Anda menggunakan ChatRoomPage untuk navigasi chat
@@ -33,8 +34,9 @@ class _GuruBerandaPageState extends State<GuruBerandaPage> {
     @override
     void initState() {
         super.initState();
-        // Panggil API saat halaman pertama kali dibuka
-        Future.microtask(() {
+        // ✅ PERBAIKAN: Gunakan addPostFrameCallback untuk memastikan context stabil
+        SchedulerBinding.instance.addPostFrameCallback((_) {
+            // Panggil API saat halaman pertama kali dibuka
             Provider.of<JadwalProvider>(
                 context,
                 listen: false,
@@ -46,6 +48,8 @@ class _GuruBerandaPageState extends State<GuruBerandaPage> {
 
     // 🔥 METODE BARU UNTUK MENGAMBIL ULASAN YANG DITUJUKAN KE GURU INI
     Future<void> _fetchUlasan() async {
+        if (!mounted) return; // Tambahkan pengecekan safety
+        
         setState(() {
             _isLoadingUlasan = true;
         });
@@ -55,9 +59,7 @@ class _GuruBerandaPageState extends State<GuruBerandaPage> {
             final ulasan = await UlasanService.getUlasanByGuruId(widget.user.id.toString());
             if (mounted) {
                 setState(() {
-                    // Filter ulasan yang belum dibalas
                     _ulasanList = ulasan;
-                    //_ulasanList = ulasan.where((u) => u.balasanGuru == null || u.balasanGuru!.isEmpty).toList();
                     _isLoadingUlasan = false;
                 });
             }
@@ -71,71 +73,80 @@ class _GuruBerandaPageState extends State<GuruBerandaPage> {
         }
     }
     
-    // 🔥 DIALOG BARU: Guru Membalas Ulasan
-    void _showReplyDialog(int ulasanId, String namaMurid, String komentarMurid) {
-        final TextEditingController replyController = TextEditingController();
+    // 🔥 DIALOG BARU: Guru Membalas Ulasan (dengan perbaikan safety)
+    // DI GuruBerandaPage.dart (pastikan Anda menggunakan kode ini di dalam _GuruBerandaPageState)
 
-        showDialog(
-            context: context,
-            builder: (context) {
-                return AlertDialog(
-                    title: Text("Balas Ulasan dari $namaMurid"),
-                    content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                            Text("Komentar: '$komentarMurid'", style: const TextStyle(fontStyle: FontStyle.italic)),
-                            const SizedBox(height: 10),
-                            TextField(
-                                controller: replyController,
-                                maxLines: 4,
-                                decoration: const InputDecoration(
-                                    hintText: "Tulis balasan Anda...",
-                                    border: OutlineInputBorder(),
-                                ),
+void _showReplyDialog(int ulasanId, String namaMurid, String komentarMurid) {
+    final TextEditingController replyController = TextEditingController();
+
+    // Simpan referensi ScaffoldMessenger di awal, menggunakan context Halaman utama
+    // agar aman meskipun dialog ditutup/context dialog hilang.
+    final scaffoldMessenger = ScaffoldMessenger.of(context); 
+
+    showDialog(
+        context: context,
+        builder: (dialogContext) { // Gunakan dialogContext untuk pop dialog
+            return AlertDialog(
+                title: Text("Balas Ulasan dari $namaMurid"),
+                // ... (content dan lainnya)
+                content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                        Text("Komentar: '$komentarMurid'", style: const TextStyle(fontStyle: FontStyle.italic)),
+                        const SizedBox(height: 10),
+                        TextField(
+                            controller: replyController,
+                            maxLines: 4,
+                            decoration: const InputDecoration(
+                                hintText: "Tulis balasan Anda...",
+                                border: OutlineInputBorder(),
                             ),
-                        ],
-                    ),
-                    actions: [
-                        TextButton(child: const Text("Batal"), onPressed: () => Navigator.of(context).pop()),
-                        ElevatedButton(
-                            child: const Text("Kirim Balasan"),
-                            onPressed: () async {
-                                final balasan = replyController.text.trim();
-                                if (balasan.isEmpty) return;
-
-                                Navigator.of(context).pop(); // Tutup dialog input
-
-                                final response = await UlasanService.submitBalasan(
-                                    ulasanId: ulasanId,
-                                    guruId: widget.user.id.toString(), // ID Guru yang sedang login
-                                    balasan: balasan,
-                                );
-                                
-                                if (mounted) {
-                                    if (response['success'] == true) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(content: Text(response['message'] ?? "Balasan berhasil dikirim!"), backgroundColor: Colors.green)
-                                        );
-                                        _fetchUlasan(); // 🔥 Refresh list ulasan
-                                    } else {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(content: Text(response['message'] ?? "Gagal mengirim balasan."), backgroundColor: Colors.red),
-                                        );
-                                    }
-                                }
-                            },
                         ),
                     ],
-                );
-            },
-        ).then((_) {
-            replyController.dispose();
-        });
-    }
+                ),
+                actions: [
+                    TextButton(child: const Text("Batal"), onPressed: () => Navigator.of(dialogContext).pop()),
+                    ElevatedButton(
+                        child: const Text("Kirim Balasan"),
+                        onPressed: () async {
+                            final balasan = replyController.text.trim();
+                            if (balasan.isEmpty) return;
+
+                            Navigator.of(dialogContext).pop(); // TUTUP DIALOG PERTAMA
+
+                            final response = await UlasanService.submitBalasan(
+                                ulasanId: ulasanId,
+                                guruId: widget.user.id.toString(),
+                                balasan: balasan,
+                            );
+                            
+                            // 👇 Periksa apakah State (Halaman) masih mounted sebelum
+                            // menampilkan SnackBar dan memanggil setState/fetch
+                            if (mounted) { 
+                                if (response['success'] == true) {
+                                    scaffoldMessenger.showSnackBar( // Menggunakan referensi yang disimpan (lebih aman)
+                                        SnackBar(content: Text(response['message'] ?? "Balasan berhasil dikirim!"), backgroundColor: Colors.green)
+                                    );
+                                    _fetchUlasan(); // Refresh list ulasan
+                                } else {
+                                    scaffoldMessenger.showSnackBar( // Menggunakan referensi yang disimpan (lebih aman)
+                                        SnackBar(content: Text(response['message'] ?? "Gagal mengirim balasan."), backgroundColor: Colors.red),
+                                    );
+                                }
+                            }
+                        },
+                    ),
+                ],
+            );
+        },
+    ).then((_) {
+        replyController.dispose();
+    });
+}
 
 
-    // --- FUNGSI 1: HAPUS JADWAL ---
+    // --- FUNGSI 1: HAPUS JADWAL (Tambahkan pengecekan mounted)---
     Future<void> _hapusJadwal(int jadwalId) async {
         bool? yakinHapus = await showDialog<bool>(
             context: context,
@@ -156,22 +167,26 @@ class _GuruBerandaPageState extends State<GuruBerandaPage> {
                 );
             },
         );
+        
+        // Pengecekan setelah dialog ditutup
+        if (!mounted || yakinHapus != true) return;
 
-        if (yakinHapus == true) {
-            final jadwalProvider = Provider.of<JadwalProvider>(
-                context,
-                listen: false,
-            );
+        final jadwalProvider = Provider.of<JadwalProvider>(
+            context,
+            listen: false,
+        );
 
-            ScaffoldMessenger.of(
-                context,
-            ).showSnackBar(const SnackBar(content: Text('Menghapus jadwal...')));
+        ScaffoldMessenger.of(
+            context,
+        ).showSnackBar(const SnackBar(content: Text('Menghapus jadwal...')));
 
-            final sukses = await jadwalProvider.deleteJadwal(
-                jadwalId,
-                widget.user.id.toString(),
-            );
+        final sukses = await jadwalProvider.deleteJadwal(
+            jadwalId,
+            widget.user.id.toString(),
+        );
 
+        // ✅ Perlu pengecekan mounted setelah await
+        if (mounted) {
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
             if (sukses) {
@@ -192,7 +207,7 @@ class _GuruBerandaPageState extends State<GuruBerandaPage> {
         }
     }
 
-    // --- FUNGSI 2: UBAH STATUS (CHECKLIST) ---
+    // --- FUNGSI 2: UBAH STATUS (CHECKLIST) (Tambahkan pengecekan mounted)---
     Future<void> _toggleStatus(int jadwalId, bool currentIsBooked) async {
         final jadwalProvider = Provider.of<JadwalProvider>(context, listen: false);
         final String action = currentIsBooked
@@ -221,28 +236,35 @@ class _GuruBerandaPageState extends State<GuruBerandaPage> {
             },
         );
 
-        if (yakinUbah == true) {
-            ScaffoldMessenger.of(
-                context,
-            ).showSnackBar(SnackBar(content: Text('$action jadwal...')));
+        // Pengecekan setelah dialog ditutup
+        if (!mounted || yakinUbah != true) return;
 
-            final sukses = await jadwalProvider.updateJadwalStatus(
-                jadwalId,
-                !currentIsBooked, // Ubah kebalikan status (true -> false, false -> true)
-                widget.user.id.toString(),
-            );
+        ScaffoldMessenger.of(
+            context,
+        ).showSnackBar(SnackBar(content: Text('$action jadwal...')));
 
+        final sukses = await jadwalProvider.updateJadwalStatus(
+            jadwalId,
+            !currentIsBooked, // Ubah kebalikan status (true -> false, false -> true)
+            widget.user.id.toString(),
+        );
+        
+        // ✅ Perlu pengecekan mounted setelah await
+        if (mounted) {
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
             if (sukses) {
                 await jadwalProvider.fetchJadwalMilikGuru(widget.user.id.toString());
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Status berhasil diubah!'),
-                        backgroundColor: Colors.green,
-                    ),
-                );
+                // Pengecekan mounted lagi setelah await kedua (walaupun fetch biasanya cepat)
+                if (mounted) { 
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Status berhasil diubah!'),
+                            backgroundColor: Colors.green,
+                        ),
+                    );
+                }
             } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -324,14 +346,14 @@ class _GuruBerandaPageState extends State<GuruBerandaPage> {
             body: SingleChildScrollView(
                 child: Column(
                     children: [
-                        // 🔥 BAGIAN BARU: ULASAN MENUNGGU BALASAN
+                        // 🔥 BAGIAN ULASAN MENUNGGU BALASAN
                         _buildUlasanMenungguBalasan(),
                         
                         // PEMISAH
                         Divider(height: 1, color: Colors.grey[300]),
                         // 🔥 INTEGRASI INBOX CHAT GURU DI SINI
                         _buildChatInbox(context, widget),
-                       
+                        
                         // BAGIAN JADWAL UTAMA
                         Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -452,8 +474,7 @@ class _GuruBerandaPageState extends State<GuruBerandaPage> {
 // lib/pages/guru/guru_beranda_page.dart (Tambahkan widget ini)
 
 // 🔥 WIDGET BARU: Daftar Inbox Chat
-// 🔥 WIDGET BARU: Daftar Inbox Chat (SUDAH DIPERBAIKI)
-Widget _buildChatInbox(BuildContext context, GuruBerandaPage widget) { // Ubah 'dynamic' jadi Tipe Asli biar aman
+Widget _buildChatInbox(BuildContext context, GuruBerandaPage widget) { 
     return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -499,8 +520,8 @@ Widget _buildChatInbox(BuildContext context, GuruBerandaPage widget) { // Ubah '
                               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                               child: ListTile(
                                   leading: const CircleAvatar(
-                                    backgroundColor: Color(0xFF3CB371), // Mint
-                                    child: Icon(Icons.person, color: Colors.white)
+                                      backgroundColor: Color(0xFF3CB371), // Mint
+                                      child: Icon(Icons.person, color: Colors.white)
                                   ),
                                   title: Text("Murid ID: $peerId"), // Nanti bisa diganti Nama
                                   subtitle: const Text("Ketuk untuk membalas..."), 
@@ -524,4 +545,3 @@ Widget _buildChatInbox(BuildContext context, GuruBerandaPage widget) { // Ubah '
         ],
     );
 }
-

@@ -40,6 +40,7 @@ dependencies:
   # Kunci/Library lainnya
   cupertino_icons: ^1.0.8
   mocktail: ^1.0.4
+  collection: ^1.18.0
 
 dev_dependencies:
   flutter_test:

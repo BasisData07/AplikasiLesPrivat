@@ -40,7 +40,9 @@ class User {
                     const newGuruId = resultGuru.insertId;
 
                     // 3. Hubungkan Guru & Mapel (DENGAN HARGA DEFAULT)
-                    const DEFAULT_HARGA = 50000; // Harga default per jam saat registrasi
+                    // Pastikan di DB, kolom harga pada tabel guru_mapel sudah diatur DEFAULT 0 atau NULL,
+                    // atau kita masukkan nilai default di sini.
+                    const DEFAULT_HARGA = 25000; // Harga default per jam saat registrasi
 
                     // ✅ PERBAIKAN: Tambahkan kolom 'harga' dan nilainya
                     const insertRelation = 'INSERT INTO guru_mapel (guru_id, mapel_id, harga) VALUES (?, ?, ?)';
@@ -157,12 +159,10 @@ class User {
     }
 
 
-   // models/User.js (di dalam method getNameById)
-
+    // --- GET NAME BY ID (Untuk Chat/Panggilan Nama) ---
     static async getNameById(userId) {
         try {
             // 1. Coba cari di akun_pengguna (Murid)
-            // GANTI SELECT nama_lengkap MENJADI SELECT username AS name
             let query = 'SELECT username AS name FROM akun_pengguna WHERE pengguna_id = ?';
             let [results] = await db.execute(query, [userId]); 
 
@@ -171,7 +171,6 @@ class User {
             }
 
             // 2. Jika tidak ditemukan, coba cari di akun_guru
-            // GANTI SELECT nama_lengkap MENJADI SELECT username AS name
             query = 'SELECT username AS name FROM akun_guru WHERE guru_id = ?';
             [results] = await db.execute(query, [userId]); 
 
@@ -183,7 +182,7 @@ class User {
 
         } catch (err) {
             console.error("❌ ERROR FINAL: MySQL query gagal di getNameById:", err);
-            // Ini akan memastikan log error Anda lebih mudah dilacak
+            // Melemparkan error yang lebih informatif
             throw new Error("Gagal mengambil nama pengguna dari database: " + err.message);
         }
     }

@@ -8,7 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'api_service.dart';
 
 class AuthService {
-  get _getBaseUrl => null;
+  // Fungsi-fungsi di dalam class AuthService ini sebaiknya static
+  // jika Anda memanggilnya langsung tanpa membuat instance.
 
   static Future<Map<String, dynamic>> login(
     String email,
@@ -76,6 +77,7 @@ class AuthService {
     final userDataString = prefs.getString('userData');
 
     if (userDataString != null) {
+      // Mengembalikan Map<String, dynamic>
       return jsonDecode(userDataString);
     }
     return {};
@@ -91,7 +93,7 @@ class AuthService {
       final response = await ApiService.post('auth/update-password-direct', {
         'email': email,
         'new_password':
-            password, // Mengirim 'new_password' sesuai harapan file PHP
+            password, // Mengirim 'new_password' sesuai harapan backend
       });
 
       print('📡 Update password response: ${response['success']}');
@@ -107,6 +109,7 @@ class AuthService {
     }
   }
 
+  // NOTE: Metode ini tidak static, berarti harus dipanggil dari instance AuthService().
   Future<Map<String, dynamic>> deleteAccount({
     required UserModel currentUser,
     required String password,
@@ -120,11 +123,14 @@ class AuthService {
         'password': password,
       };
 
+      // Idealnya, jika backend menggunakan DELETE, gunakan ApiService.delete()
       final response = await ApiService.post('auth/delete-account', data);
 
       print('📡 Delete account response: ${response['success']}');
 
       if (response['success'] == true) {
+        // Setelah berhasil hapus, lakukan logout juga
+        await AuthService.logout(); 
         return {'success': true, 'message': response['message']};
       } else {
         return {'success': false, 'message': response['message']};
@@ -151,11 +157,11 @@ class AuthService {
     }
   }
 
+  // NOTE: Metode ini tidak static, berarti harus dipanggil dari instance AuthService().
   Future<Map<String, dynamic>> uploadProfilePicture(
     XFile imageFile,
     String userId,
   ) async {
-    //
     print(
       '🔗 [DEBUG] Mengirim request ke: ${ApiService.getBaseUrl}/profile/upload-profile-picture',
     );
@@ -173,6 +179,7 @@ class AuthService {
       http.MultipartFile multipartFile;
 
       if (kIsWeb) {
+        // Logika untuk Flutter Web (membaca bytes)
         var bytes = await imageFile.readAsBytes();
         multipartFile = http.MultipartFile.fromBytes(
           'profile_picture',
@@ -180,6 +187,7 @@ class AuthService {
           filename: imageFile.name,
         );
       } else {
+        // Logika untuk Mobile/Desktop (membaca dari path)
         multipartFile = await http.MultipartFile.fromPath(
           'profile_picture',
           imageFile.path,
@@ -199,7 +207,7 @@ class AuthService {
         '📄 [DEBUG] Response Body (50 karakter pertama): ${response.body.length > 500 ? "${response.body.substring(0, 50)}..." : response.body}',
       );
 
-      // --- DEBUG 4: CEK APAKAH RESPONSE HTML ---
+      // --- DEBUG 4: CEK APAKAH RESPONSE HTML (Sering terjadi jika URL salah) ---
       if (response.body.trim().startsWith('<!DOCTYPE') ||
           response.body.trim().startsWith('<html')) {
         print('❌ [DEBUG] SERVER MENGEMBALIKAN HTML, BUKAN JSON!');
@@ -215,6 +223,7 @@ class AuthService {
         var responseData = json.decode(response.body);
         return {'success': true, 'url': responseData['url']};
       } else {
+        // Mencoba mendapatkan pesan error dari body response (JSON)
         var responseData = json.decode(response.body);
         return {
           'success': false,

@@ -39,12 +39,12 @@ class _GuruHomePageState extends State<GuruHomePage> {
       // Jangan pakai ChatRoomPage, pakai ChatListPage (Inbox)
       // Dan pastikan kirim ID sebagai String (bukan username)
       ChatListPage(
-        currentUserId: widget.user.id.toString(), 
+        currentUserId: widget.user.id.toString(),
       ),
 
       // Tab 2: Profil
       GuruProfilPage(user: widget.user),
-      
+
       // Tab 3: Pengaturan
       GuruPengaturanPage(user: widget.user),
     ];
@@ -131,6 +131,13 @@ class _GuruHomePageState extends State<GuruHomePage> {
       'Minggu',
     ];
     int? selectedIdGuruMapel;
+
+    // 🔥 FETCH TERBARU: Pastikan daftar mapel selalu fresh sebelum menampilkan dialog
+    // Ini mencegah error foreign key jika mapel baru saja dihapus/diubah
+    Future.microtask(() {
+      Provider.of<JadwalProvider>(context, listen: false)
+          .fetchMapelGuru(widget.user.id.toString());
+    });
 
     showDialog(
       context: context,
@@ -263,8 +270,8 @@ class _GuruHomePageState extends State<GuruHomePage> {
                   child: const Text("Batal"),
                 ),
                 ElevatedButton(
-                  onPressed:
-                      listMapelGuru.isEmpty || selectedIdGuruMapel == null
+                  onPressed: listMapelGuru.isEmpty ||
+                          selectedIdGuruMapel == null
                       ? null
                       : () {
                           if (formKey.currentState!.validate()) {
@@ -278,42 +285,41 @@ class _GuruHomePageState extends State<GuruHomePage> {
 
                             jadwalProvider
                                 .createJadwalBaru(
-                                  idGuruMapel: selectedIdGuruMapel!,
-                                  hari: selectedDay,
-                                  jamMulai:
-                                      jamMulaiController.text, // Format HH:MM
-                                  jamSelesai:
-                                      jamSelesaiController.text, // Format HH:MM
-                                )
+                              idGuruMapel: selectedIdGuruMapel!,
+                              hari: selectedDay,
+                              jamMulai: jamMulaiController.text, // Format HH:MM
+                              jamSelesai:
+                                  jamSelesaiController.text, // Format HH:MM
+                            )
                                 .then((sukses) {
-                                  Navigator.of(dialogContext).pop();
-                                  ScaffoldMessenger.of(
-                                    context,
-                                  ).hideCurrentSnackBar();
+                              Navigator.of(dialogContext).pop();
+                              ScaffoldMessenger.of(
+                                context,
+                              ).hideCurrentSnackBar();
 
-                                  if (sukses) {
-                                    jadwalProvider.fetchJadwalMilikGuru(
-                                      widget.user.id.toString(),
-                                    );
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Jadwal berhasil disimpan!',
-                                        ),
-                                        backgroundColor: Colors.green,
-                                      ),
-                                    );
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Gagal menyimpan jadwal.',
-                                        ),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
-                                  }
-                                });
+                              if (sukses) {
+                                jadwalProvider.fetchJadwalMilikGuru(
+                                  widget.user.id.toString(),
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Jadwal berhasil disimpan!',
+                                    ),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Gagal menyimpan jadwal.',
+                                    ),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            });
                           }
                         },
                   child: const Text("Simpan"),
@@ -482,43 +488,42 @@ class _GuruHomePageState extends State<GuruHomePage> {
 
                             jadwalProvider
                                 .updateJadwal(
-                                  jadwalId: jadwalId,
-                                  idGuruMapel: idGuruMapelLama!,
-                                  hari: selectedDay,
-                                  jamMulai:
-                                      jamMulaiController.text, // Format HH:MM
-                                  jamSelesai:
-                                      jamSelesaiController.text, // Format HH:MM
-                                )
+                              jadwalId: jadwalId,
+                              idGuruMapel: idGuruMapelLama!,
+                              hari: selectedDay,
+                              jamMulai: jamMulaiController.text, // Format HH:MM
+                              jamSelesai:
+                                  jamSelesaiController.text, // Format HH:MM
+                            )
                                 .then((sukses) {
-                                  Navigator.of(dialogContext).pop();
-                                  ScaffoldMessenger.of(
-                                    context,
-                                  ).hideCurrentSnackBar();
+                              Navigator.of(dialogContext).pop();
+                              ScaffoldMessenger.of(
+                                context,
+                              ).hideCurrentSnackBar();
 
-                                  if (sukses) {
-                                    jadwalProvider.fetchJadwalMilikGuru(
-                                      widget.user.id.toString(),
-                                    );
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Jadwal berhasil diupdate!',
-                                        ),
-                                        backgroundColor: Colors.green,
-                                      ),
-                                    );
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Gagal mengupdate jadwal.',
-                                        ),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
-                                  }
-                                });
+                              if (sukses) {
+                                jadwalProvider.fetchJadwalMilikGuru(
+                                  widget.user.id.toString(),
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Jadwal berhasil diupdate!',
+                                    ),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Gagal mengupdate jadwal.',
+                                    ),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            });
                           }
                         },
                   child: const Text("Update"),
@@ -538,11 +543,11 @@ class _GuruHomePageState extends State<GuruHomePage> {
         user: widget.user,
         onEditJadwal: (slot) => _showEditJadwalDialog(context, slot),
       ),
-      
+
       // ✅ PERBAIKAN: Gunakan ChatListPage, bukan ChatRoomPage
       // Pastikan kirim user.id (Angka) yang diubah ke String
-      ChatListPage(currentUserId: widget.user.id.toString()), 
-      
+      ChatListPage(currentUserId: widget.user.id.toString()),
+
       GuruProfilPage(user: widget.user),
       GuruPengaturanPage(user: widget.user),
     ];

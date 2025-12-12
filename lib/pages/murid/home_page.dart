@@ -1,19 +1,20 @@
 import 'package:PRIVATE_AJA/pages/murid/hubungi_guru.dart';
+import 'package:PRIVATE_AJA/pages/murid/jadwal_saya_page.dart'; // Import ini
 import 'package:flutter/material.dart';
 import '../model/user_model.dart';
 import '../model/guru_model.dart';
 // Pastikan semua file ini ada di folder yang benar
-import '../murid/profil_page.dart'; 
+import '../murid/profil_page.dart';
 import '../murid/beranda_page.dart';
 import '../murid/favorit.dart';
 
 class MyHomePage extends StatefulWidget {
   // Data pengguna yang login
   final UserModel user;
-  
+
   // Parameter opsional untuk mengatur tab awal yang aktif
   final int initialIndex;
-  
+
   // Parameter opsional untuk membawa daftar guru favorit
   final List<Guru> favoriteTeachers;
 
@@ -31,10 +32,10 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   // Variabel untuk melacak tab yang sedang aktif
   late int _selectedIndex;
-  
+
   // Variabel untuk status mode gelap/terang
   bool _isDarkMode = false;
-  
+
   // Variabel untuk menyimpan daftar guru favorit
   late List<Guru> _favoriteTeachers;
 
@@ -60,22 +61,20 @@ class _MyHomePageState extends State<MyHomePage> {
           isDarkMode: _isDarkMode,
           favoriteTeachers: _favoriteTeachers,
         ),
+
+        // Tab 2: Jadwal Saya
+        JadwalSayaPage(user: widget.user),
         //Tab 2: Chat Room
         /*ChatRoomPage(
           currentUserId: widget.user.id.toString(),
           peerId: '0', // ID default, nanti dipilih di ChatListPage
           peerName: 'Chat Room',
         ),*/
-        
-        const ChatPage(
-        
-        ),
-        
+
+        const ChatPage(),
+
         // Tab 3: Profil
-        ProfilPage(
-          user: widget.user, 
-          isDarkMode: _isDarkMode
-        ),
+        ProfilPage(user: widget.user, isDarkMode: _isDarkMode),
       ];
 
   // Fungsi yang dipanggil saat item di BottomNavigationBar ditekan
@@ -162,28 +161,17 @@ class _MyHomePageState extends State<MyHomePage> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         selectedItemColor: darkerMintGreen,
-        unselectedItemColor:
-            _isDarkMode ? Colors.white70 : Colors.grey[600],
+        unselectedItemColor: _isDarkMode ? Colors.white70 : Colors.grey[600],
         selectedIconTheme: const IconThemeData(size: 30),
         unselectedIconTheme: const IconThemeData(size: 24),
         type: BottomNavigationBarType.fixed, // Agar semua label terlihat
         items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Beranda"),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favorit"),
           BottomNavigationBarItem(
-            icon: Icon(Icons.home), 
-            label: "Beranda"
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite), 
-            label: "Favorit"
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.rate_review),
-            label: "Room"
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person), 
-            label: "Profil"
-          ),
+              icon: Icon(Icons.calendar_month), label: "Jadwal"),
+          BottomNavigationBarItem(icon: Icon(Icons.rate_review), label: "Room"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profil"),
         ],
       ),
     );

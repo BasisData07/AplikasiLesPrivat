@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 import '../model/user_model.dart';
 import '../../login_page.dart';

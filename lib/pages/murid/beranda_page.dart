@@ -3,6 +3,7 @@ import 'package:PRIVATE_AJA/pages/model/jadwal_les_model.dart';
 import 'package:PRIVATE_AJA/pages/model/jadwal_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 import '../model/guru_model.dart';
 import '../model/user_model.dart';
@@ -31,7 +32,7 @@ class _BerandaPageState extends State<BerandaPage> {
   static const Color mintHighlight = Colors.orange;
   static const Color lightMintBackground = Color(0xFFF5FFFA);
   static const Color lightMintAccent = Colors.orangeAccent;
-  
+
   bool get _isDarkMode => false;
 
   @override
@@ -62,7 +63,9 @@ class _BerandaPageState extends State<BerandaPage> {
 
   // GURU FUNCTIONS
   List<Guru> getRecommendedTeachers(List<Guru> guruList, String level) {
-    return guruList.where((g) => g.kategori_jenjang == level && g.rating >= 4.0).toList();
+    return guruList
+        .where((g) => g.kategori_jenjang == level && g.rating >= 4.0)
+        .toList();
   }
 
   List<Guru> getNewTeachers(List<Guru> guruList) {
@@ -81,6 +84,37 @@ class _BerandaPageState extends State<BerandaPage> {
     }).toList();
   }
 
+  // --- UTILITY BARU: Fungsi untuk memformat mata uang ---
+  String _formatCurrency(dynamic value) {
+    if (value == null) return "Rp 0";
+
+    // Jika value numerik, langsung format
+    if (value is num) {
+      // Jika 0, kembalikan Rp 0 atau bisa N/A tergantung selera, tapi Rp 0 lebih konsisten
+      return NumberFormat.currency(
+              locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0)
+          .format(value);
+    }
+
+    // Jika String, bersihkan karakter non-numeric
+    String valStr = value.toString();
+
+    // Hapus "Rp", " " (spasi)
+    valStr = valStr.replaceAll('Rp', '').replaceAll(' ', '');
+
+    // Hapus titik (asumsi ribuan separator IDR). Hati-hati jika desimal pakai titik.
+    // Tapi IDR jarang pakai sen.
+    valStr = valStr.replaceAll('.', '');
+
+    // Parse
+    final num price = double.tryParse(valStr) ?? 0;
+
+    final formatter =
+        NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+
+    return formatter.format(price);
+  }
+
   // ===========================
   // JADWAL LES SECTION
   // ===========================
@@ -91,14 +125,11 @@ class _BerandaPageState extends State<BerandaPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionTitle("Jadwal Les Terbaru"),
-
         if (jadwalProvider.isLoadingBeranda)
           const Center(child: CircularProgressIndicator()),
-
         if (!jadwalProvider.isLoadingBeranda &&
             jadwalProvider.jadwalBeranda.isEmpty)
           const Center(child: Text("Belum ada jadwal les.")),
-
         if (!jadwalProvider.isLoadingBeranda &&
             jadwalProvider.jadwalBeranda.isNotEmpty)
           SizedBox(
@@ -320,7 +351,7 @@ class _BerandaPageState extends State<BerandaPage> {
               const SizedBox(height: 8),
               _buildInfoRow(
                 Icons.price_change_outlined,
-                "Rp ${guru.harga}K / jam",
+                _formatCurrency(guru.harga) + " / jam",
                 subTextColor,
                 textColor: widget.isDarkMode ? lightMintAccent : mintHighlight,
               ),
@@ -375,20 +406,18 @@ class _BerandaPageState extends State<BerandaPage> {
         : [mintGreen, darkerMintGreen];
 
     return Scaffold(
-      backgroundColor: widget.isDarkMode
-          ? Colors.grey[900]
-          : lightMintBackground,
-          
+      backgroundColor:
+          widget.isDarkMode ? Colors.grey[900] : lightMintBackground,
       appBar: AppBar(
-          title: const Text("Dashboard Murid"),
-          backgroundColor: Colors.orange,
-          foregroundColor: Colors.white,
+        title: const Text("Dashboard Murid"),
+        backgroundColor: Colors.orange,
+        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             // SEARCH BAR
             TextField(
               style: TextStyle(color: textColor),
@@ -452,20 +481,8 @@ class _BerandaPageState extends State<BerandaPage> {
                   ),
                 )
               else ...[
-               /* _buildSectionTitle("Guru Rekomendasi (SD)"),
-                buildGuruList(getRecommendedTeachers(allGurus, "SD")),
-                const SizedBox(height: 10),
-
-                _buildSectionTitle("Guru Rekomendasi (SMP)"),
-                buildGuruList(getRecommendedTeachers(allGurus, "SMP")),
-                const SizedBox(height: 10),
-
-                _buildSectionTitle("Guru Rekomendasi (SMA)"),
-                buildGuruList(getRecommendedTeachers(allGurus, "SMA")),
-                const SizedBox(height: 10),
-
-                _buildSectionTitle("Guru Baru Bergabung"),*/
-                buildGuruList(getNewTeachers(allGurus)),
+                _buildSectionTitle("Semua Guru"),
+                buildGuruList(allGurus),
               ],
             ],
           ],

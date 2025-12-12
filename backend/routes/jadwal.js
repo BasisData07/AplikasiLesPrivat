@@ -4,6 +4,19 @@ import db from '../config/database.js';
 
 const router = Router();
 
+// 🔥 ENDPOINT KHUSUS UTK FIX DATABASE (Update Nama Kolom ke pengguna_id)
+router.get('/fix-migration', async (req, res) => {
+    try {
+        // Coba Add pengguna_id langsung (asumsi id_murid belum ada atau mau diganti)
+        // Kita gunakan ADD COLUMN IF NOT EXISTS logic via catch
+        await db.execute("ALTER TABLE jadwal_les ADD COLUMN pengguna_id INT NULL AFTER is_booked;");
+        res.send("✅ Migration Success: Added pengguna_id column. (Old id_murid ignored if exists)");
+    } catch (e) {
+        // Jika error "Duplicate column", berarti sudah ada.
+        res.send("Migration result: " + e.message);
+    }
+});
+
 console.log('✅ routes/jadwal.js loaded (Async/Await Mode)');
 
 /* =========================================================
@@ -11,7 +24,7 @@ console.log('✅ routes/jadwal.js loaded (Async/Await Mode)');
     ========================================================= */
 router.post('/create', async (req, res) => {
     console.log('🔥 [POST] /api/jadwal/create HIT!');
-    
+
     try {
         const { id_gurumapel, hari, jam_mulai, jam_selesai } = req.body;
 
@@ -19,8 +32,20 @@ router.post('/create', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Semua field wajib diisi.' });
         }
 
+        // 🔥 VALIDASI KEBERADAAN ID_GURUMAPEL
+        // Cek apakah id_gurumapel benar-benar ada milik siapa pun (atau milik guru ybs jika mau lebih ketat)
+        const [checkMapel] = await db.execute('SELECT id_gurumapel FROM guru_mapel WHERE id_gurumapel = ?', [id_gurumapel]);
+
+        if (checkMapel.length === 0) {
+            console.warn(`⚠️ id_gurumapel ${id_gurumapel} tidak ditemukan di database!`);
+            return res.status(400).json({
+                success: false,
+                message: 'Data mapel guru tidak valid atau sudah dihapus. Silakan refresh halaman.'
+            });
+        }
+
         const query = 'INSERT INTO jadwal_les (id_gurumapel, hari, jam_mulai, jam_selesai) VALUES (?, ?, ?, ?)';
-        
+
         const [result] = await db.execute(query, [id_gurumapel, hari, jam_mulai, jam_selesai]);
 
         res.status(201).json({
@@ -107,15 +132,15 @@ router.get('/guru/:guru_id', async (req, res) => {
     ========================================================= */
 router.post('/update/:jadwal_id', async (req, res) => {
     const { jadwal_id } = req.params;
-    const { hari, jam_mulai, jam_selesai, id_gurumapel } = req.body; 
+    const { hari, jam_mulai, jam_selesai, id_gurumapel } = req.body;
 
     console.log(`🔥 [POST] /jadwal/update/${jadwal_id} HIT!`);
 
     try {
-        if (!hari || !jam_mulai || !jam_selesai || !id_gurumapel) { 
+        if (!hari || !jam_mulai || !jam_selesai || !id_gurumapel) {
             return res.status(400).json({ success: false, message: 'Field hari, jam, dan id_gurumapel wajib diisi.' });
         }
-        
+
         const query =
             'UPDATE jadwal_les SET hari = ?, jam_mulai = ?, jam_selesai = ?, id_gurumapel = ? ' +
             'WHERE jadwal_id = ?';
@@ -138,28 +163,40 @@ router.post('/update/:jadwal_id', async (req, res) => {
 });
 
 /* =========================================================
-    (UPDATE STATUS) Guru mengubah status is_booked (CHECKLIST)
+    (UPDATE STATUS) Guru mengubah status is_booked (CHECKLIST & ASSIGN)
     ========================================================= */
 router.post('/status/:jadwal_id', async (req, res) => {
     const { jadwal_id } = req.params;
-    const { is_booked, guru_id_pemilik } = req.body; 
+    const { is_booked, guru_id_pemilik, pengguna_id } = req.body; // 🔥 GANTI id_murid -> pengguna_id
 
     console.log(`🔥 [POST] /jadwal/status/${jadwal_id} HIT!`);
+    console.log('📦 Body:', req.body);
 
     if (is_booked === undefined || !guru_id_pemilik) {
-           return res.status(400).json({ success: false, message: 'Status dan ID pemilik wajib diisi.' });
+        return res.status(400).json({ success: false, message: 'Status dan ID pemilik wajib diisi.' });
     }
 
     try {
-        const query = 
+        // 🔥 UPDATE v2: Jika is_booked = 1, kita bisa assign pengguna_id (jika ada)
+        // Jika is_booked = 0, kita set pengguna_id = NULL
+
+        let query = '';
+        let params = [];
+
+        // UPDATE Logic:
+        const setMuridPart = (is_booked && pengguna_id) ? ', j.pengguna_id = ? ' : ', j.pengguna_id = NULL ';
+
+        query =
             'UPDATE jadwal_les j ' +
             'JOIN guru_mapel gm ON j.id_gurumapel = gm.id_gurumapel ' +
-            'SET j.is_booked = ? ' +
+            'SET j.is_booked = ? ' + setMuridPart +
             'WHERE j.jadwal_id = ? AND gm.guru_id = ?';
-        
-        const isBookedValue = (is_booked === true || is_booked === 1) ? 1 : 0;
 
-        const [result] = await db.execute(query, [isBookedValue, jadwal_id, guru_id_pemilik]);
+        params = [(is_booked ? 1 : 0)];
+        if (is_booked && pengguna_id) params.push(pengguna_id);
+        params.push(jadwal_id, guru_id_pemilik);
+
+        const [result] = await db.execute(query, params);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({
@@ -175,6 +212,44 @@ router.post('/status/:jadwal_id', async (req, res) => {
         res.status(500).json({ success: false, message: 'Database error', error: err.message });
     }
 });
+
+/* =========================================================
+    (READ) JADWAL SPESIFIK MURID (Jadwal Saya)
+    ========================================================= */
+router.get('/murid/:murid_id', async (req, res) => {
+    const { murid_id } = req.params;
+    console.log(`🔥 [GET] /jadwal/murid/${murid_id} HIT!`);
+
+    try {
+        const query = `
+            SELECT 
+                j.jadwal_id, 
+                j.hari, 
+                j.jam_mulai, 
+                j.jam_selesai,
+                ag.username AS nama_guru,
+                gm.guru_id,
+                m.nama_mapel,
+                j.is_booked
+            FROM jadwal_les j
+            JOIN guru_mapel gm ON j.id_gurumapel = gm.id_gurumapel
+            JOIN akun_guru ag ON gm.guru_id = ag.guru_id
+            JOIN mapel m ON gm.mapel_id = m.mapel_id
+            WHERE j.pengguna_id = ? AND j.is_booked = 1
+            ORDER BY j.hari ASC, j.jam_mulai ASC
+        `;
+
+        const [results] = await db.execute(query, [murid_id]);
+
+        res.json({ success: true, data: results });
+
+    } catch (err) {
+        console.error('❌ Error get jadwal murid:', err);
+        res.status(500).json({ success: false, message: 'Database error', error: err.message });
+    }
+});
+
+
 
 
 /* =========================================================

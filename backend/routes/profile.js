@@ -55,13 +55,18 @@ router.post('/upload-profile-picture', upload.single('profile_picture'), async (
 // ============================================================
 router.put('/update-info/:id', async (req, res) => {
     const idGuru = req.params.id;
-    const { bio_deskripsi, pengalaman_tahun, no_telpon, nama_instansi, posisi, domisili, harga_per_jam, jenjang } = req.body;
+    const { nama_lengkap, bio_deskripsi, pengalaman_tahun, no_telpon, nama_instansi, posisi, domisili, harga_per_jam, jenjang } = req.body;
 
     console.log(`\n--- UPDATE ID ${idGuru} ---`);
     console.log(`-> Jenjang Input: ${jenjang}`);
     console.log(`-> Harga Input: ${harga_per_jam}`);
 
     try {
+        if (nama_lengkap) {
+            await db.execute('UPDATE akun_guru SET username = ? WHERE guru_id = ?', [nama_lengkap, idGuru]);
+            console.log(`-> Nama Updated: ${nama_lengkap}`);
+        }
+
         // --- LOGIKA LOKASI (FIXED: MENCEGAH DUPLIKASI PADA MASTER LOKASI) ---
         let finalLokasiId = null;
         if (domisili) {
@@ -94,11 +99,27 @@ router.put('/update-info/:id', async (req, res) => {
 
 
         // --- LOGIKA PROFIL (Update/Insert profile_guru) ---
-        const [cekProfil] = await db.execute('SELECT profile_id FROM profile_guru WHERE guru_id = ?', [idGuru]);
+        // Fetch existing data to preserve if not provided
+        const [cekProfil] = await db.execute('SELECT profile_id, nama_instansi, posisi, deskripsi, tahun_ajar, no_telpon FROM profile_guru WHERE guru_id = ?', [idGuru]);
 
         if (cekProfil.length > 0) {
+            const existing = cekProfil[0];
+
+            // Use input if provided (even empty string), otherwise fallback to existing, otherwise '-' for NOT NULL columns
+            const valInstansi = nama_instansi !== undefined ? nama_instansi : (existing.nama_instansi || '-');
+            const valPosisi = posisi !== undefined ? posisi : (existing.posisi || '-');
+            const valDeskripsi = bio_deskripsi !== undefined ? bio_deskripsi : (existing.deskripsi || '');
+            const valTahun = pengalaman_tahun !== undefined ? pengalaman_tahun : (existing.tahun_ajar || '');
+            const valTelpon = no_telpon !== undefined ? no_telpon : (existing.no_telpon || '');
+
             let sql = `UPDATE profile_guru SET deskripsi=?, tahun_ajar=?, no_telpon=?, nama_instansi=?, posisi=?`;
-            let params = [bio_deskripsi, pengalaman_tahun, no_telpon, nama_instansi, posisi];
+            let params = [
+                valDeskripsi,
+                valTahun,
+                valTelpon,
+                valInstansi,
+                valPosisi
+            ];
 
             // finalLokasiId (Lokasi ID) MENIMPA ID lama di profile_guru
             if (finalLokasiId) { sql += `, lokasi_id=?`; params.push(finalLokasiId); }
@@ -107,9 +128,18 @@ router.put('/update-info/:id', async (req, res) => {
             await db.execute(sql, params);
             console.log("-> Profil Updated");
         } else {
+            // New Profile: Must provide defaults for NOT NULL columns
             await db.execute(
                 `INSERT INTO profile_guru (guru_id, deskripsi, tahun_ajar, no_telpon, nama_instansi, posisi, lokasi_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
-                [idGuru, bio_deskripsi, pengalaman_tahun, no_telpon, nama_instansi, posisi, finalLokasiId]
+                [
+                    idGuru,
+                    bio_deskripsi || '',
+                    pengalaman_tahun || '',
+                    no_telpon || '',
+                    nama_instansi || '-',
+                    posisi || '-',
+                    finalLokasiId
+                ]
             );
             console.log("-> Profil Created");
         }

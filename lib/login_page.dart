@@ -10,6 +10,7 @@ import 'pages/model/user_model.dart';
 import 'pages/murid/home_page.dart';
 import 'SignUpPage.dart';
 import 'pages/guru/guru_home_page.dart';
+import 'pages/admin/admin_home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -54,6 +55,28 @@ class _LoginPageState extends State<LoginPage> {
 
       String email = _usernameController.text.trim();
       String password = _passwordController.text.trim();
+
+      // --- ADMIN LOGIN BACKDOOR ---
+      if (email == 'admin123@gmail.com' && password == 'admin123') {
+        final adminUser = UserModel(
+          id: 0,
+          name: 'Admin',
+          username: 'admin',
+          email: email,
+          role: 'admin',
+        );
+
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isLoggedIn', true);
+        await prefs.setString('userData', jsonEncode(adminUser.toJson()));
+
+        if (mounted) {
+          setState(() => _isLoading = false);
+          _navigateByUserRole(adminUser);
+        }
+        return;
+      }
+      // -----------------------------
 
       try {
         final result = await AuthService.login(email, password);
@@ -100,7 +123,7 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.pushReplacement(
         context,
         //MaterialPageRoute(builder: (context) => const AdminPage()),
-        MaterialPageRoute(builder: (context) => const LoginPage()),
+        MaterialPageRoute(builder: (context) => const AdminHomePage()),
       );
     } else {
       Navigator.pushReplacement(
@@ -139,51 +162,50 @@ class _LoginPageState extends State<LoginPage> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : isSmallScreen
-            ? SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const _Logo(),
-                    _FormContent(
-                      formKey: _formKey,
-                      usernameController: _usernameController,
-                      passwordController: _passwordController,
-                      onLogin: _login,
-                      onSignUp: _goToSignUp,
-                      isLoading: _isLoading,
-                      onPassword: _LupaPasswordForm,
-                    ),
-                  ],
-                ),
-              )
-            : Stack(
-                children: [
-                  // 2. Konten Utama
-                  Container(
-                    padding: const EdgeInsets.all(32.0),
-                    constraints: const BoxConstraints(maxWidth: 800),
-                    child: Row(
+                ? SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Expanded(child: _Logo()),
-                        Expanded(
-                          child: Center(
-                            child: _FormContent(
-                              formKey: _formKey,
-                              usernameController: _usernameController,
-                              passwordController: _passwordController,
-                              onLogin: _login,
-                              onSignUp: _goToSignUp,
-                              isLoading: _isLoading,
-                              onPassword: _LupaPasswordForm,
-                            ),
-                          ),
+                        const _Logo(),
+                        _FormContent(
+                          formKey: _formKey,
+                          usernameController: _usernameController,
+                          passwordController: _passwordController,
+                          onLogin: _login,
+                          onSignUp: _goToSignUp,
+                          isLoading: _isLoading,
+                          onPassword: _LupaPasswordForm,
                         ),
                       ],
                     ),
+                  )
+                : Stack(
+                    children: [
+                      // 2. Konten Utama
+                      Container(
+                        padding: const EdgeInsets.all(32.0),
+                        constraints: const BoxConstraints(maxWidth: 800),
+                        child: Row(
+                          children: [
+                            const Expanded(child: _Logo()),
+                            Expanded(
+                              child: Center(
+                                child: _FormContent(
+                                  formKey: _formKey,
+                                  usernameController: _usernameController,
+                                  passwordController: _passwordController,
+                                  onLogin: _login,
+                                  onSignUp: _goToSignUp,
+                                  isLoading: _isLoading,
+                                  onPassword: _LupaPasswordForm,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-
       ),
     );
   }
@@ -207,15 +229,15 @@ class _Logo extends StatelessWidget {
             textAlign: TextAlign.center,
             style: isSmallScreen
                 ? Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.orange,
-                    fontSize: 20,
-                  )
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange,
+                      fontSize: 20,
+                    )
                 : Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.orange,
-                    fontSize: 24,
-                  ),
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange,
+                      fontSize: 24,
+                    ),
           ),
         ),
         Padding(
@@ -266,10 +288,9 @@ class __FormContentState extends State<_FormContent> {
   Widget build(BuildContext context) {
     return Container(
       constraints: const BoxConstraints(maxWidth: 300),
-      
       decoration: MediaQuery.of(context).size.width >= 600
           ? BoxDecoration(
-              color: Colors.white.withOpacity(0.95), 
+              color: Colors.white.withOpacity(0.95),
               borderRadius: BorderRadius.circular(8),
               image: DecorationImage(
                 image: const AssetImage('assets/nu.png'),
@@ -289,9 +310,8 @@ class __FormContentState extends State<_FormContent> {
             )
           : null,
       padding: MediaQuery.of(context).size.width >= 600
-          ? const EdgeInsets.all(24.0) 
+          ? const EdgeInsets.all(24.0)
           : null,
-      
       child: Form(
         key: widget.formKey,
         child: Column(

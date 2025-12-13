@@ -31,7 +31,7 @@ class _EditProfilGuruPageState extends State<EditProfilGuruPage> {
   late TextEditingController _posisiController;
 
   // Logic Jenjang
-  final List<String> _opsiJenjang = ["SD", "SMP", "SMA", "MAHASISWA"];
+  final List<String> _opsiJenjang = ["SD", "SMP", "SMA", "Mahasiswa"];
   List<String> _selectedJenjang = [];
 
   static const Color mintColor = Color(0xFF3CB371);

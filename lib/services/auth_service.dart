@@ -130,7 +130,7 @@ class AuthService {
 
       if (response['success'] == true) {
         // Setelah berhasil hapus, lakukan logout juga
-        await AuthService.logout(); 
+        await AuthService.logout();
         return {'success': true, 'message': response['message']};
       } else {
         return {'success': false, 'message': response['message']};
@@ -144,7 +144,8 @@ class AuthService {
   static Future<Map<String, dynamic>> getAllUsers() async {
     try {
       print('👥 Requesting all users');
-      final response = await ApiService.get('auth/users');
+      // Fix endpoint to match backend route
+      final response = await ApiService.get('users/all');
 
       if (response['success'] == true) {
         return {'success': true, 'data': response['data']};
@@ -154,6 +155,22 @@ class AuthService {
     } catch (e) {
       print('💥 Get all users error: $e');
       return {'success': false, 'message': 'Gagal mengambil data pengguna'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> deleteUserByAdmin(
+      int id, String role) async {
+    try {
+      print('🗑️ Admin decreasing population: $role $id');
+      final response = await ApiService.delete('users/$role/$id');
+
+      if (response['success'] == true) {
+        return {'success': true, 'message': response['message']};
+      } else {
+        return {'success': false, 'message': response['message']};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Gagal menghapus user: $e'};
     }
   }
 

@@ -90,11 +90,13 @@ class _FavoritPageState extends State<FavoritPage> {
                     color: cardColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: borderColor.withAlpha(90), width: 1),
+                      side: BorderSide(
+                          color: borderColor.withAlpha(90), width: 1),
                     ),
                     margin: const EdgeInsets.only(bottom: 12),
                     child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 8, horizontal: 16),
                       leading: CircleAvatar(
                         radius: 28,
                         backgroundColor: Colors.grey[300],
@@ -116,9 +118,8 @@ class _FavoritPageState extends State<FavoritPage> {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           // WARNA DIUBAH DI SINI
-                          color: widget.isDarkMode
-                              ? Colors.amber
-                              : mintHighlight,
+                          color:
+                              widget.isDarkMode ? Colors.amber : mintHighlight,
                         ),
                       ),
                     ),

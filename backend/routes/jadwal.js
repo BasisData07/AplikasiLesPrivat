@@ -78,8 +78,8 @@ router.get('/all', async (req, res) => {
                 ag.email AS email_guru, /* 🔥 DITAMBAHKAN: Kunci untuk filtering di Flutter */
                 m.nama_mapel,
                 COALESCE(l.nama_kota, 'Indonesia') AS kota, 
-                COALESCE(kj.nama_jenjang, 'Umum') AS level
-
+                COALESCE(kj.nama_jenjang, 'Umum') AS level,
+                ap.username AS nama_murid
             FROM jadwal_les j
             JOIN guru_mapel gm ON j.id_gurumapel = gm.id_gurumapel
             JOIN akun_guru ag ON gm.guru_id = ag.guru_id
@@ -87,6 +87,7 @@ router.get('/all', async (req, res) => {
             LEFT JOIN kategori_jenjang kj ON gm.kategori_id = kj.kategori_id
             LEFT JOIN profile_guru pg ON ag.guru_id = pg.guru_id
             LEFT JOIN lokasi l ON pg.lokasi_id = l.lokasi_id
+            LEFT JOIN akun_pengguna ap ON j.pengguna_id = ap.pengguna_id
             
             ORDER BY j.jadwal_id DESC
         `;

@@ -1,6 +1,7 @@
-/*import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../model/guru_model.dart';
+import '../model/guru_provider.dart';
 
 class EditGuruPage extends StatefulWidget {
   final Guru guru;
@@ -14,37 +15,63 @@ class EditGuruPage extends StatefulWidget {
 
 class _EditGuruPageState extends State<EditGuruPage> {
   final _namaController = TextEditingController();
-  final _gelarController = TextEditingController();
+  final _gelarController =
+      TextEditingController(); // Note: Backend might not support 'gelar' update? profile.js doesn't show it.
   final _noTeleponController = TextEditingController();
-  final _mapelController = TextEditingController();
+  final _mapelController =
+      TextEditingController(); // Note: Will map to 'subject' or 'list_mapel'
   final _alamatController = TextEditingController();
   final _hargaController = TextEditingController();
   final _pengalamanController = TextEditingController();
   final _deskripsiController = TextEditingController();
-  final _photoController = TextEditingController();
+  final _photoController = TextEditingController(); // Note: URL update only
   final _cvUrlController = TextEditingController();
+  final _instansiController = TextEditingController();
+  final _posisiController = TextEditingController();
 
   late String _selectedLevel;
-  final List<String> _levels = ["SD", "SMP", "SMA/SMK"];
+  final List<String> _levels = ["SD", "SMP", "SMA/SMK", "Mahasiswa"];
 
-  // Palet Warna Tema
-  static const Color mintHighlight = Color(0xFF3CB371);
-  static const Color lightMintBackground = Color(0xFFF5FFFA);
+  // Palet Warna Tema (Simple fallback)
+  static const Color mintHighlight = Colors.blue;
+  static const Color lightMintBackground = Colors.white;
 
   @override
   void initState() {
     super.initState();
-    _namaController.text = widget.guru.name;
-    _gelarController.text = widget.guru.gelar;
+    _namaController.text = widget.guru.nama;
+    // _gelarController.text = widget.guru.gelar; // Guru model has no 'gelar' field in abstract!
+    // Wait, let's check Guru model again.
+    // abstract class Guru ... no 'gelar'. But subclasses might?
+    // GuruSD has 'gelar'. Abstract Guru has 'nama', 'email', 'harga', 'rating', 'foto', 'kota', 'mapel', 'noTelepon', 'pengalaman', 'deskripsi', 'cvUrl'.
+    // It does NOT have 'gelar'. The subclasses verify 'super.gelar' is NOT there?
+    // In guru_model.dart:48 `class GuruSD extends Guru ... required super.nama ...`
+    // It actually DOES NOT have 'gelar' in the super constructor calls!
+    // Looking at guru_model.dart again (Step 80)...
+    // `class GuruSD extends Guru { const GuruSD({...}) : super(...) }`
+    // No 'gelar' property in GuruSD either!
+    // So 'gelar' is likely invalid. I will comment it out or remove it.
+
     _noTeleponController.text = widget.guru.noTelepon;
     _mapelController.text = widget.guru.mapel;
     _alamatController.text = widget.guru.kota;
-    _hargaController.text = widget.guru.price.toString();
+    _hargaController.text = widget.guru.harga.toString();
     _pengalamanController.text = widget.guru.pengalaman;
     _deskripsiController.text = widget.guru.deskripsi;
-    _photoController.text = widget.guru.photo;
+    _photoController.text = widget.guru.foto;
     _cvUrlController.text = widget.guru.cvUrl ?? '';
-    _selectedLevel = widget.guru.level;
+    _instansiController.text = widget.guru.instansi;
+    _posisiController.text = widget.guru.posisi;
+
+    // Level logic
+    if (widget.guru is GuruSD)
+      _selectedLevel = "SD";
+    else if (widget.guru is GuruSMP)
+      _selectedLevel = "SMP";
+    else if (widget.guru is GuruSMA)
+      _selectedLevel = "SMA/SMK";
+    else
+      _selectedLevel = "Mahasiswa";
   }
 
   @override
@@ -59,6 +86,8 @@ class _EditGuruPageState extends State<EditGuruPage> {
     _deskripsiController.dispose();
     _photoController.dispose();
     _cvUrlController.dispose();
+    _instansiController.dispose();
+    _posisiController.dispose();
     super.dispose();
   }
 
@@ -72,7 +101,7 @@ class _EditGuruPageState extends State<EditGuruPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Edit Data Guru"),
-        backgroundColor: mintHighlight, // Warna disesuaikan
+        backgroundColor: Colors.orangeAccent,
         foregroundColor: Colors.white,
       ),
       body: Container(
@@ -91,7 +120,7 @@ class _EditGuruPageState extends State<EditGuruPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    "Mengubah Data: ${widget.guru.name}",
+                    "Mengubah Data: ${widget.guru.nama}",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 22,
@@ -101,10 +130,12 @@ class _EditGuruPageState extends State<EditGuruPage> {
                   ),
                   const SizedBox(height: 24),
                   _buildTextField(_namaController, "Nama Lengkap", textColor),
-                  _buildTextField(_gelarController, "Gelar (e.g., S.Pd.)", textColor),
-                  _buildTextField(_noTeleponController, "No. Telepon", textColor, keyboardType: TextInputType.phone),
+                  // _buildTextField(_gelarController, "Gelar (e.g., S.Pd.)", textColor), // Removed
+                  _buildTextField(
+                      _noTeleponController, "No. Telepon", textColor,
+                      keyboardType: TextInputType.phone),
                   DropdownButtonFormField<String>(
-                    initialValue: _selectedLevel,
+                    value: _selectedLevel,
                     decoration: _inputDecoration("Level Mengajar", textColor),
                     dropdownColor: cardColor,
                     items: _levels.map((level) {
@@ -118,17 +149,29 @@ class _EditGuruPageState extends State<EditGuruPage> {
                     },
                   ),
                   const SizedBox(height: 12),
-                  _buildTextField(_mapelController, "Mata Pelajaran Utama", textColor),
-                  _buildTextField(_alamatController, "Kota Domisili", textColor),
-                  _buildTextField(_hargaController, "Tarif per Jam (Rp)", textColor, keyboardType: TextInputType.number),
-                  _buildTextField(_pengalamanController, "Pengalaman (e.g., 5 tahun)", textColor),
-                  _buildTextField(_deskripsiController, "Deskripsi Singkat", textColor, maxLines: 3),
-                  _buildTextField(_photoController, "URL Foto Profil", textColor),
-                  _buildTextField(_cvUrlController, "URL CV Google Drive", textColor),
+                  _buildTextField(
+                      _mapelController, "Mata Pelajaran Utama", textColor),
+                  _buildTextField(
+                      _alamatController, "Kota Domisili", textColor),
+                  _buildTextField(
+                      _hargaController, "Tarif per Jam (Rp)", textColor,
+                      keyboardType: TextInputType.number),
+                  _buildTextField(_pengalamanController,
+                      "Pengalaman (e.g., 5 tahun)", textColor),
+                  _buildTextField(
+                      _deskripsiController, "Deskripsi Singkat", textColor,
+                      maxLines: 3),
+                  _buildTextField(
+                      _photoController, "URL Foto Profil", textColor),
+                  _buildTextField(_instansiController,
+                      "Instansi (e.g. Universitas X)", textColor),
+                  _buildTextField(_posisiController,
+                      "Posisi (e.g. Dosen, Mahasiswa)", textColor),
+                  // _buildTextField(_cvUrlController, "URL CV Google Drive", textColor),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: mintHighlight, // Warna disesuaikan
+                      backgroundColor: mintHighlight,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -155,13 +198,14 @@ class _EditGuruPageState extends State<EditGuruPage> {
       labelText: label,
       labelStyle: TextStyle(color: textColor.withAlpha(204)),
       filled: true,
-      fillColor: widget.isDarkMode ? Colors.grey[800] : Colors.white.withOpacity(0.8),
+      fillColor:
+          widget.isDarkMode ? Colors.grey[800] : Colors.white.withOpacity(0.8),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: mintHighlight, width: 2),
+        borderSide: const BorderSide(color: Colors.orangeAccent, width: 2),
         borderRadius: BorderRadius.circular(12),
       ),
     );
@@ -186,9 +230,8 @@ class _EditGuruPageState extends State<EditGuruPage> {
     );
   }
 
-  void _updateForm() {
+  void _updateForm() async {
     final nama = _namaController.text;
-    final gelar = _gelarController.text;
     final alamat = _alamatController.text;
     final mapel = _mapelController.text;
     final noTelepon = _noTeleponController.text;
@@ -196,7 +239,7 @@ class _EditGuruPageState extends State<EditGuruPage> {
     final deskripsi = _deskripsiController.text;
     final harga = int.tryParse(_hargaController.text) ?? 0;
     final photo = _photoController.text;
-    final cvUrl = _cvUrlController.text;
+    // final cvUrl = _cvUrlController.text;
 
     if (nama.isEmpty || alamat.isEmpty || mapel.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -208,71 +251,97 @@ class _EditGuruPageState extends State<EditGuruPage> {
       return;
     }
 
+    // Creating updated model to pass to logic (though we just need IDs and Fields)
     Guru updatedGuru;
 
-    // ## INI BAGIAN YANG DIPERBAIKI ##
-    // Anda harus menyertakan 'email' saat membuat objek guru baru.
-    // Kita gunakan email dari guru yang lama karena email tidak diubah.
-    
+    final instansi = _instansiController.text;
+    final posisi = _posisiController.text;
+
+    // Helper to create object
     if (_selectedLevel == "SD") {
       updatedGuru = GuruSD(
-        email: widget.guru.email, // <-- PERBAIKAN DI SINI
-        name: nama,
-        gelar: gelar,
-        price: harga,
+        idGuru: widget.guru.idGuru,
+        email: widget.guru.email,
+        nama: nama,
+        harga: harga,
         rating: widget.guru.rating,
-        photo: photo,
+        foto: photo,
         kota: alamat,
         mapel: mapel,
         noTelepon: noTelepon,
         pengalaman: pengalaman,
         deskripsi: deskripsi,
-        cvUrl: cvUrl,
-        isApproved: widget.guru.isApproved,
+        // cvUrl: cvUrl,
+        instansi: instansi,
+        posisi: posisi,
       );
     } else if (_selectedLevel == "SMP") {
       updatedGuru = GuruSMP(
-        email: widget.guru.email, // <-- PERBAIKAN DI SINI
-        name: nama,
-        gelar: gelar,
-        price: harga,
+        idGuru: widget.guru.idGuru,
+        email: widget.guru.email,
+        nama: nama,
+        harga: harga,
         rating: widget.guru.rating,
-        photo: photo,
+        foto: photo,
         kota: alamat,
         mapel: mapel,
         noTelepon: noTelepon,
         pengalaman: pengalaman,
         deskripsi: deskripsi,
-        cvUrl: cvUrl,
-        isApproved: widget.guru.isApproved,
+        instansi: instansi,
+        posisi: posisi,
+      );
+    } else if (_selectedLevel == "SMA/SMK") {
+      updatedGuru = GuruSMA(
+        idGuru: widget.guru.idGuru,
+        email: widget.guru.email,
+        nama: nama,
+        harga: harga,
+        rating: widget.guru.rating,
+        foto: photo,
+        kota: alamat,
+        mapel: mapel,
+        noTelepon: noTelepon,
+        pengalaman: pengalaman,
+        deskripsi: deskripsi,
+        instansi: instansi,
+        posisi: posisi,
       );
     } else {
-      updatedGuru = GuruSMA(
-        email: widget.guru.email, // <-- PERBAIKAN DI SINI
-        name: nama,
-        gelar: gelar,
-        price: harga,
+      updatedGuru = GuruMahasiswa(
+        idGuru: widget.guru.idGuru,
+        email: widget.guru.email,
+        nama: nama,
+        harga: harga,
         rating: widget.guru.rating,
-        photo: photo,
+        foto: photo,
         kota: alamat,
         mapel: mapel,
         noTelepon: noTelepon,
         pengalaman: pengalaman,
         deskripsi: deskripsi,
-        cvUrl: cvUrl,
-        isApproved: widget.guru.isApproved,
+        instansi: instansi,
+        posisi: posisi,
       );
     }
 
-    context.read<GuruProvider>().updateGuru(widget.guru, updatedGuru);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        backgroundColor: Colors.green,
-        content: Text("Data guru berhasil diperbarui!"),
-      ),
-    );
-
-    Navigator.of(context).pop();
+    try {
+      await context.read<GuruProvider>().updateGuru(widget.guru, updatedGuru);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.green,
+            content: Text("Data guru berhasil diperbarui!"),
+          ),
+        );
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Gagal: $e"), backgroundColor: Colors.red),
+        );
+      }
+    }
   }
-}*/
+}

@@ -62,6 +62,10 @@ class GuruProvider with ChangeNotifier {
     final String deskripsi = g["deskripsi"]?.toString() ?? '';
     final String cvUrl = g["file_sertifikat"]?.toString() ?? '';
 
+    // New Fields for Admin
+    final String instansi = g["nama_instansi"]?.toString() ?? '-';
+    final String posisi = g["posisi"]?.toString() ?? '-';
+
     // 1. Ambil jenjang pertama
     final rawJenjang =
         listJenjang != null ? listJenjang.split(', ')[0] : "Semua";
@@ -110,6 +114,8 @@ class GuruProvider with ChangeNotifier {
           pengalaman: pengalamanTahun,
           deskripsi: deskripsi,
           cvUrl: cvUrl,
+          instansi: instansi,
+          posisi: posisi,
         );
 
       case "SMP":
@@ -126,6 +132,8 @@ class GuruProvider with ChangeNotifier {
           pengalaman: pengalamanTahun,
           deskripsi: deskripsi,
           cvUrl: cvUrl,
+          instansi: instansi,
+          posisi: posisi,
         );
 
       case "SMA/SMK": // Menggunakan SMA/SMK karena modelnya GuruSMA
@@ -143,9 +151,11 @@ class GuruProvider with ChangeNotifier {
           pengalaman: pengalamanTahun,
           deskripsi: deskripsi,
           cvUrl: cvUrl,
+          instansi: instansi,
+          posisi: posisi,
         );
 
-      case "Mahasiswa":
+      case "MAHASISWA":
         return GuruMahasiswa(
           idGuru: guruId,
           nama: namaLengkap,
@@ -159,6 +169,8 @@ class GuruProvider with ChangeNotifier {
           pengalaman: pengalamanTahun,
           deskripsi: deskripsi,
           cvUrl: cvUrl,
+          instansi: instansi,
+          posisi: posisi,
         );
 
       default:
@@ -176,7 +188,50 @@ class GuruProvider with ChangeNotifier {
           pengalaman: pengalamanTahun,
           deskripsi: deskripsi,
           cvUrl: cvUrl,
+          instansi: instansi,
+          posisi: posisi,
         );
+    }
+  }
+
+  // =======================================================
+  // 🔥 UPDATE GURU (Admin Feature)
+  // =======================================================
+  Future<void> updateGuru(Guru oldData, Guru newData) async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final data = {
+        'nama_lengkap': newData.nama, // Requires backend update
+        'bio_deskripsi': newData.deskripsi,
+        'pengalaman_tahun': newData.pengalaman,
+        'no_telpon': newData.noTelepon,
+        'domisili': newData.kota,
+        'harga_per_jam': newData.harga.toString(),
+        'jenjang': newData.kategori_jenjang,
+        'nama_instansi': newData.instansi,
+        'posisi': newData.posisi,
+      };
+
+      final response = await ApiService.ApiService.put(
+          '$apiEndpoint/update-info/${newData.idGuru}', data);
+
+      if (response['success'] == true) {
+        // Update local list
+        final index = _guruList.indexWhere((g) => g.idGuru == newData.idGuru);
+        if (index != -1) {
+          _guruList[index] = newData;
+        }
+        await fetchGuruList(); // Refresh to be sure
+      } else {
+        throw Exception(response['message'] ?? 'Gagal update guru');
+      }
+    } catch (e) {
+      rethrow;
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
   }
 }

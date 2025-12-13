@@ -19,13 +19,13 @@ class TermsPage extends StatelessWidget {
       icon: Icons.gavel_rounded,
       title: "1. Penerimaan Persyaratan",
       content:
-          "Dengan mengunduh, mengakses, atau menggunakan aplikasi LES MANIA (\"Aplikasi\"), Anda setuju untuk terikat oleh Syarat dan Ketentuan ini (\"Syarat\"). Jika Anda tidak menyetujui Syarat ini, Anda tidak diizinkan untuk menggunakan Aplikasi.",
+          "Dengan mengunduh, mengakses, atau menggunakan aplikasi PrivateAja (\"Aplikasi\"), Anda setuju untuk terikat oleh Syarat dan Ketentuan ini (\"Syarat\"). Jika Anda tidak menyetujui Syarat ini, Anda tidak diizinkan untuk menggunakan Aplikasi.",
     ),
     _TermsSection(
       icon: Icons.miscellaneous_services_rounded,
       title: "2. Deskripsi Layanan",
       content:
-          "LES MANIA adalah platform yang menghubungkan calon siswa atau orang tua murid (\"Pengguna\") dengan penyedia jasa les privat (\"Guru\"). Peran kami adalah sebagai perantara untuk memfasilitasi pertemuan antara Pengguna dan Guru. Kami tidak mempekerjakan Guru secara langsung dan tidak bertanggung jawab atas metode pengajaran atau interaksi yang terjadi di luar platform.",
+          "PrivateAja adalah platform yang menghubungkan calon siswa atau orang tua murid (\"Pengguna\") dengan penyedia jasa les privat (\"Guru\"). Peran kami adalah sebagai perantara untuk memfasilitasi pertemuan antara Pengguna dan Guru. Kami tidak mempekerjakan Guru secara langsung dan tidak bertanggung jawab atas metode pengajaran atau interaksi yang terjadi di luar platform.",
     ),
     _TermsSection(
       icon: Icons.rule_rounded,
@@ -41,13 +41,13 @@ class TermsPage extends StatelessWidget {
       icon: Icons.payment_rounded,
       title: "4. Pembayaran Jasa Guru",
       content:
-          "Semua transaksi pembayaran untuk jasa les privat dilakukan secara langsung antara Pengguna dan Guru berdasarkan kesepakatan kedua belah pihak. LES MANIA tidak terlibat dalam proses transaksi dan tidak bertanggung jawab atas perselisihan pembayaran apa pun.",
+          "Semua transaksi pembayaran untuk jasa les privat dilakukan secara langsung antara Pengguna dan Guru berdasarkan kesepakatan kedua belah pihak. PrivateAja tidak terlibat dalam proses transaksi dan tidak bertanggung jawab atas perselisihan pembayaran apa pun.",
     ),
     _TermsSection(
       icon: Icons.security_rounded,
       title: "5. Pembatasan Tanggung Jawab",
       content:
-          "LES MANIA menyediakan platform \"sebagaimana adanya\". Meskipun kami berupaya melakukan verifikasi dasar terhadap profil Guru, kami tidak menjamin kualitas, keamanan, atau legalitas jasa yang ditawarkan. Interaksi dan kesepakatan apa pun yang Anda buat dengan Guru adalah sepenuhnya menjadi risiko dan tanggung jawab Anda sendiri.",
+          "PrivateAja menyediakan platform \"sebagaimana adanya\". Meskipun kami berupaya melakukan verifikasi dasar terhadap profil Guru, kami tidak menjamin kualitas, keamanan, atau legalitas jasa yang ditawarkan. Interaksi dan kesepakatan apa pun yang Anda buat dengan Guru adalah sepenuhnya menjadi risiko dan tanggung jawab Anda sendiri.",
     ),
     _TermsSection(
       icon: Icons.change_circle_rounded,
@@ -59,7 +59,7 @@ class TermsPage extends StatelessWidget {
       icon: Icons.contact_mail_rounded,
       title: "7. Kontak Kami",
       content:
-          "Jika Anda memiliki pertanyaan mengenai Syarat dan Ketentuan ini, silakan hubungi kami melalui email di: kontak@lesmania.com",
+          "Jika Anda memiliki pertanyaan mengenai Syarat dan Ketentuan ini, silakan hubungi kami melalui email di: kontak @privateaja.id",
     ),
   ];
 
@@ -67,7 +67,7 @@ class TermsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final cardColor = isDarkMode ? Colors.grey[850] : Colors.white;
-    final brandColor = Colors.pink[700];
+    final brandColor = Colors.orange;
 
     return Scaffold(
       appBar: AppBar(
@@ -100,19 +100,19 @@ class TermsPage extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.pink.withAlpha(26) : Colors.pink[50],
+        color: isDarkMode ? Colors.orange.withAlpha(26) : Colors.orange[50],
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isDarkMode
-              ? Colors.pink.withAlpha(51)
-              : Colors.pink.withAlpha(77),
+              ? Colors.orange.withAlpha(51)
+              : Colors.orange.withAlpha(77),
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Syarat & Ketentuan Penggunaan Aplikasi LES MANIA",
+            "Syarat & Ketentuan Penggunaan Aplikasi PrivateAja",
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
               color: brandColor,
@@ -120,7 +120,7 @@ class TermsPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text(
-            "Terakhir diperbarui: 6 Oktober 2025",
+            "Terakhir diperbarui: 13 Desember 2025",
             style: TextStyle(color: Colors.grey, fontSize: 14),
           ),
         ],

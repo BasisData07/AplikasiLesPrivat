@@ -1,6 +1,6 @@
 <div align="center">
-  <h1>LES MANIA</h1>
-  <p><em>A simple Java program that functions to order cinema tickets!</em></p>
+  <h1>PrivateAja</h1>
+  <p><em>Aplikasi Les Privat</em></p>
 </div>
 
 ##  Contributor
